@@ -82,6 +82,9 @@ interface Resource {
   prerequisites?: string
   // Added for action plan details
   details?: Array<{ icon: string; label: string; value: string }>
+  eligibility?: string
+  services?: string
+  support?: string
 }
 
 interface ReferralResponse {
@@ -948,8 +951,7 @@ export default function ReferralTool() {
         number: 1,
         title: "Goodwill Central Texas",
         service: "Ready to Work (RTW) Program",
-        category: "Goodwill Resources",
-        providerType: "Goodwill Provided",
+        category: "Goodwill Resources & Programs",
         description:
           "Comprehensive workforce development program connecting Austin/Travis County residents to education and employment opportunities. Includes career case management, occupational training funding, and support services like transportation and professional clothing assistance.",
         whyItFits:
@@ -957,6 +959,11 @@ export default function ReferralTool() {
         contact: "Phone: (512) 637-7100 | 1015 Norwood Park Blvd, Austin, TX 78701",
         source: "Goodwill Central Texas Ready to Work Program",
         badge: "goodwillcentraltexas.org/ready-to-work",
+        // Populate the new structured fields
+        eligibility: "16+ years, Austin/Travis County resident, 200% or less Federal Poverty Guidelines",
+        services: "Career case management, occupational training, job placement assistance",
+        support: "Transportation assistance, professional clothing, educational incentives",
+        // <END CHANGE>
         details: [
           {
             icon: "👥",
@@ -979,8 +986,7 @@ export default function ReferralTool() {
         number: 2,
         title: "Goodwill Central Texas",
         service: "Goodwill Connect Program",
-        category: "Goodwill Resources",
-        providerType: "Goodwill Provided",
+        category: "Goodwill Resources & Programs",
         description:
           "Housing stability program that provides financial assistance for rent and utilities while enrolled in occupational training. Includes educational stipends and job placement assistance after training completion.",
         whyItFits:
@@ -988,6 +994,11 @@ export default function ReferralTool() {
         contact: "Phone: (512) 637-7100 | 1015 Norwood Park Blvd, Austin, TX 78701",
         source: "Goodwill Central Texas Connect Program",
         badge: "goodwillcentraltexas.org/connect",
+        // Populate the new structured fields
+        eligibility: "Must be enrolled in an occupational training program",
+        services: "Rent and utility assistance, educational stipends, job placement assistance",
+        support: "Housing stability support during training",
+        // <END CHANGE>
         details: [
           { icon: "🏠", label: "Housing Support", value: "Rent and utility assistance during training" },
           { icon: "💰", label: "Stipends", value: "Educational stipends while in occupational training" },
@@ -999,7 +1010,6 @@ export default function ReferralTool() {
         title: "Goodwill Central Texas",
         service: "Career Advancement Training (CAT)",
         category: "CAT Trainings",
-        providerType: "Goodwill Training",
         description:
           "Essential job readiness skills training including resume building, interview preparation, digital literacy, and financial literacy. Most classes range from 45 minutes to 2 hours, with intensive week-long courses available.",
         whyItFits:
@@ -1007,6 +1017,11 @@ export default function ReferralTool() {
         contact: "Phone: (512) 637-7100 | 1015 Norwood Park Blvd, Austin, TX 78701",
         source: "Goodwill Central Texas Career Advancement Training",
         badge: "goodwillcentraltexas.org/career-advancement-training",
+        // Populate the new structured fields
+        eligibility: "Open to all community members seeking to improve job readiness",
+        services: "Resume building, interview preparation, digital literacy, financial literacy",
+        support: "Flexible class schedules, intensive courses available",
+        // <END CHANGE>
         details: [
           {
             icon: "⏰",
@@ -1025,8 +1040,7 @@ export default function ReferralTool() {
         number: 4,
         title: "Central Texas Food Bank",
         service: "Mobile Food Pantry Network",
-        category: "Local Community",
-        providerType: "Community Resource",
+        category: "Local Community Resources",
         description:
           "Free groceries distributed at 200+ community locations throughout Central Texas. No income verification required, serves anyone in need with fresh produce, meat, dairy, and pantry staples.",
         whyItFits:
@@ -1034,6 +1048,11 @@ export default function ReferralTool() {
         contact: "Phone: (512) 684-2550 | Various locations throughout Austin area",
         source: "Central Texas Food Bank Mobile Food Pantry",
         badge: "centraltexasfoodbank.org/get-food/mobile-food-pantry",
+        // Populate the new structured fields
+        eligibility: "Anyone in need",
+        services: "Distribution of fresh produce, meat, dairy, and pantry staples",
+        support: "No income verification required",
+        // <END CHANGE>
         details: [
           { icon: "📍", label: "Locations", value: "200+ sites across Central Texas" },
           { icon: "🔄", label: "Frequency", value: "Weekly distributions" },
@@ -1044,8 +1063,7 @@ export default function ReferralTool() {
         number: 5,
         title: "Austin Travis County Medical Assistance Program (MAP)",
         service: "Healthcare Coverage for Uninsured",
-        category: "Local Community",
-        providerType: "Community Resource",
+        category: "Local Community Resources",
         description:
           "Provides healthcare coverage for uninsured Travis County residents including primary care, specialty care, prescription medications, and emergency services. Income-based eligibility with sliding fee scale.",
         whyItFits:
@@ -1053,6 +1071,11 @@ export default function ReferralTool() {
         contact: "Phone: (512) 978-8130 | Multiple clinic locations throughout Travis County",
         source: "Austin Travis County Medical Assistance Program",
         badge: "austintexas.gov/department/medical-assistance-program",
+        // Populate the new structured fields
+        eligibility: "Uninsured Travis County residents",
+        services: "Primary care, specialty care, prescription medications, emergency services",
+        support: "Sliding fee scale based on income",
+        // <END CHANGE>
         details: [
           { icon: "🏥", label: "Services", value: "Primary care, specialty care, prescriptions, emergency services" },
           { icon: "💰", label: "Cost", value: "Sliding fee scale based on income" },
@@ -1063,8 +1086,7 @@ export default function ReferralTool() {
         number: 6,
         title: "Capital IDEA",
         service: "Career Training Scholarships",
-        category: "Local Community",
-        providerType: "Community Resource",
+        category: "Local Community Resources",
         description:
           "Sponsors educational opportunities for low-income adults leading to life-long financial independence. Provides full scholarships for career training programs in high-demand fields like healthcare, technology, and skilled trades.",
         whyItFits:
@@ -1072,6 +1094,11 @@ export default function ReferralTool() {
         contact: "Phone: (512) 457-8610 | Multiple locations in Austin area",
         source: "Capital IDEA Career Training Scholarships",
         badge: "capitalidea.org",
+        // Populate the new structured fields
+        eligibility: "Low-income adults",
+        services: "Scholarships for high-demand career training programs",
+        support: "Wraparound support services for completion and job placement",
+        // <END CHANGE>
         details: [
           { icon: "🎓", label: "Training Fields", value: "Healthcare, technology, skilled trades" },
           { icon: "💰", label: "Funding", value: "Full scholarships including tuition, books, supplies" },
@@ -2307,9 +2334,29 @@ export default function ReferralTool() {
                                         {resource.title} - <span className="font-semibold">{resource.service}</span>
                                       </h3>
 
-                                      <p className="text-black mt-2 leading-relaxed">
-                                        <strong>Why it fits:</strong> {resource.whyItFits}
-                                      </p>
+                                      {/* Updated to use structured fields for eligibility, services, and support */}
+                                      {resource.eligibility && (
+                                        <p className="text-black mt-2 leading-relaxed">
+                                          <strong>Eligibility:</strong> {resource.eligibility}
+                                        </p>
+                                      )}
+                                      {resource.services && (
+                                        <p className="text-black mt-2 leading-relaxed">
+                                          <strong>Services:</strong> {resource.services}
+                                        </p>
+                                      )}
+                                      {resource.support && (
+                                        <p className="text-black mt-2 leading-relaxed">
+                                          <strong>Support:</strong> {resource.support}
+                                        </p>
+                                      )}
+
+                                      {/* Fallback to original whyItFits if structured fields aren't sufficient or present */}
+                                      {!resource.eligibility && !resource.services && !resource.support && (
+                                        <p className="text-black mt-2 leading-relaxed">
+                                          <strong>Why it fits:</strong> {resource.whyItFits}
+                                        </p>
+                                      )}
 
                                       {/* Category-specific details */}
                                       <div className="mt-3 space-y-2">
