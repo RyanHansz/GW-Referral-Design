@@ -101,9 +101,9 @@ For each resource, you MUST include these structured sections:
 
 1. **Title**: Organization name and program/service name
 2. **Why it fits**: Specific explanation of how this resource addresses the client's needs
-3. **Eligibility**: Requirements to qualify (use 👥 icon). Include age, location, income level, or other criteria
-4. **Services**: What the program provides (use 📋 icon). List specific services, training, or support offered
-5. **Support**: Additional wraparound services (use 🎯 icon). Include transportation, clothing, incentives, etc.
+3. **Eligibility**: Requirements to qualify. Include age, location, income level, or other criteria
+4. **Services**: What the program provides. List specific services, training, or support offered
+5. **Support**: Additional wraparound services. Include transportation, clothing, incentives, etc.
 6. **Contact**: Complete contact information including phone, address, and hours
 7. **Source**: Program name and specific detailed URL
 
@@ -111,17 +111,23 @@ REQUIRED STRUCTURE FOR EACH RESOURCE:
 {
   "number": 1,
   "title": "Organization Name - Program Name",
-  "service": "Brief service type",
+  "service": "Service type",
   "category": "Exact category name from the list",
   "providerType": "Goodwill Provided | Community Resource | Government Benefit",
   "whyItFits": "Detailed explanation of why this resource matches the client's specific situation",
-  "eligibility": "👥 Eligibility: [Specific requirements like age, location, income level]",
-  "services": "📋 Services: [Comma-separated list of services provided]",
-  "support": "🎯 Support: [Comma-separated list of wraparound services]",
-  "contact": "Phone: [number] | [full address with city, state, zip]",
-  "source": "Source reference with program name",
+  "eligibility": "16+ years, Austin/Travis County resident, 200% or less Federal Poverty Guidelines",
+  "services": "Career case management, occupational training, job placement assistance",
+  "support": "Transportation assistance, professional clothing, educational incentives",
+  "contact": "Phone: [number] | [address]",
+  "source": "Source reference with specific detailed URL",
   "badge": "specific-program-page.com (not homepage)"
 }
+
+CRITICAL FORMATTING RULES:
+- DO NOT include "Eligibility:", "Services:", "Support:", or emoji icons in the field values
+- DO NOT include "👥", "📋", or "🎯" in the field values
+- The UI will add these labels and icons automatically
+- Just provide the content directly (e.g., "Open to all families..." not "👥 Eligibility: Open to all families...")
 
 PROVIDER LABELING RULES:
 - "Goodwill Provided": Any Goodwill Central Texas service, program, or location
@@ -156,9 +162,9 @@ Format the response as JSON with this structure:
       "category": "Exact category name from the list above",
       "providerType": "Goodwill Provided | Community Resource | Government Benefit",
       "whyItFits": "Why this resource matches the client's needs",
-      "eligibility": "👥 Eligibility: [requirements]",
-      "services": "📋 Services: [list of services]",
-      "support": "🎯 Support: [wraparound services]",
+      "eligibility": "16+ years, Austin/Travis County resident, 200% or less Federal Poverty Guidelines",
+      "services": "Career case management, occupational training, job placement assistance",
+      "support": "Transportation assistance, professional clothing, educational incentives",
       "contact": "Phone: [number] | [address]",
       "source": "Source reference with specific detailed URL",
       "badge": "specific-program-page.com (not homepage)"
@@ -174,7 +180,7 @@ Format the response as JSON with this structure:
 IMPORTANT: 
 - Generate all content in ${outputLanguage}. All resource titles, descriptions, contact information, and explanations should be in ${outputLanguage}.
 - ALWAYS include the "category" field with one of the exact category names listed above.
-- ALWAYS include eligibility, services, and support fields with the specified icons.
+- ALWAYS include eligibility, services, and support fields WITHOUT the label prefixes or icons.
 - Return ONLY the JSON object, no markdown formatting or code blocks.
 
 Client description: ${prompt}`
