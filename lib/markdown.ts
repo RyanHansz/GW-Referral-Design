@@ -9,16 +9,16 @@ import rehypeStringify from "rehype-stringify"
  * Converts markdown content to HTML using remark + rehype
  * Supports GitHub Flavored Markdown (GFM) including lists, links, bold, italic, etc.
  */
-export async function parseMarkdownToHTML(content: string): Promise<string> {
+export function parseMarkdownToHTML(content: string): string {
   if (!content) return ""
 
-  const file = await unified()
+  const file = unified()
     .use(remarkParse) // Parse markdown to AST
     .use(remarkGfm) // Support GitHub Flavored Markdown (tables, strikethrough, task lists, etc.)
     .use(remarkRehype) // Convert markdown AST to HTML AST
     .use(rehypeSanitize) // Sanitize HTML to prevent XSS attacks
     .use(rehypeStringify) // Convert HTML AST to string
-    .process(content)
+    .processSync(content)
 
   let html = String(file)
 
