@@ -49,6 +49,9 @@ import {
   Globe,
 } from "lucide-react"
 
+// Import the new parseMarkdownToHTML function
+import { parseMarkdownToHTML } from "@/lib/markdown"
+
 interface Resource {
   number: number
   title: string
@@ -249,132 +252,6 @@ const translateCategory = (category: string, language: string): string => {
 
   // Return translated category if available, otherwise return original
   return translations[language]?.[category] || category
-}
-
-function parseMarkdownToHTML(content: string): string {
-  if (!content) return ""
-
-  let html = content
-
-  // Convert headers (must be at start of line)
-  html = html.replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mb-2 text-slate-800">$1</h3>')
-  html = html.replace(/^## (.+)$/gm, '<h2 class="text-xl font-semibold mb-3 text-slate-800">$1</h2>')
-  html = html.replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mb-4 text-slate-900">$1</h1>')
-
-  // Convert bold text (use ** for bold)
-  html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-slate-900">$1</strong>')
-
-  // Convert links
-  html = html.replace(
-    /\[(.+?)\]$$(.+?)$$/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>',
-  )
-
-  // Process lists line by line
-  const lines = html.split("\n")
-  const processedLines: string[] = []
-  let inOrderedList = false
-  let inUnorderedList = false
-  let listIndentLevel = 0
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-    const trimmedLine = line.trim()
-
-    // Check for ordered list item (number followed by period and space)
-    const orderedMatch = trimmedLine.match(/^(\d+)\.\s+(.+)$/)
-    // Check for unordered list item (asterisk or dash followed by space)
-    const unorderedMatch = trimmedLine.match(/^[*-]\s+(.+)$/)
-
-    // Detect indentation level
-    const leadingSpaces = line.match(/^(\s*)/)?.[1].length || 0
-    const currentIndentLevel = Math.floor(leadingSpaces / 2)
-
-    if (orderedMatch) {
-      // Close unordered list if we were in one
-      if (inUnorderedList) {
-        processedLines.push("</ul>")
-        inUnorderedList = false
-      }
-
-      // Open ordered list if not already in one
-      if (!inOrderedList) {
-        processedLines.push('<ol class="list-decimal ml-6 mb-4 space-y-1">')
-        inOrderedList = true
-        listIndentLevel = currentIndentLevel
-      }
-
-      // Add list item
-      processedLines.push(`<li class="mb-1 leading-relaxed">${orderedMatch[2]}</li>`)
-    } else if (unorderedMatch) {
-      // Close ordered list if we were in one
-      if (inOrderedList) {
-        processedLines.push("</ol>")
-        inOrderedList = false
-      }
-
-      // Open unordered list if not already in one
-      if (!inUnorderedList) {
-        processedLines.push('<ul class="list-disc ml-6 mb-4 space-y-1">')
-        inUnorderedList = true
-        listIndentLevel = currentIndentLevel
-      }
-
-      // Add list item
-      processedLines.push(`<li class="mb-1 leading-relaxed">${unorderedMatch[1]}</li>`)
-    } else {
-      // Not a list item - close any open lists
-      if (inOrderedList) {
-        processedLines.push("</ol>")
-        inOrderedList = false
-      }
-      if (inUnorderedList) {
-        processedLines.push("</ul>")
-        inUnorderedList = false
-      }
-
-      // Add the line as-is
-      if (trimmedLine) {
-        processedLines.push(line)
-      } else {
-        processedLines.push("")
-      }
-    }
-  }
-
-  // Close any remaining open lists
-  if (inOrderedList) {
-    processedLines.push("</ol>")
-  }
-  if (inUnorderedList) {
-    processedLines.push("</ul>")
-  }
-
-  html = processedLines.join("\n")
-
-  // Convert italic text (single asterisk, but not at start of line which would be a bullet)
-  html = html.replace(/(?<!^|\s)\*([^*\n]+?)\*/g, '<em class="italic">$1</em>')
-
-  // Convert line breaks to <br> tags (but not inside lists or after block elements)
-  html = html.replace(/(?<!<\/(li|ul|ol|h[1-6])>)\n(?!<(ul|ol|h[1-6]|li))/g, "<br>")
-
-  // Convert double line breaks to paragraph breaks
-  html = html.replace(/\n\n+/g, '</p><p class="mb-3 leading-relaxed">')
-
-  // Wrap content in paragraphs if it doesn't start with a block element
-  if (!html.match(/^<(h[1-6]|ul|ol|div|p)/)) {
-    html = `<p class="mb-3 leading-relaxed">${html}</p>`
-  } else if (html.includes("</p><p")) {
-    html = `<p class="mb-3 leading-relaxed">${html}</p>`
-  }
-
-  // Clean up any empty paragraphs
-  html = html.replace(/<p[^>]*><\/p>/g, "")
-
-  // Clean up extra line breaks
-  html = html.replace(/<br>\s*<br>/g, "<br>")
-
-  return html
 }
 
 export default function ReferralTool() {
