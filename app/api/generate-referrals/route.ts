@@ -97,14 +97,37 @@ When the client needs fall into these categories, prioritize these types of reso
 - Career pathway planning
 
 FORMATTING REQUIREMENTS:
-For each resource, you MUST include:
-- Organization name and service type
-- Category: Must be one of these exact values: "Goodwill Resources & Programs", "Local Community Resources", "Government Benefits", "Job Postings", "GCTA Trainings", or "CAT Trainings"
-- Provider type label: "Goodwill Provided", "Community Resource", or "Government Benefit"
-- Brief description with key details (eligibility, schedule, cost)
-- "Why it fits" explanation that's specific to the client's situation
-- Complete contact information (phone, address, website)
-- Source reference with SPECIFIC detailed URLs
+For each resource, you MUST include these structured sections:
+
+1. **Title**: Organization name and program/service name
+2. **Why it fits**: Specific explanation of how this resource addresses the client's needs
+3. **Eligibility**: Requirements to qualify. Include age, location, income level, or other criteria
+4. **Services**: What the program provides. List specific services, training, or support offered
+5. **Support**: Additional wraparound services. Include transportation, clothing, incentives, etc.
+6. **Contact**: Complete contact information including phone, address, and hours
+7. **Source**: Program name and specific detailed URL
+
+REQUIRED STRUCTURE FOR EACH RESOURCE:
+{
+  "number": 1,
+  "title": "Organization Name - Program Name",
+  "service": "Service type",
+  "category": "Exact category name from the list",
+  "providerType": "Goodwill Provided | Community Resource | Government Benefit",
+  "whyItFits": "Detailed explanation of why this resource matches the client's specific situation",
+  "eligibility": "16+ years, Austin/Travis County resident, 200% or less Federal Poverty Guidelines",
+  "services": "Career case management, occupational training, job placement assistance",
+  "support": "Transportation assistance, professional clothing, educational incentives",
+  "contact": "Phone: [number] | [address]",
+  "source": "Source reference with specific detailed URL",
+  "badge": "specific-program-page.com (not homepage)"
+}
+
+CRITICAL FORMATTING RULES:
+- DO NOT include "Eligibility:", "Services:", "Support:", or emoji icons in the field values
+- DO NOT include "👥", "📋", or "🎯" in the field values
+- The UI will add these labels and icons automatically
+- Just provide the content directly (e.g., "Open to all families..." not "👥 Eligibility: Open to all families...")
 
 PROVIDER LABELING RULES:
 - "Goodwill Provided": Any Goodwill Central Texas service, program, or location
@@ -134,13 +157,15 @@ Format the response as JSON with this structure:
   "resources": [
     {
       "number": 1,
-      "title": "Organization Name",
+      "title": "Organization Name - Program Name",
       "service": "Service type",
       "category": "Exact category name from the list above",
       "providerType": "Goodwill Provided | Community Resource | Government Benefit",
-      "description": "Description with key details",
       "whyItFits": "Why this resource matches the client's needs",
-      "contact": "Contact information with specific detailed URL",
+      "eligibility": "16+ years, Austin/Travis County resident, 200% or less Federal Poverty Guidelines",
+      "services": "Career case management, occupational training, job placement assistance",
+      "support": "Transportation assistance, professional clothing, educational incentives",
+      "contact": "Phone: [number] | [address]",
       "source": "Source reference with specific detailed URL",
       "badge": "specific-program-page.com (not homepage)"
     }
@@ -155,6 +180,7 @@ Format the response as JSON with this structure:
 IMPORTANT: 
 - Generate all content in ${outputLanguage}. All resource titles, descriptions, contact information, and explanations should be in ${outputLanguage}.
 - ALWAYS include the "category" field with one of the exact category names listed above.
+- ALWAYS include eligibility, services, and support fields WITHOUT the label prefixes or icons.
 - Return ONLY the JSON object, no markdown formatting or code blocks.
 
 Client description: ${prompt}`
