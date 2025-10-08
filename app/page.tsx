@@ -1233,6 +1233,16 @@ export default function ReferralTool() {
     }
   }
 
+  const handleSelectAllResources = (resources: Resource[]) => {
+    if (resources && selectedResources.length === resources.length) {
+      // If all are selected, deselect all
+      setSelectedResources([])
+    } else if (resources) {
+      // Otherwise, select all
+      setSelectedResources(resources)
+    }
+  }
+
   const generateActionPlan = async () => {
     if (selectedResources.length === 0) return
 
@@ -2409,6 +2419,21 @@ export default function ReferralTool() {
                               Choose resources for an action plan and individual guides:
                             </h4>
                             <div className="space-y-3">
+                              <div className="flex items-center justify-between pb-2 border-b">
+                                <h3 className="text-sm font-medium text-gray-700">
+                                  Choose resources for an action plan and individual guides:
+                                </h3>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleSelectAllResources(exchange.response.resources)}
+                                  className="text-xs"
+                                >
+                                  {selectedResources.length === exchange.response.resources.length
+                                    ? "Deselect All"
+                                    : "Select All"}
+                                </Button>
+                              </div>
                               {exchange.response.resources.map((resource: Resource, resourceIndex: number) => (
                                 <div key={resourceIndex} className="flex items-start gap-3 p-3 bg-white rounded border">
                                   <input
