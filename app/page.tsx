@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   Search,
   MapPin,
@@ -47,6 +48,7 @@ import {
   BookOpen,
   CheckSquare,
   Globe,
+  Mail,
 } from "lucide-react"
 
 // Import the new parseMarkdownToHTML function
@@ -82,7 +84,7 @@ interface Resource {
   prerequisites?: string
   // Added for action plan details
   details?: Array<{ icon: string; label: string; value: string }>
-  eligibility?: string
+  // eligibility?: string // Duplicate field, removed
   services?: string
   support?: string
 }
@@ -327,6 +329,11 @@ export default function ReferralTool() {
 
   const [outputLanguage, setOutputLanguage] = useState<string>("English")
 
+  const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [emailAddress, setEmailAddress] = useState("")
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [emailError, setEmailError] = useState("")
+
   const mockHistory = [
     {
       id: 1,
@@ -380,11 +387,8 @@ export default function ReferralTool() {
     },
   ]
 
-  const handlePrintChatThread = () => {
-    const printWindow = window.open("", "_blank")
-    if (!printWindow) return
-
-    const printContent = `
+  const generatePrintHTML = () => {
+    return `
       <!DOCTYPE html>
       <html>
         <head>
@@ -616,11 +620,69 @@ export default function ReferralTool() {
         </body>
       </html>
     `
+  }
 
+  const handleDirectPrint = () => {
+    const printWindow = window.open("", "_blank")
+    if (!printWindow) return
+
+    const printContent = generatePrintHTML()
     printWindow.document.write(printContent)
     printWindow.document.close()
     printWindow.focus()
     printWindow.print()
+    setShowPrintDialog(false)
+  }
+
+  const handleEmailPDF = async () => {
+    if (!emailAddress.trim()) {
+      setEmailError("Please enter an email address")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(emailAddress)) {
+      setEmailError("Please enter a valid email address")
+      return
+    }
+
+    setIsSendingEmail(true)
+    setEmailError("")
+
+    try {
+      const htmlContent = generatePrintHTML()
+
+      const response = await fetch("/api/email-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          htmlContent,
+          recipientEmail: emailAddress,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to send email")
+      }
+
+      // Success - close dialog and show success message
+      setShowPrintDialog(false)
+      setEmailAddress("")
+      alert("Report has been sent to your email successfully!")
+    } catch (error: any) {
+      console.error("Error sending email:", error)
+      setEmailError(error.message || "Failed to send email. Please try again.")
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
+
+  const handlePrintChatThread = () => {
+    setShowPrintDialog(true)
+    setEmailError("")
   }
 
   const toggleCategory = (categoryId: string) => {
@@ -2844,6 +2906,69 @@ export default function ReferralTool() {
           </div>
         </div>
       </div>
+
+      <Dialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Print or Email Report</DialogTitle>
+            <DialogDescription>Choose how you would like to receive your referral report.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <Button
+              onClick={handleDirectPrint}
+              className="w-full flex items-center justify-center gap-2 bg-transparent"
+              variant="outline"
+            >
+              <Printer className="w-4 h-4" />
+              Print Report
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={emailAddress}
+                onChange={(e) => {
+                  setEmailAddress(e.target.value)
+                  setEmailError("")
+                }}
+                disabled={isSendingEmail}
+              />
+              {emailError && <p className="text-sm text-red-600">{emailError}</p>}
+            </div>
+
+            <Button
+              onClick={handleEmailPDF}
+              className="w-full flex items-center justify-center gap-2"
+              disabled={isSendingEmail}
+            >
+              {isSendingEmail ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4" />
+                  Email PDF Report
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
