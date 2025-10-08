@@ -334,6 +334,7 @@ export default function ReferralTool() {
   const [emailAddress, setEmailAddress] = useState("")
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [emailError, setEmailError] = useState("")
+  const [emailSent, setEmailSent] = useState(false)
 
   const mockHistory = [
     {
@@ -669,10 +670,7 @@ export default function ReferralTool() {
         throw new Error(errorData.message || "Failed to send email")
       }
 
-      // Success - close dialog and show success message
-      setShowPrintDialog(false)
-      setEmailAddress("")
-      alert("Report has been sent to your email successfully!")
+      setEmailSent(true)
     } catch (error: any) {
       console.error("Error sending email:", error)
       setEmailError(error.message || "Failed to send email. Please try again.")
@@ -2908,7 +2906,17 @@ export default function ReferralTool() {
         </div>
       </div>
 
-      <Dialog open={showPrintDialog} onOpenChange={setShowPrintDialog}>
+      <Dialog
+        open={showPrintDialog}
+        onOpenChange={(open) => {
+          setShowPrintDialog(open)
+          if (!open) {
+            setEmailAddress("")
+            setEmailError("")
+            setEmailSent(false)
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Print or Email Report</DialogTitle>
@@ -2916,57 +2924,88 @@ export default function ReferralTool() {
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            <Button
-              onClick={handleDirectPrint}
-              className="w-full flex items-center justify-center gap-2 bg-transparent"
-              variant="outline"
-            >
-              <Printer className="w-4 h-4" />
-              Print Report
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+            {emailSent ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-green-900">Email sent successfully!</p>
+                    <p className="text-sm text-green-700 mt-1">
+                      The report has been sent to <span className="font-medium">{emailAddress}</span>
+                    </p>
+                  </div>
+                </div>
+                <Button onClick={() => setShowPrintDialog(false)} className="w-full" variant="outline">
+                  Close
+                </Button>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">Or</span>
-              </div>
-            </div>
+            ) : (
+              <>
+                <Button
+                  onClick={handleDirectPrint}
+                  className="w-full flex items-center justify-center gap-2 bg-transparent"
+                  variant="outline"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Report
+                </Button>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your.email@example.com"
-                value={emailAddress}
-                onChange={(e) => {
-                  setEmailAddress(e.target.value)
-                  setEmailError("")
-                }}
-                disabled={isSendingEmail}
-              />
-              {emailError && <p className="text-sm text-red-600">{emailError}</p>}
-            </div>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
 
-            <Button
-              onClick={handleEmailPDF}
-              className="w-full flex items-center justify-center gap-2"
-              disabled={isSendingEmail}
-            >
-              {isSendingEmail ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Mail className="w-4 h-4" />
-                  Email PDF Report
-                </>
-              )}
-            </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={emailAddress}
+                    onChange={(e) => {
+                      setEmailAddress(e.target.value)
+                      setEmailError("")
+                    }}
+                    disabled={isSendingEmail}
+                  />
+                  {emailError && <p className="text-sm text-red-600">{emailError}</p>}
+                </div>
+
+                <Button
+                  onClick={handleEmailPDF}
+                  className="w-full flex items-center justify-center gap-2"
+                  disabled={isSendingEmail}
+                >
+                  {isSendingEmail ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4" />
+                      Email PDF Report
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
