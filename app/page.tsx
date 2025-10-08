@@ -49,6 +49,7 @@ import {
   CheckSquare,
   Globe,
   Mail,
+  Share2,
 } from "lucide-react"
 
 // Import the new parseMarkdownToHTML function
@@ -240,7 +241,7 @@ const translateCategory = (category: string, language: string): string => {
     Hindi: {
       "Goodwill Resources & Programs": "Goodwill संसाधन और कार्यक्रम",
       "Local Community Resources": "स्थानीय सामुदायिक संसाधन",
-      "Government Benefits": "सरकारी लाभ",
+      "Government Benefits": " सरकारी लाभ",
       "Job Postings": "नौकरी की पोस्टिंग",
       "GCTA Trainings": "GCTA प्रशिक्षण",
       "CAT Trainings": "CAT प्रशिक्षण",
@@ -2317,8 +2318,8 @@ export default function ReferralTool() {
                           size="sm"
                           className="hover:bg-gray-100 hover:text-gray-900"
                         >
-                          <Printer className="w-4 h-4 mr-2" />
-                          Print Report
+                          <Share2 className="w-4 h-4 mr-2" />
+                          Share
                         </Button>
                       </div>
                     </div>
@@ -2581,8 +2582,8 @@ export default function ReferralTool() {
                         size="sm"
                         className="hover:bg-gray-100 hover:text-gray-900"
                       >
-                        <Printer className="w-4 h-4 mr-2" />
-                        Print Report
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
                       </Button>
                     </div>
 
