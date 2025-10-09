@@ -45,6 +45,7 @@ import {
   Globe,
   Mail,
   Share2,
+  Handshake,
 } from "lucide-react"
 
 // Import the new parseMarkdownToHTML function
@@ -2338,42 +2339,61 @@ export default function ReferralTool() {
                         {exchange.response.resources && exchange.response.resources.length > 0 ? (
                           <div className="space-y-6">
                             {exchange.response.resources.map((resource) => {
-                              // Category-specific styling and icons
                               const getCategoryStyle = (category) => {
                                 switch (category) {
                                   case "Goodwill Resources & Programs":
                                     return {
-                                      text: "text-blue-800",
-                                      icon: "🏢",
+                                      text: "text-blue-700",
+                                      bg: "bg-white",
+                                      border: "border-blue-700",
+                                      icon: (
+                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                          <rect x="4" y="4" width="7" height="7" rx="1" />
+                                          <path d="M14 6h4v2h-4V6zm0 4h4v2h-4v-2zm0 4h4v2h-4v-2z" />
+                                          <path d="M4 14h7v6H4v-6z" />
+                                        </svg>
+                                      ),
                                     }
                                   case "Local Community Resources":
                                     return {
-                                      text: "text-green-800",
-                                      icon: "🤝",
+                                      text: "text-green-700",
+                                      bg: "bg-white",
+                                      border: "border-green-700",
+                                      icon: <Handshake className="w-4 h-4" />,
                                     }
                                   case "Government Benefits":
                                     return {
-                                      text: "text-purple-800",
-                                      icon: "🏛️",
+                                      text: "text-gray-900",
+                                      bg: "bg-white",
+                                      border: "border-gray-900",
+                                      icon: <Landmark className="w-4 h-4" />,
                                     }
                                   case "Job Postings":
                                     return {
                                       text: "text-orange-800",
+                                      bg: "bg-white",
+                                      border: "border-orange-800",
                                       icon: "💼",
                                     }
                                   case "GCTA Trainings":
                                     return {
                                       text: "text-indigo-800",
+                                      bg: "bg-white",
+                                      border: "border-indigo-800",
                                       icon: "🎓",
                                     }
                                   case "CAT Trainings":
                                     return {
                                       text: "text-teal-800",
+                                      bg: "bg-white",
+                                      border: "border-teal-800",
                                       icon: "📚",
                                     }
                                   default:
                                     return {
                                       text: "text-gray-800",
+                                      bg: "bg-white",
+                                      border: "border-gray-800",
                                       icon: "📋",
                                     }
                                 }
@@ -2388,11 +2408,14 @@ export default function ReferralTool() {
                                       {resource.number}
                                     </span>
                                     <div className="flex-1">
-                                      {/* Category Badge */}
                                       <div
-                                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium mb-2 ${categoryStyle.text} bg-white border border-gray-300`}
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold mb-2 ${categoryStyle.text} ${categoryStyle.bg} border-2 ${categoryStyle.border}`}
                                       >
-                                        <span>{categoryStyle.icon}</span>
+                                        {typeof categoryStyle.icon === "string" ? (
+                                          <span>{categoryStyle.icon}</span>
+                                        ) : (
+                                          categoryStyle.icon
+                                        )}
                                         {translateCategory(resource.category, outputLanguage)}
                                       </div>
 
