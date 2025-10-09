@@ -4,12 +4,13 @@ import type React from "react"
 
 import { useState, useRef, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   Search,
   MapPin,
@@ -37,16 +38,14 @@ import {
   Filter,
   Eye,
   RefreshCw,
-  User,
-  Target,
-  Clock,
-  AlertTriangle,
   Loader2,
-  X,
   Landmark,
   BookOpen,
   CheckSquare,
   Globe,
+  Mail,
+  Share2,
+  Handshake,
 } from "lucide-react"
 
 // Import the new parseMarkdownToHTML function
@@ -82,7 +81,7 @@ interface Resource {
   prerequisites?: string
   // Added for action plan details
   details?: Array<{ icon: string; label: string; value: string }>
-  eligibility?: string
+  // eligibility?: string // Duplicate field, removed
   services?: string
   support?: string
 }
@@ -238,7 +237,7 @@ const translateCategory = (category: string, language: string): string => {
     Hindi: {
       "Goodwill Resources & Programs": "Goodwill संसाधन और कार्यक्रम",
       "Local Community Resources": "स्थानीय सामुदायिक संसाधन",
-      "Government Benefits": "सरकारी लाभ",
+      "Government Benefits": " सरकारी लाभ",
       "Job Postings": "नौकरी की पोस्टिंग",
       "GCTA Trainings": "GCTA प्रशिक्षण",
       "CAT Trainings": "CAT प्रशिक्षण",
@@ -327,6 +326,12 @@ export default function ReferralTool() {
 
   const [outputLanguage, setOutputLanguage] = useState<string>("English")
 
+  const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [emailAddress, setEmailAddress] = useState("")
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [emailError, setEmailError] = useState("")
+  const [emailSent, setEmailSent] = useState(false)
+
   const mockHistory = [
     {
       id: 1,
@@ -380,11 +385,8 @@ export default function ReferralTool() {
     },
   ]
 
-  const handlePrintChatThread = () => {
-    const printWindow = window.open("", "_blank")
-    if (!printWindow) return
-
-    const printContent = `
+  const generatePrintHTML = () => {
+    return `
       <!DOCTYPE html>
       <html>
         <head>
@@ -616,11 +618,66 @@ export default function ReferralTool() {
         </body>
       </html>
     `
+  }
 
+  const handleDirectPrint = () => {
+    const printWindow = window.open("", "_blank")
+    if (!printWindow) return
+
+    const printContent = generatePrintHTML()
     printWindow.document.write(printContent)
     printWindow.document.close()
     printWindow.focus()
     printWindow.print()
+    setShowPrintDialog(false)
+  }
+
+  const handleEmailPDF = async () => {
+    if (!emailAddress.trim()) {
+      setEmailError("Please enter an email address")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(emailAddress)) {
+      setEmailError("Please enter a valid email address")
+      return
+    }
+
+    setIsSendingEmail(true)
+    setEmailError("")
+
+    try {
+      const htmlContent = generatePrintHTML()
+
+      const response = await fetch("/api/email-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          htmlContent,
+          recipientEmail: emailAddress,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to send email")
+      }
+
+      setEmailSent(true)
+    } catch (error: any) {
+      console.error("Error sending email:", error)
+      setEmailError(error.message || "Failed to send email. Please try again.")
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
+
+  const handlePrintChatThread = () => {
+    setShowPrintDialog(true)
+    setEmailError("")
   }
 
   const toggleCategory = (categoryId: string) => {
@@ -1157,49 +1214,15 @@ export default function ReferralTool() {
     const followUpEntry = {
       prompt: "What documents do I need to apply for the Ready to Work program and how long does the process take?",
       response: sampleFollowUpData,
-      timestamp: new Date(Date.now() + 1000).toISOString(), // 1 second later
+      timestamp: new Date(Date.now() + 1000).toISOString(),
     }
 
     setConversationHistory([initialEntry, followUpEntry])
-    // setCurrentReferralData(sampleReferralData) // This line seems to be a leftover and not used. Removed.
     setSelectedResources([])
     setActionPlan(null)
-    setShowResults(true) // Ensure results are shown when sample data is loaded
-    setSuggestedFollowUps(sampleFollowUpData.suggestedFollowUps || []) // Update suggested follow-ups if they were present in sampleFollowUpData
-
-    const samplePrompt =
-      "Generate sample referrals for a single mother needing job training, childcare, and housing assistance in Austin, TX."
-    try {
-      const response = await fetch("/api/generate-referrals", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: samplePrompt,
-          languages: [],
-          outputLanguage: outputLanguage, // Added output language to request
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to generate sample referrals")
-      }
-
-      const data = await response.json()
-      // Assuming the API returns data in a similar format to conversationHistory entries
-      const newEntry = {
-        prompt: samplePrompt,
-        response: data,
-        timestamp: new Date().toISOString(),
-      }
-      setConversationHistory([newEntry]) // Replace history with sample data
-      setShowResults(true)
-      setSuggestedFollowUps(data.suggestedFollowUps || [])
-    } catch (error) {
-      console.error("Error generating sample referrals:", error)
-      alert("Failed to load sample referrals. Please try again.")
-    }
+    setShowResults(true)
+    setSuggestedFollowUps(sampleFollowUpData.suggestedFollowUps || [])
+    // </CHANGE>
   }
 
   const handleCopyToClipboard = () => {
@@ -1230,6 +1253,16 @@ export default function ReferralTool() {
       setSelectedResources((prev) => [...prev, resource])
     } else {
       setSelectedResources((prev) => prev.filter((r) => r.number !== resource.number))
+    }
+  }
+
+  const handleSelectAllResources = (resources: Resource[]) => {
+    if (resources && selectedResources.length === resources.length) {
+      // If all are selected, deselect all
+      setSelectedResources([])
+    } else if (resources) {
+      // Otherwise, select all
+      setSelectedResources(resources)
     }
   }
 
@@ -2245,8 +2278,8 @@ export default function ReferralTool() {
                           size="sm"
                           className="hover:bg-gray-100 hover:text-gray-900"
                         >
-                          <Printer className="w-4 h-4 mr-2" />
-                          Print Report
+                          <Share2 className="w-4 h-4 mr-2" />
+                          Share
                         </Button>
                       </div>
                     </div>
@@ -2272,42 +2305,61 @@ export default function ReferralTool() {
                         {exchange.response.resources && exchange.response.resources.length > 0 ? (
                           <div className="space-y-6">
                             {exchange.response.resources.map((resource) => {
-                              // Category-specific styling and icons
                               const getCategoryStyle = (category) => {
                                 switch (category) {
                                   case "Goodwill Resources & Programs":
                                     return {
-                                      text: "text-blue-800",
-                                      icon: "🏢",
+                                      text: "text-blue-700",
+                                      bg: "bg-white",
+                                      border: "border-blue-700",
+                                      icon: (
+                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                          <rect x="4" y="4" width="7" height="7" rx="1" />
+                                          <path d="M14 6h4v2h-4V6zm0 4h4v2h-4v-2zm0 4h4v2h-4v-2z" />
+                                          <path d="M4 14h7v6H4v-6z" />
+                                        </svg>
+                                      ),
                                     }
                                   case "Local Community Resources":
                                     return {
-                                      text: "text-green-800",
-                                      icon: "🤝",
+                                      text: "text-green-700",
+                                      bg: "bg-white",
+                                      border: "border-green-700",
+                                      icon: <Handshake className="w-4 h-4" />,
                                     }
                                   case "Government Benefits":
                                     return {
-                                      text: "text-purple-800",
-                                      icon: "🏛️",
+                                      text: "text-gray-900",
+                                      bg: "bg-white",
+                                      border: "border-gray-900",
+                                      icon: <Landmark className="w-4 h-4" />,
                                     }
                                   case "Job Postings":
                                     return {
                                       text: "text-orange-800",
+                                      bg: "bg-white",
+                                      border: "border-orange-800",
                                       icon: "💼",
                                     }
                                   case "GCTA Trainings":
                                     return {
                                       text: "text-indigo-800",
+                                      bg: "bg-white",
+                                      border: "border-indigo-800",
                                       icon: "🎓",
                                     }
                                   case "CAT Trainings":
                                     return {
                                       text: "text-teal-800",
+                                      bg: "bg-white",
+                                      border: "border-teal-800",
                                       icon: "📚",
                                     }
                                   default:
                                     return {
                                       text: "text-gray-800",
+                                      bg: "bg-white",
+                                      border: "border-gray-800",
                                       icon: "📋",
                                     }
                                 }
@@ -2322,11 +2374,14 @@ export default function ReferralTool() {
                                       {resource.number}
                                     </span>
                                     <div className="flex-1">
-                                      {/* Category Badge */}
                                       <div
-                                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium mb-2 ${categoryStyle.text} bg-white border border-gray-300`}
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold mb-2 ${categoryStyle.text} ${categoryStyle.bg} border-2 ${categoryStyle.border}`}
                                       >
-                                        <span>{categoryStyle.icon}</span>
+                                        {typeof categoryStyle.icon === "string" ? (
+                                          <span>{categoryStyle.icon}</span>
+                                        ) : (
+                                          categoryStyle.icon
+                                        )}
                                         {translateCategory(resource.category, outputLanguage)}
                                       </div>
 
@@ -2409,6 +2464,21 @@ export default function ReferralTool() {
                               Choose resources for an action plan and individual guides:
                             </h4>
                             <div className="space-y-3">
+                              <div className="flex items-center justify-between pb-2 border-b">
+                                <h3 className="text-sm font-medium text-gray-700">
+                                  Choose resources for an action plan and individual guides:
+                                </h3>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleSelectAllResources(exchange.response.resources)}
+                                  className="text-xs"
+                                >
+                                  {selectedResources.length === exchange.response.resources.length
+                                    ? "Deselect All"
+                                    : "Select All"}
+                                </Button>
+                              </div>
                               {exchange.response.resources.map((resource: Resource, resourceIndex: number) => (
                                 <div key={resourceIndex} className="flex items-start gap-3 p-3 bg-white rounded border">
                                   <input
@@ -2494,8 +2564,8 @@ export default function ReferralTool() {
                         size="sm"
                         className="hover:bg-gray-100 hover:text-gray-900"
                       >
-                        <Printer className="w-4 h-4 mr-2" />
-                        Print Report
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
                       </Button>
                     </div>
 
@@ -2515,310 +2585,113 @@ export default function ReferralTool() {
                 )}
               </div>
             </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {/* Client Information Card */}
-              <Card className="bg-white shadow-sm">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <User className="w-5 h-5 text-blue-600" />
-                    Client Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
-                        First Name
-                      </Label>
-                      <Input
-                        id="firstName"
-                        value={clientInfo.firstName}
-                        onChange={(e) => setClientInfo({ ...clientInfo, firstName: e.target.value })}
-                        className="mt-1"
-                        placeholder="Enter first name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
-                        Last Name
-                      </Label>
-                      <Input
-                        id="lastName"
-                        value={clientInfo.lastName}
-                        onChange={(e) => setClientInfo({ ...clientInfo, lastName: e.target.value })}
-                        className="mt-1"
-                        placeholder="Enter last name"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="age" className="text-sm font-medium text-gray-700">
-                        Age
-                      </Label>
-                      <Input
-                        id="age"
-                        type="number"
-                        value={clientInfo.age}
-                        onChange={(e) => setClientInfo({ ...clientInfo, age: e.target.value })}
-                        className="mt-1"
-                        placeholder="Enter age"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="location" className="text-sm font-medium text-gray-700">
-                        Location
-                      </Label>
-                      <Input
-                        id="location"
-                        value={clientInfo.location}
-                        onChange={(e) => setClientInfo({ ...clientInfo, location: e.target.value })}
-                        className="mt-1"
-                        placeholder="Enter location"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="situation" className="text-sm font-medium text-gray-700">
-                      Current Situation
-                    </Label>
-                    <Textarea
-                      id="situation"
-                      value={clientInfo.situation}
-                      onChange={(e) => setClientInfo({ ...clientInfo, situation: e.target.value })}
-                      className="mt-1 min-h-[100px]"
-                      placeholder="Describe the client's current situation and needs..."
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Document Upload Card */}
-              <Card className="bg-white shadow-sm">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                    Document Upload
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileUpload}
-                      accept=".pdf,.doc,.docx,.txt"
-                      className="hidden"
-                      multiple
-                    />
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">
-                      Drop files here or{" "}
-                      <button onClick={triggerFileInput} className="text-blue-600 hover:text-blue-700 font-medium">
-                        browse
-                      </button>
-                    </p>
-                    <p className="text-xs text-gray-500">Supports PDF, DOC, DOCX, TXT files</p>
-                  </div>
-
-                  {uploadedFiles.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700">Uploaded Files:</h4>
-                      <div className="space-y-2 max-h-32 overflow-y-auto">
-                        {uploadedFiles.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                            <span className="truncate flex-1 mr-2">{file.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFile(index)}
-                              className="text-red-600 hover:text-red-700 p-1"
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Resource Selection */}
-            <Card className="bg-white shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Target className="w-5 h-5 text-blue-600" />
-                  Resource Selection
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-blue-600" />
-                    Resource Categories
-                  </h4>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                    {resourceCategories.map((category) => {
-                      const Icon = category.icon
-                      const isSelected = selectedCategories.includes(category.id)
-                      return (
-                        <Button
-                          key={category.id}
-                          variant={isSelected ? "default" : "outline"}
-                          size="sm"
-                          className={`text-xs sm:text-sm flex-col justify-center px-2 h-16 sm:h-20 ${
-                            isSelected
-                              ? "bg-blue-600 text-white hover:bg-blue-700"
-                              : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                          }`}
-                          onClick={() => toggleCategory(category.id)}
-                        >
-                          <Icon className="w-4 h-4 sm:w-6 sm:h-6 mb-1" />
-                          <span className="text-center leading-tight">{category.label}</span>
-                        </Button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <Building className="w-4 h-4 text-blue-600" />
-                    Resource Provider Types
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <Button
-                      variant={selectedResourceTypes.includes("goodwill") ? "default" : "outline"}
-                      size="sm"
-                      className={`h-12 ${
-                        selectedResourceTypes.includes("goodwill")
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
-                      onClick={() => toggleResourceType("goodwill")}
-                    >
-                      <Building className="w-4 h-4 mr-2" />
-                      Goodwill Programs
-                    </Button>
-                    <Button
-                      variant={selectedResourceTypes.includes("community") ? "default" : "outline"}
-                      size="sm"
-                      className={`h-12 ${
-                        selectedResourceTypes.includes("community")
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
-                      onClick={() => toggleResourceType("community")}
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      Community Resources
-                    </Button>
-                    <Button
-                      variant={selectedResourceTypes.includes("government") ? "default" : "outline"}
-                      size="sm"
-                      className={`h-12 ${
-                        selectedResourceTypes.includes("government")
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
-                      onClick={() => toggleResourceType("government")}
-                    >
-                      <MapPin className="w-4 h-4 mr-2" />
-                      Government Services
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    Urgency Level
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <Button
-                      variant={urgencyLevel === "immediate" ? "default" : "outline"}
-                      size="sm"
-                      className={`h-12 ${
-                        urgencyLevel === "immediate"
-                          ? "bg-red-600 text-white hover:bg-red-700"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
-                      onClick={() => setUrgencyLevel("immediate")}
-                    >
-                      <AlertTriangle className="w-4 h-4 mr-2" />
-                      Immediate Need
-                    </Button>
-                    <Button
-                      variant={urgencyLevel === "within_week" ? "default" : "outline"}
-                      size="sm"
-                      className={`h-12 ${
-                        urgencyLevel === "within_week"
-                          ? "bg-blue-600 text-white hover:bg-blue-700"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
-                      onClick={() => setUrgencyLevel("within_week")}
-                    >
-                      <Clock className="w-4 h-4 mr-2" />
-                      Within a Week
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h4 className="font-semibold text-gray-900">Output Language</h4>
-                  <select
-                    value={outputLanguage}
-                    onChange={(e) => setOutputLanguage(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="English">English</option>
-                    <option value="Spanish">Spanish (Español)</option>
-                    <option value="French">French (Français)</option>
-                    <option value="German">German (Deutsch)</option>
-                    <option value="Italian">Italian (Italiano)</option>
-                    <option value="Portuguese">Portuguese (Português)</option>
-                    <option value="Chinese">Chinese (中文)</option>
-                    <option value="Japanese">Japanese (日本語)</option>
-                    <option value="Korean">Korean (한국어)</option>
-                    <option value="Arabic">Arabic (العربية)</option>
-                    <option value="Russian">Russian (Русский)</option>
-                    <option value="Hindi">Hindi (हिन्दी)</option>
-                  </select>
-                  <p className="text-xs text-gray-600">
-                    Select the language for the generated referrals and action plans.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Generate Button */}
-            <div className="flex justify-center">
-              <Button
-                onClick={generateReferrals}
-                disabled={isGenerating || !clientInfo.firstName || !clientInfo.lastName}
-                className="generate-referrals-button px-8 py-3 text-lg font-semibold w-full sm:w-auto"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    Generating Referrals...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Generate AI Referrals
-                  </>
-                )}
-              </Button>
-            </div>
           </div>
         </div>
       </div>
+
+      <Dialog
+        open={showPrintDialog}
+        onOpenChange={(open) => {
+          setShowPrintDialog(open)
+          if (!open) {
+            setEmailAddress("")
+            setEmailError("")
+            setEmailSent(false)
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Print or Email Report</DialogTitle>
+            <DialogDescription>Choose how you would like to receive your referral report.</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {emailSent ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex-shrink-0">
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-green-900">Email sent successfully!</p>
+                    <p className="text-sm text-green-700 mt-1">
+                      The report has been sent to <span className="font-medium">{emailAddress}</span>
+                    </p>
+                  </div>
+                </div>
+                <Button onClick={() => setShowPrintDialog(false)} className="w-full" variant="outline">
+                  Close
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button
+                  onClick={handleDirectPrint}
+                  className="w-full flex items-center justify-center gap-2 bg-transparent"
+                  variant="outline"
+                >
+                  <Printer className="w-4 h-4" />
+                  Print Report
+                </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-muted-foreground">Or</span>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={emailAddress}
+                    onChange={(e) => {
+                      setEmailAddress(e.target.value)
+                      setEmailError("")
+                    }}
+                    disabled={isSendingEmail}
+                  />
+                  {emailError && <p className="text-sm text-red-600">{emailError}</p>}
+                </div>
+
+                <Button
+                  onClick={handleEmailPDF}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={isSendingEmail}
+                >
+                  {isSendingEmail ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4" />
+                      Email PDF Report
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
