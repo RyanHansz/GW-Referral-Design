@@ -1214,49 +1214,15 @@ export default function ReferralTool() {
     const followUpEntry = {
       prompt: "What documents do I need to apply for the Ready to Work program and how long does the process take?",
       response: sampleFollowUpData,
-      timestamp: new Date(Date.now() + 1000).toISOString(), // 1 second later
+      timestamp: new Date(Date.now() + 1000).toISOString(),
     }
 
     setConversationHistory([initialEntry, followUpEntry])
-    // setCurrentReferralData(sampleReferralData) // This line seems to be a leftover and not used. Removed.
     setSelectedResources([])
     setActionPlan(null)
-    setShowResults(true) // Ensure results are shown when sample data is loaded
-    setSuggestedFollowUps(sampleFollowUpData.suggestedFollowUps || []) // Update suggested follow-ups if they were present in sampleFollowUpData
-
-    const samplePrompt =
-      "Generate sample referrals for a single mother needing job training, childcare, and housing assistance in Austin, TX."
-    try {
-      const response = await fetch("/api/generate-referrals", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: samplePrompt,
-          languages: [],
-          outputLanguage: outputLanguage, // Added output language to request
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to generate sample referrals")
-      }
-
-      const data = await response.json()
-      // Assuming the API returns data in a similar format to conversationHistory entries
-      const newEntry = {
-        prompt: samplePrompt,
-        response: data,
-        timestamp: new Date().toISOString(),
-      }
-      setConversationHistory([newEntry]) // Replace history with sample data
-      setShowResults(true)
-      setSuggestedFollowUps(data.suggestedFollowUps || [])
-    } catch (error) {
-      console.error("Error generating sample referrals:", error)
-      alert("Failed to load sample referrals. Please try again.")
-    }
+    setShowResults(true)
+    setSuggestedFollowUps(sampleFollowUpData.suggestedFollowUps || [])
+    // </CHANGE>
   }
 
   const handleCopyToClipboard = () => {
