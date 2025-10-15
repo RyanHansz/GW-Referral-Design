@@ -1,4 +1,4 @@
-import { generateText } from "ai"
+import { generateText, streamText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: Request) {
@@ -185,10 +185,40 @@ IMPORTANT:
 
 Client description: ${prompt}`
 
+    // Use streaming for follow-up questions
+    if (isFollowUp) {
+      const result = streamText({
+        model: openai("gpt-5-mini"),
+        prompt: aiPrompt,
+        tools: {
+          web_search: openai.tools.webSearch({
+            searchContextSize: "high",
+          }),
+        },
+        providerOptions: {
+          openai: {
+            reasoningEffort: "low",
+          },
+        },
+      })
+
+      return result.toTextStreamResponse()
+    }
+
+    // Use standard generation for referrals
     const { text } = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5-mini"),
       prompt: aiPrompt,
-      temperature: 0.7,
+      tools: {
+        web_search: openai.tools.webSearch({
+          searchContextSize: "high",
+        }),
+      },
+      providerOptions: {
+        openai: {
+          reasoningEffort: "low",
+        },
+      },
     })
 
     let cleanedText = text.trim()

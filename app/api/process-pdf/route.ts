@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     // Use OpenAI to extract text and analyze the PDF
     const { text } = await generateText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-5"),
       messages: [
         {
           role: "user",
