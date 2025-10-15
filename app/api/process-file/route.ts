@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
             content: [
               {
                 type: "text",
-                text: "This is a PDF intake form. Please extract all client information including name, age, address, income, family situation, housing status, employment, health conditions, disabilities, transportation needs, and any other relevant details that could help determine appropriate social services referrals. Format the information clearly and comprehensively. IMPORTANT: At the end of your response, include a citation noting that this analysis was performed by AI (ChatGPT/GPT-4) and should be reviewed by a human case worker for accuracy.",
+                text: "This is a PDF intake form for a client seeking assistance from a Goodwill Central Texas career case manager. Please extract all client information including name, age, address, income, family situation, housing status, employment, health conditions, disabilities, transportation needs, and any other relevant details that could help determine appropriate social services referrals. Format the information clearly and comprehensively. IMPORTANT: At the end of your response, include a citation noting that this analysis was performed by AI (ChatGPT/GPT-4) and should be reviewed by a human case worker for accuracy.",
               },
               {
                 type: "image",
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
             content: [
               {
                 type: "text",
-                text: "This is an intake form image (could be handwritten or typed). Please extract all client information including name, age, address, income, family situation, housing status, employment, health conditions, disabilities, transportation needs, and any other relevant details that could help determine appropriate social services referrals. Format the information clearly and comprehensively. IMPORTANT: At the end of your response, include a citation noting that this analysis was performed by AI (ChatGPT/GPT-4) and should be reviewed by a human case worker for accuracy.",
+                text: "This is an intake form image (could be handwritten or typed) for a client seeking assistance from a Goodwill Central Texas career case manager. Please extract all client information including name, age, address, income, family situation, housing status, employment, health conditions, disabilities, transportation needs, and any other relevant details that could help determine appropriate social services referrals. Format the information clearly and comprehensively. IMPORTANT: At the end of your response, include a citation noting that this analysis was performed by AI (ChatGPT/GPT-4) and should be reviewed by a human case worker for accuracy.",
               },
               {
                 type: "image",

@@ -141,3 +141,137 @@
     color: #ffffff !important;
   }
 }
+
+/* Streaming animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in both;
+}
+
+/* Action Plan Styling */
+.action-plan-content {
+  color: #1f2937;
+  line-height: 1.7;
+}
+
+.action-plan-content h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #dbeafe;
+}
+
+.action-plan-content h2:first-child {
+  margin-top: 0;
+}
+
+.action-plan-content h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid #3b82f6;
+}
+
+.action-plan-content ul {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  list-style: none;
+}
+
+.action-plan-content ul li {
+  position: relative;
+  padding-left: 0.5rem;
+  margin-bottom: 0.625rem;
+  line-height: 1.6;
+}
+
+.action-plan-content ul li::before {
+  content: "•";
+  position: absolute;
+  left: -1rem;
+  color: #3b82f6;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.action-plan-content ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  counter-reset: item;
+  list-style: none;
+}
+
+.action-plan-content ol li {
+  position: relative;
+  padding-left: 0.5rem;
+  margin-bottom: 0.75rem;
+  counter-increment: item;
+  line-height: 1.6;
+}
+
+.action-plan-content ol li::before {
+  content: counter(item) ".";
+  position: absolute;
+  left: -1.5rem;
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.action-plan-content ol ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-left: 1.25rem;
+}
+
+.action-plan-content ol ol li::before {
+  content: counter(item, lower-alpha) ".";
+  color: #3b82f6;
+}
+
+.action-plan-content strong {
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.action-plan-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-decoration-color: #93c5fd;
+  text-underline-offset: 2px;
+  transition: all 0.2s ease;
+}
+
+.action-plan-content a:hover {
+  color: #1d4ed8;
+  text-decoration-color: #2563eb;
+}
+
+.action-plan-content p {
+  margin: 0.625rem 0;
+  line-height: 1.65;
+}
+
+.action-plan-content p:first-child {
+  margin-top: 0;
+}
+
+.action-plan-content p:last-child {
+  margin-bottom: 0;
+}

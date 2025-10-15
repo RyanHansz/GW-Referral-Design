@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     }
 
     const aiPrompt = isFollowUp
-      ? `You are a social services case manager AI assistant for Goodwill Central Texas. This is a follow-up question based on previous conversation.
+      ? `You are a social services case manager AI assistant for Goodwill Central Texas. You are helping a client who is already enrolled in Goodwill's Workforce Advancement Program and receives career coaching support. This is a follow-up question based on previous conversation.
 
 ${contextPrompt}${prompt}
 
@@ -45,7 +45,21 @@ Format the response as JSON with this structure:
 }
 
 IMPORTANT: Return ONLY the JSON object, no markdown formatting or code blocks.`
-      : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance. Based on the client description provided, generate exactly 4 relevant resources from the categories below.
+      : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance.
+
+IMPORTANT CONTEXT: The client is already enrolled in Goodwill Central Texas's Workforce Advancement Program and receives career coaching and case management support from a Goodwill career case manager. Do NOT recommend general career coaching, case management, or workforce advancement programs from Goodwill since they already have this support.
+
+Based on the client description provided, generate exactly 4 relevant resources from the categories below.
+
+CRITICAL: Generate resources in STRICT NUMERICAL ORDER (1, 2, 3, 4). Start writing resource #1 first, then #2, then #3, then #4. Do NOT skip ahead to generate other resources first.
+
+RESOURCE PRIORITIZATION:
+- ALWAYS prioritize SPECIFIC Goodwill programs (GCTA Trainings, CAT Trainings, job postings, Digital Navigator) FIRST when they match the client's needs
+- DO NOT recommend general "Goodwill Workforce Advancement" or "Career Coaching" since the client already receives this
+- List Goodwill/GCTA resources as resource #1 and #2 whenever applicable
+- Only use Community Resources and Government Benefits to fill remaining slots after considering all relevant specific Goodwill/GCTA options
+- Example: If a client needs job training, prioritize GCTA trainings over community college programs
+- Generate each resource completely (with all details) before moving to the next one
 
 CRITICAL SPECIFICITY REQUIREMENTS:
 - Find SPECIFIC programs, courses, or services - NOT general websites or class schedule pages
@@ -64,12 +78,11 @@ EXAMPLES OF GOOD VS BAD RESOURCES:
 When the client needs fall into these categories, prioritize these types of resources:
 
 **Goodwill Resources & Programs:**
-- Goodwill Central Texas job training programs (IT, healthcare, retail, manufacturing)
-- Career coaching and resume services
-- Digital literacy training
-- Goodwill retail stores for affordable goods
-- Goodwill donation centers
-- Specific programs: GoodSkills, GoodCareers, Digital Navigator
+- Goodwill Central Texas specific job postings (retail, donation center positions, etc.)
+- Digital Navigator program (digital literacy training)
+- Goodwill retail stores for affordable goods (if client needs clothing, furniture, household items)
+- Goodwill donation centers (if relevant to client's needs)
+- DO NOT recommend: General career coaching, case management, or workforce advancement (client already has this)
 
 **Local Community Resources:**
 - Food banks: Central Texas Food Bank, local pantries, mobile food markets
@@ -101,6 +114,7 @@ When the client needs fall into these categories, prioritize these types of reso
 - Customer service and retail training
 - Entrepreneurship programs
 - Financial literacy courses
+- IMPORTANT: Use web search to check https://gctatraining.org/class-schedule/ for current course offerings and start dates
 
 **CAT Trainings (Career Advancement Training):**
 - Advanced skill development programs
@@ -116,11 +130,23 @@ Keep ALL content CONCISE and SCANNABLE. Use SHORT phrases, not full sentences.
 1. **Title**: Keep SHORT and CLEAR. Maximum 5-6 words. Format: "Organization - Program Name" (e.g., "GCTA - Medical Assistant Cert", "Food Bank - Mobile Pantry")
 2. **Service**: One word or short phrase (e.g., "Healthcare Training", "Food Assistance")
 3. **Why it fits**: ONE sentence maximum, 15-20 words
-4. **Eligibility**: Maximum 3-5 short requirements separated by commas. Example: "18+, Travis County, HS diploma/GED"
-5. **Services**: Maximum 3-4 key items with commas. Example: "520-hour training, certification prep, job coaching"
+4. **Eligibility**: Maximum 3-5 short requirements separated by commas.
+   - For TRAININGS/CLASSES: Include next class start date if available (e.g., "18+, HS diploma/GED, Next class starts Jan 2026")
+   - For other resources: Example: "18+, Travis County, income under $50k"
+5. **Services**: Maximum 3-4 key items with commas.
+   - For TRAININGS/CLASSES: Include duration and schedule (e.g., "520-hour training, Mon-Fri 9am-5pm, certification prep, job coaching")
+   - For other resources: Example: "Case management, financial aid, career counseling"
 6. **Support**: Maximum 2-3 items. Example: "Full tuition grants, job placement assistance"
 7. **Contact**: "Phone: [number] | Address: [city/area] | Hours: [brief]"
 8. **Source**: Specific program page URL only
+
+SPECIAL REQUIREMENTS FOR TRAINING/CLASS RESOURCES:
+- Use web search efficiently to find upcoming class start dates and session schedules
+- For GCTA courses, quickly check https://gctatraining.org/class-schedule/ for the latest course offerings and start dates (don't let web search delay generating resource #1)
+- Include class timing in eligibility or services field (e.g., "Next cohort: March 2026" or "Rolling enrollment - classes start monthly")
+- Include class duration and schedule in services field (e.g., "10-week course, Tuesdays/Thursdays 6-9pm")
+- Be specific about enrollment windows if available (e.g., "Applications open Nov 1st")
+- If exact dates aren't immediately available, use "Contact for next session dates" and continue generating the resource
 
 REQUIRED STRUCTURE FOR EACH RESOURCE:
 {
@@ -158,12 +184,12 @@ CATEGORY ASSIGNMENT RULES:
 - Use "Job Postings" for current job openings and employment opportunities
 
 CRITICAL RULES FOR SOURCES AND SPECIFICITY:
-- Source URLs must go directly to the specific program/course/service page - NEVER to homepages, general "services" pages, or class schedule listing pages
-- If you find a class schedule page, use web search to find the specific course within it and reference that specific course
-- Title must name the specific program (e.g., "CNA Certification Program starting June 2025" NOT "Healthcare Training Programs")
+- Source URLs must go directly to the specific program/course/service page when available
+- For GCTA courses: Use web search on https://gctatraining.org/class-schedule/ to find current course offerings and dates, then link to the most specific page available
+- Title must name the specific program with dates (e.g., "GCTA - CNA Certification (Oct 20, 2025)" NOT "Healthcare Training Programs")
 - Badge field should show the specific page domain/path to verify it's not a homepage
-- Bad example: title "GCTA Training" with source "gctatraining.org/class-schedule"
-- Good example: title "GCTA - Certified Nursing Assistant (CNA) Program" with source "gctatraining.org/programs/healthcare/cna-certification"
+- Bad example: title "GCTA Training" with generic description
+- Good example: title "GCTA - Patient Care Technician (Oct 20, 2025)" with specific start date and detailed course info
 
 For suggested follow-ups, create questions that ask for more details about HOW TO USE or ACCESS the specific resources you provided. Examples:
 - "Write a guide to applying for reduced fare" (for transportation resources)
@@ -236,53 +262,153 @@ Client description: ${prompt}`
       return result.toTextStreamResponse()
     }
 
-    // Use standard generation for referrals
-    const { text } = await generateText({
-      model: openai("gpt-5-mini"),
-      prompt: aiPrompt,
-      maxTokens: 3000,
-      tools: {
-        web_search: openai.tools.webSearch({
-          searchContextSize: "medium",
-        }),
-      },
-      providerOptions: {
-        openai: {
-          reasoningEffort: "low",
-        },
+    // Use streaming for referrals with progressive resource display
+    const stream = new TransformStream()
+    const writer = stream.writable.getWriter()
+    const encoder = new TextEncoder()
+
+    // Start async generation
+    ;(async () => {
+      try {
+        // Send initial status
+        await writer.write(encoder.encode(JSON.stringify({ type: "status", message: "Searching for resources..." }) + "\n"))
+
+        const result = streamText({
+          model: openai("gpt-5-mini"),
+          prompt: aiPrompt,
+          maxTokens: 3000,
+          tools: {
+            web_search: openai.tools.webSearch({
+              searchContextSize: "medium",
+            }),
+          },
+          providerOptions: {
+            openai: {
+              reasoningEffort: "low",
+            },
+          },
+        })
+
+        let buffer = ""
+        const sentResources = new Set<number>()
+        let metadata: any = null
+
+        // Stream and parse incrementally
+        for await (const chunk of result.textStream) {
+          buffer += chunk
+
+          // Try to extract complete JSON
+          let cleanBuffer = buffer.trim()
+          if (cleanBuffer.startsWith("```json")) {
+            cleanBuffer = cleanBuffer.replace(/^```json\s*/, "")
+          } else if (cleanBuffer.startsWith("```")) {
+            cleanBuffer = cleanBuffer.replace(/^```\s*/, "")
+          }
+
+          // Try to parse complete resources from buffer
+          try {
+            // Look for complete resource objects
+            const resourceMatches = cleanBuffer.matchAll(/{[\s\S]*?"number"\s*:\s*(\d+)[\s\S]*?"badge"\s*:\s*"[^"]*"[\s\S]*?}/g)
+
+            for (const match of resourceMatches) {
+              try {
+                const resource = JSON.parse(match[0])
+                if (resource.number && resource.title && !sentResources.has(resource.number)) {
+                  await writer.write(encoder.encode(JSON.stringify({ type: "resource", data: resource }) + "\n"))
+                  sentResources.add(resource.number)
+                }
+              } catch (e) {
+                // Invalid JSON, skip
+              }
+            }
+          } catch (e) {
+            // Parsing error, continue accumulating
+          }
+        }
+
+        // Parse final complete response
+        let cleanedText = buffer.trim()
+        if (cleanedText.startsWith("```json")) {
+          cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
+        } else if (cleanedText.startsWith("```")) {
+          cleanedText = cleanedText.replace(/^```\s*/, "").replace(/\s*```$/, "")
+        }
+        cleanedText = cleanedText.trim()
+
+        try {
+          const fullData = JSON.parse(cleanedText)
+
+          // Send any remaining resources not yet sent
+          if (fullData.resources) {
+            for (const resource of fullData.resources) {
+              if (!sentResources.has(resource.number)) {
+                await writer.write(encoder.encode(JSON.stringify({ type: "resource", data: resource }) + "\n"))
+                sentResources.add(resource.number)
+              }
+            }
+          }
+
+          // Send metadata
+          await writer.write(
+            encoder.encode(
+              JSON.stringify({
+                type: "metadata",
+                data: {
+                  question: fullData.question,
+                  summary: fullData.summary,
+                },
+              }) + "\n",
+            ),
+          )
+
+          // Send follow-ups
+          if (fullData.suggestedFollowUps) {
+            await writer.write(
+              encoder.encode(
+                JSON.stringify({
+                  type: "followups",
+                  data: fullData.suggestedFollowUps,
+                }) + "\n",
+              ),
+            )
+          }
+
+          // Send completion
+          await writer.write(encoder.encode(JSON.stringify({ type: "complete" }) + "\n"))
+        } catch (parseError) {
+          console.error("JSON parsing failed:", parseError)
+          await writer.write(
+            encoder.encode(
+              JSON.stringify({
+                type: "error",
+                error: "Failed to parse AI response",
+              }) + "\n",
+            ),
+          )
+        }
+
+        await writer.close()
+      } catch (error) {
+        console.error("Streaming error:", error)
+        await writer.write(
+          encoder.encode(
+            JSON.stringify({
+              type: "error",
+              error: "Failed to generate resources",
+            }) + "\n",
+          ),
+        )
+        await writer.close()
+      }
+    })()
+
+    return new Response(stream.readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
       },
     })
-
-    let cleanedText = text.trim()
-
-    // Remove markdown code blocks if present
-    if (cleanedText.startsWith("```json")) {
-      cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
-    } else if (cleanedText.startsWith("```")) {
-      cleanedText = cleanedText.replace(/^```\s*/, "").replace(/\s*```$/, "")
-    }
-
-    cleanedText = cleanedText.trim()
-
-    let referralData
-    try {
-      referralData = JSON.parse(cleanedText)
-    } catch (parseError) {
-      console.error("JSON parsing failed:", parseError)
-      console.error("Raw response:", text)
-      console.error("Cleaned response:", cleanedText)
-
-      // Return a fallback response
-      return Response.json(
-        {
-          error: "Failed to parse AI response",
-          rawResponse: text.substring(0, 500), // First 500 chars for debugging
-        },
-        { status: 500 },
-      )
-    }
-
-    return Response.json(referralData)
   } catch (error) {
     console.error("Error generating referrals:", error)
     return Response.json({ error: "Failed to generate referrals" }, { status: 500 })

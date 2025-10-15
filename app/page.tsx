@@ -46,6 +46,7 @@ import {
   Mail,
   Share2,
   Handshake,
+  ChevronUp,
 } from "lucide-react"
 
 // Import the new parseMarkdownToHTML function
@@ -99,6 +100,124 @@ interface ActionPlan {
   title: string
   summary: string
   content: string
+}
+
+// Component for rendering action plan with collapsible resource sections
+function ActionPlanContent({ content }: { content: string }) {
+  const [expandedSections, setExpandedSections] = React.useState<Set<number>>(new Set([0, 1, 2, 3, 4]))
+
+  // Parse the content to split into sections
+  const sections = React.useMemo(() => {
+    const html = parseMarkdownToHTML(content)
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(html, "text/html")
+
+    const result: Array<{ title: string; content: string; isResourceSection: boolean }> = []
+    let currentSection: { title: string; content: string; isResourceSection: boolean } | null = null
+
+    doc.body.childNodes.forEach((node) => {
+      if (node.nodeName === "H3") {
+        // Save previous section
+        if (currentSection) {
+          result.push(currentSection)
+        }
+        // Start new resource section
+        currentSection = {
+          title: node.textContent || "",
+          content: "",
+          isResourceSection: true,
+        }
+      } else if (node.nodeName === "H2") {
+        // Save previous section
+        if (currentSection) {
+          result.push(currentSection)
+        }
+        // Start new major section (not collapsible)
+        currentSection = {
+          title: node.textContent || "",
+          content: "",
+          isResourceSection: false,
+        }
+      } else if (currentSection) {
+        // Add content to current section
+        const div = document.createElement("div")
+        div.appendChild(node.cloneNode(true))
+        currentSection.content += div.innerHTML
+      } else {
+        // Content before any heading
+        const div = document.createElement("div")
+        div.appendChild(node.cloneNode(true))
+        result.push({
+          title: "",
+          content: div.innerHTML,
+          isResourceSection: false,
+        })
+      }
+    })
+
+    // Push final section
+    if (currentSection) {
+      result.push(currentSection)
+    }
+
+    return result
+  }, [content])
+
+  const toggleSection = (index: number) => {
+    const newExpanded = new Set(expandedSections)
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index)
+    } else {
+      newExpanded.add(index)
+    }
+    setExpandedSections(newExpanded)
+  }
+
+  return (
+    <div className="action-plan-content">
+      {sections.map((section, index) => {
+        if (section.isResourceSection) {
+          const isExpanded = expandedSections.has(index)
+          return (
+            <div key={index} className="mb-4 border border-gray-200 rounded-lg overflow-hidden print:border-0">
+              <button
+                onClick={() => toggleSection(index)}
+                className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left print:pointer-events-none print:bg-white"
+              >
+                <h3 className="text-lg font-semibold text-blue-900 m-0">{section.title}</h3>
+                <span className="print:hidden">
+                  {isExpanded ? (
+                    <ChevronUp className="w-5 h-5 text-gray-600" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-gray-600" />
+                  )}
+                </span>
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-200 print:block ${isExpanded ? "block" : "hidden"}`}
+              >
+                <div
+                  className="p-4 prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: section.content }}
+                />
+              </div>
+            </div>
+          )
+        } else {
+          // Non-collapsible section
+          return (
+            <div key={index} className="mb-4">
+              {section.title && <h2 className="text-xl font-bold text-blue-900 mb-3">{section.title}</h2>}
+              <div
+                className="prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: section.content }}
+              />
+            </div>
+          )
+        }
+      })}
+    </div>
+  )
 }
 
 const resourceCategories = [
@@ -331,6 +450,11 @@ export default function ReferralTool() {
   const [isSendingEmail, setIsSendingEmail] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [emailSent, setEmailSent] = useState(false)
+
+  // Streaming state
+  const [streamingStatus, setStreamingStatus] = useState("")
+  const [streamingResources, setStreamingResources] = useState<any[]>([])
+  const [isStreaming, setIsStreaming] = useState(false)
 
   const mockHistory = [
     {
@@ -834,22 +958,109 @@ export default function ReferralTool() {
         throw new Error(errorData.message || "Failed to generate referrals")
       }
 
-      const data = await response.json()
-      const endTime = Date.now()
-      const duration = Math.round((endTime - startTime) / 1000)
+      // Handle streaming for regular referrals
+      if (!isFollowUp) {
+        setIsStreaming(true)
+        setStreamingResources([])
+        setStreamingStatus("Starting...")
+        setShowResults(true)
 
-      const newEntry = {
-        prompt: fullPrompt,
-        response: data,
-        timestamp: new Date().toISOString(),
-      }
+        const reader = response.body?.getReader()
+        if (!reader) throw new Error("No reader available")
 
-      setConversationHistory((prev) => [...prev, newEntry])
-      setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
-      setShowResults(true)
-      setSuggestedFollowUps(data.suggestedFollowUps || []) // Update suggested follow-ups
+        const decoder = new TextDecoder()
+        let buffer = ""
+        const resources: any[] = []
+        let metadata: any = {}
+        let followups: string[] = []
 
-      if (isFollowUp) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            buffer += decoder.decode(value, { stream: true })
+
+            // Split by newlines to get individual messages
+            const lines = buffer.split("\n")
+            buffer = lines.pop() || "" // Keep incomplete line in buffer
+
+            for (const line of lines) {
+              if (!line.trim()) continue
+
+              try {
+                const message = JSON.parse(line)
+
+                switch (message.type) {
+                  case "status":
+                    setStreamingStatus(message.message)
+                    break
+
+                  case "resource":
+                    resources.push(message.data)
+                    setStreamingResources([...resources])
+                    break
+
+                  case "metadata":
+                    metadata = message.data
+                    break
+
+                  case "followups":
+                    followups = message.data
+                    setSuggestedFollowUps(message.data)
+                    break
+
+                  case "complete":
+                    setIsStreaming(false)
+                    break
+
+                  case "error":
+                    throw new Error(message.error)
+                }
+              } catch (e) {
+                console.error("Failed to parse message:", line, e)
+              }
+            }
+          }
+
+          const endTime = Date.now()
+          const duration = Math.round((endTime - startTime) / 1000)
+
+          // Create final conversation entry
+          const newEntry = {
+            prompt: fullPrompt,
+            response: {
+              question: metadata.question || fullPrompt,
+              summary: metadata.summary || "",
+              resources: resources,
+              suggestedFollowUps: followups,
+            },
+            timestamp: new Date().toISOString(),
+          }
+
+          setConversationHistory((prev) => [...prev, newEntry])
+          setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
+        } catch (streamError) {
+          console.error("Streaming error:", streamError)
+          setError("Error while streaming results")
+          setIsStreaming(false)
+        }
+      } else {
+        // Handle follow-up (non-streaming JSON response)
+        const data = await response.json()
+        const endTime = Date.now()
+        const duration = Math.round((endTime - startTime) / 1000)
+
+        const newEntry = {
+          prompt: fullPrompt,
+          response: data,
+          timestamp: new Date().toISOString(),
+        }
+
+        setConversationHistory((prev) => [...prev, newEntry])
+        setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
+        setShowResults(true)
+        setSuggestedFollowUps(data.suggestedFollowUps || [])
         setFollowUpPrompt("")
       }
     } catch (error: any) {
@@ -1280,7 +1491,7 @@ export default function ReferralTool() {
         },
         body: JSON.stringify({
           resources: selectedResources,
-          outputLanguage: outputLanguage, // Added output language to request
+          outputLanguage: outputLanguage,
         }),
       })
 
@@ -1288,8 +1499,65 @@ export default function ReferralTool() {
         throw new Error("Failed to generate action plan")
       }
 
-      const data: ActionPlan = await response.json()
-      setActionPlan(data)
+      // Handle streaming response
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error("No reader available")
+
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+
+        // Try to parse complete JSON from buffer
+        let cleanBuffer = buffer.trim()
+
+        // Remove markdown code blocks if present
+        if (cleanBuffer.startsWith("```json")) {
+          cleanBuffer = cleanBuffer.replace(/^```json\s*/, "")
+        } else if (cleanBuffer.startsWith("```")) {
+          cleanBuffer = cleanBuffer.replace(/^```\s*/, "")
+        }
+        if (cleanBuffer.endsWith("```")) {
+          cleanBuffer = cleanBuffer.replace(/\s*```$/, "")
+        }
+
+        // Try to parse and update progressively
+        try {
+          // Look for content field in partial JSON
+          const contentMatch = cleanBuffer.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/s)
+          const titleMatch = cleanBuffer.match(/"title"\s*:\s*"([^"]*)"/)
+          const summaryMatch = cleanBuffer.match(/"summary"\s*:\s*"([^"]*)"/)
+
+          if (titleMatch || summaryMatch || contentMatch) {
+            setActionPlan({
+              title: titleMatch ? titleMatch[1] : "Action Plan",
+              summary: summaryMatch ? summaryMatch[1] : "Generating...",
+              content: contentMatch ? contentMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"') : "",
+            })
+          }
+        } catch (e) {
+          // Continue accumulating
+        }
+      }
+
+      // Parse final complete response
+      let cleanedText = buffer.trim()
+      if (cleanedText.startsWith("```json")) {
+        cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
+      } else if (cleanedText.startsWith("```")) {
+        cleanedText = cleanedText.replace(/^```\s*/, "").replace(/\s*```$/, "")
+      }
+
+      try {
+        const finalData: ActionPlan = JSON.parse(cleanedText)
+        setActionPlan(finalData)
+      } catch (parseError) {
+        console.error("Failed to parse final action plan:", parseError)
+      }
     } catch (error) {
       console.error("Error generating action plan:", error)
       alert("Failed to generate action plan. Please try again.")
@@ -2284,6 +2552,251 @@ export default function ReferralTool() {
                       </div>
                     </div>
 
+                    {/* Show empty loading state when streaming starts */}
+                    {isStreaming && streamingResources.length === 0 && (
+                      <div className="space-y-4 pb-6">
+                        {/* Status Message */}
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                          <span className="text-blue-900 font-medium">{streamingStatus}</span>
+                        </div>
+
+                        {/* Placeholder cards for all 4 resources */}
+                        <div className="space-y-6">
+                          {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={`initial-placeholder-${i}`} className="p-4 rounded-lg border border-gray-200 animate-pulse">
+                              <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 bg-gray-200 rounded-full" />
+                                <div className="flex-1 space-y-3">
+                                  <div className="h-6 bg-gray-200 rounded w-3/4" />
+                                  <div className="h-4 bg-gray-200 rounded w-full" />
+                                  <div className="h-4 bg-gray-200 rounded w-2/3" />
+                                  <div className="h-4 bg-gray-200 rounded w-5/6" />
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show streaming resources while generating */}
+                    {isStreaming && streamingResources.length > 0 && (
+                      <div className="space-y-4 pb-6 border-b border-gray-200">
+                        {/* Status Message */}
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                          <span className="text-blue-900 font-medium">{streamingStatus}</span>
+                        </div>
+
+                        {/* Streaming Resources - sorted by number */}
+                        <div className="space-y-6">
+                          {streamingResources
+                            .slice()
+                            .sort((a, b) => Number(a.number) - Number(b.number))
+                            .map((resource, idx) => {
+                            const getCategoryStyle = (category) => {
+                              switch (category) {
+                                case "Goodwill Resources & Programs":
+                                  return {
+                                    text: "text-blue-700",
+                                    bg: "bg-white",
+                                    border: "border-blue-700",
+                                    icon: (
+                                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                        <rect x="4" y="4" width="7" height="7" rx="1" />
+                                        <rect x="13" y="4" width="7" height="7" rx="1" />
+                                        <rect x="4" y="13" width="7" height="7" rx="1" />
+                                        <rect x="13" y="13" width="7" height="7" rx="1" />
+                                      </svg>
+                                    ),
+                                  }
+                                case "Local Community Resources":
+                                  return {
+                                    text: "text-green-700",
+                                    bg: "bg-white",
+                                    border: "border-green-700",
+                                    icon: <Users className="w-4 h-4" />,
+                                  }
+                                case "Government Benefits":
+                                  return {
+                                    text: "text-purple-700",
+                                    bg: "bg-white",
+                                    border: "border-purple-700",
+                                    icon: <Landmark className="w-4 h-4" />,
+                                  }
+                                case "Job Postings":
+                                  return {
+                                    text: "text-orange-700",
+                                    bg: "bg-white",
+                                    border: "border-orange-700",
+                                    icon: <Briefcase className="w-4 h-4" />,
+                                  }
+                                case "GCTA Trainings":
+                                  return {
+                                    text: "text-red-700",
+                                    bg: "bg-white",
+                                    border: "border-red-700",
+                                    icon: <GraduationCap className="w-4 h-4" />,
+                                  }
+                                case "CAT Trainings":
+                                  return {
+                                    text: "text-teal-700",
+                                    bg: "bg-white",
+                                    border: "border-teal-700",
+                                    icon: <BookOpen className="w-4 h-4" />,
+                                  }
+                                default:
+                                  return {
+                                    text: "text-gray-700",
+                                    bg: "bg-white",
+                                    border: "border-gray-700",
+                                    icon: <Building className="w-4 h-4" />,
+                                  }
+                              }
+                            }
+
+                            const categoryStyle = getCategoryStyle(resource.category)
+
+                            return (
+                              <div
+                                key={resource.number}
+                                className="p-4 rounded-lg border border-gray-200 animate-fadeIn"
+                                style={{
+                                  animation: `fadeIn 0.3s ease-in ${(resource.number - 1) * 0.1}s both`,
+                                }}
+                              >
+                                <div className="flex items-start gap-4">
+                                  <span className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">
+                                    {resource.number}
+                                  </span>
+                                  <div className="flex-1 min-w-0">
+                                    <div
+                                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold mb-3 ${categoryStyle.text} ${categoryStyle.bg}`}
+                                    >
+                                      {typeof categoryStyle.icon === "string" ? (
+                                        <span>{categoryStyle.icon}</span>
+                                      ) : (
+                                        categoryStyle.icon
+                                      )}
+                                      {resource.category}
+                                    </div>
+
+                                    <h3 className="font-bold text-black text-lg mb-3">{resource.title}</h3>
+
+                                    {(() => {
+                                      // Define context-specific labels based on category
+                                      const getLabels = (category) => {
+                                        switch (category) {
+                                          case "GCTA Trainings":
+                                          case "CAT Trainings":
+                                            return {
+                                              eligibility: "📋 Who Can Enroll:",
+                                              services: "📚 What You'll Learn:",
+                                              support: "💰 Financial Support:",
+                                              contact: "📞 Enrollment Info:",
+                                            }
+                                          case "Job Postings":
+                                            return {
+                                              eligibility: "✅ Requirements:",
+                                              services: "💼 Position Details:",
+                                              support: "🎯 Benefits & Perks:",
+                                              contact: "📧 Apply Here:",
+                                            }
+                                          case "Government Benefits":
+                                            return {
+                                              eligibility: "👥 Who Qualifies:",
+                                              services: "🏛️ Benefits Included:",
+                                              support: "📝 Application Help:",
+                                              contact: "📍 Get Started:",
+                                            }
+                                          case "Local Community Resources":
+                                            return {
+                                              eligibility: "🎫 Who Can Use This:",
+                                              services: "🤝 Services Provided:",
+                                              support: "💙 Additional Support:",
+                                              contact: "📍 Location & Hours:",
+                                            }
+                                          case "Goodwill Resources & Programs":
+                                            return {
+                                              eligibility: "✨ Eligibility:",
+                                              services: "🛠️ Services Offered:",
+                                              support: "🎁 What's Included:",
+                                              contact: "📞 Contact Info:",
+                                            }
+                                          default:
+                                            return {
+                                              eligibility: "📋 Eligibility:",
+                                              services: "🔧 Services:",
+                                              support: "🤲 Support:",
+                                              contact: "📞 Contact:",
+                                            }
+                                        }
+                                      }
+
+                                      const labels = getLabels(resource.category)
+
+                                      return (
+                                        <>
+                                          {resource.eligibility && (
+                                            <p className="text-black mt-2 text-sm leading-relaxed">
+                                              <span className="font-semibold">{labels.eligibility}</span>{" "}
+                                              {resource.eligibility}
+                                            </p>
+                                          )}
+                                          {resource.services && (
+                                            <p className="text-black mt-1 text-sm leading-relaxed">
+                                              <span className="font-semibold">{labels.services}</span> {resource.services}
+                                            </p>
+                                          )}
+                                          {resource.support && (
+                                            <p className="text-black mt-1 text-sm leading-relaxed">
+                                              <span className="font-semibold">{labels.support}</span> {resource.support}
+                                            </p>
+                                          )}
+                                          {resource.contact && (
+                                            <p className="text-black mt-3 text-sm">
+                                              <span className="font-semibold">{labels.contact}</span> {resource.contact}
+                                            </p>
+                                          )}
+                                        </>
+                                      )
+                                    })()}
+
+                                    <p className="text-black text-xs mt-2 text-gray-600">
+                                      <a
+                                        href={`https://${resource.badge}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 underline"
+                                      >
+                                        {resource.badge}
+                                      </a>
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+
+                          {/* Placeholder cards for remaining resources */}
+                          {streamingResources.length < 4 &&
+                            Array.from({ length: 4 - streamingResources.length }).map((_, i) => (
+                              <div key={`placeholder-${i}`} className="p-4 rounded-lg border border-gray-200 animate-pulse">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 bg-gray-200 rounded-full" />
+                                  <div className="flex-1 space-y-3">
+                                    <div className="h-6 bg-gray-200 rounded w-3/4" />
+                                    <div className="h-4 bg-gray-200 rounded w-full" />
+                                    <div className="h-4 bg-gray-200 rounded w-2/3" />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
                     {conversationHistory.map((exchange, index) => (
                       <div key={index} className="space-y-4 pb-6 border-b border-gray-200 last:border-b-0">
                         {/* Question Header */}
@@ -2304,7 +2817,10 @@ export default function ReferralTool() {
                         {/* Updated resource display to show category prominently and use category-specific formatting */}
                         {exchange.response.resources && exchange.response.resources.length > 0 ? (
                           <div className="space-y-6">
-                            {exchange.response.resources.map((resource) => {
+                            {exchange.response.resources
+                              .slice()
+                              .sort((a, b) => Number(a.number) - Number(b.number))
+                              .map((resource) => {
                               const getCategoryStyle = (category) => {
                                 switch (category) {
                                   case "Goodwill Resources & Programs":
@@ -2369,13 +2885,13 @@ export default function ReferralTool() {
 
                               return (
                                 <div key={resource.number} className="p-4 rounded-lg border border-gray-200">
-                                  <div className="flex items-start gap-3">
-                                    <span className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                  <div className="flex items-start gap-4">
+                                    <span className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">
                                       {resource.number}
                                     </span>
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                       <div
-                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold mb-2 ${categoryStyle.text} ${categoryStyle.bg} border-2 ${categoryStyle.border}`}
+                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold mb-3 ${categoryStyle.text} ${categoryStyle.bg}`}
                                       >
                                         {typeof categoryStyle.icon === "string" ? (
                                           <span>{categoryStyle.icon}</span>
@@ -2385,40 +2901,107 @@ export default function ReferralTool() {
                                         {translateCategory(resource.category, outputLanguage)}
                                       </div>
 
-                                      <h3 className="font-bold text-black text-lg">
+                                      <h3 className="font-bold text-black text-lg mb-3">
                                         {resource.title}
                                       </h3>
 
-                                      {/* Simplified content display without headers */}
-                                      {resource.eligibility && (
-                                        <p className="text-black mt-2 text-sm leading-relaxed">{resource.eligibility}</p>
-                                      )}
-                                      {resource.services && (
-                                        <p className="text-black mt-1 text-sm leading-relaxed">{resource.services}</p>
-                                      )}
-                                      {resource.support && (
-                                        <p className="text-black mt-1 text-sm leading-relaxed">{resource.support}</p>
-                                      )}
+                                      {(() => {
+                                        // Define context-specific labels based on category
+                                        const getLabels = (category) => {
+                                          switch (category) {
+                                            case "GCTA Trainings":
+                                            case "CAT Trainings":
+                                              return {
+                                                eligibility: "📋 Who Can Enroll:",
+                                                services: "📚 What You'll Learn:",
+                                                support: "💰 Financial Support:",
+                                                contact: "📞 Enrollment Info:",
+                                              }
+                                            case "Job Postings":
+                                              return {
+                                                eligibility: "✅ Requirements:",
+                                                services: "💼 Position Details:",
+                                                support: "🎯 Benefits & Perks:",
+                                                contact: "📧 Apply Here:",
+                                              }
+                                            case "Government Benefits":
+                                              return {
+                                                eligibility: "👥 Who Qualifies:",
+                                                services: "🏛️ Benefits Included:",
+                                                support: "📝 Application Help:",
+                                                contact: "📍 Get Started:",
+                                              }
+                                            case "Local Community Resources":
+                                              return {
+                                                eligibility: "🎫 Who Can Use This:",
+                                                services: "🤝 Services Provided:",
+                                                support: "💙 Additional Support:",
+                                                contact: "📍 Location & Hours:",
+                                              }
+                                            case "Goodwill Resources & Programs":
+                                              return {
+                                                eligibility: "✨ Eligibility:",
+                                                services: "🛠️ Services Offered:",
+                                                support: "🎁 What's Included:",
+                                                contact: "📞 Contact Info:",
+                                              }
+                                            default:
+                                              return {
+                                                eligibility: "📋 Eligibility:",
+                                                services: "🔧 Services:",
+                                                support: "🤲 Support:",
+                                                contact: "📞 Contact:",
+                                              }
+                                          }
+                                        }
 
-                                      {/* Fallback to original whyItFits if structured fields aren't sufficient or present */}
-                                      {!resource.eligibility && !resource.services && !resource.support && (
-                                        <p className="text-black mt-2 text-sm leading-relaxed">{resource.whyItFits}</p>
-                                      )}
+                                        const labels = getLabels(resource.category)
 
-                                      {/* Category-specific details */}
-                                      <div className="mt-3 space-y-2">
-                                        {resource.details &&
-                                          resource.details.map((detail, detailIndex) => (
-                                            <div key={detailIndex} className="flex items-center gap-1 text-sm">
-                                              <span className="font-medium text-black">
-                                                {detail.icon} {detail.label}:
-                                              </span>
-                                              <span className="text-black">{detail.value}</span>
+                                        return (
+                                          <>
+                                            {resource.eligibility && (
+                                              <p className="text-black mt-2 text-sm leading-relaxed">
+                                                <span className="font-semibold">{labels.eligibility}</span>{" "}
+                                                {resource.eligibility}
+                                              </p>
+                                            )}
+                                            {resource.services && (
+                                              <p className="text-black mt-1 text-sm leading-relaxed">
+                                                <span className="font-semibold">{labels.services}</span> {resource.services}
+                                              </p>
+                                            )}
+                                            {resource.support && (
+                                              <p className="text-black mt-1 text-sm leading-relaxed">
+                                                <span className="font-semibold">{labels.support}</span> {resource.support}
+                                              </p>
+                                            )}
+
+                                            {/* Fallback to original whyItFits if structured fields aren't sufficient or present */}
+                                            {!resource.eligibility && !resource.services && !resource.support && (
+                                              <p className="text-black mt-2 text-sm leading-relaxed">{resource.whyItFits}</p>
+                                            )}
+
+                                            {/* Category-specific details */}
+                                            <div className="mt-3 space-y-2">
+                                              {resource.details &&
+                                                resource.details.map((detail, detailIndex) => (
+                                                  <div key={detailIndex} className="flex items-center gap-1 text-sm">
+                                                    <span className="font-medium text-black">
+                                                      {detail.icon} {detail.label}:
+                                                    </span>
+                                                    <span className="text-black">{detail.value}</span>
+                                                  </div>
+                                                ))}
                                             </div>
-                                          ))}
-                                      </div>
 
-                                      <p className="text-black mt-3 text-sm">{resource.contact}</p>
+                                            {resource.contact && (
+                                              <p className="text-black mt-3 text-sm">
+                                                <span className="font-semibold">{labels.contact}</span> {resource.contact}
+                                              </p>
+                                            )}
+                                          </>
+                                        )
+                                      })()}
 
                                       <p className="text-black text-xs mt-2 text-gray-600">
                                         <a
@@ -2468,7 +3051,10 @@ export default function ReferralTool() {
                                     : "Select All"}
                                 </Button>
                               </div>
-                              {exchange.response.resources.map((resource: Resource, resourceIndex: number) => (
+                              {exchange.response.resources
+                                .slice()
+                                .sort((a, b) => Number(a.number) - Number(b.number))
+                                .map((resource: Resource, resourceIndex: number) => (
                                 <div key={resourceIndex} className="flex items-start gap-3 p-3 bg-white rounded border">
                                   <input
                                     type="checkbox"
@@ -2491,7 +3077,11 @@ export default function ReferralTool() {
                                   disabled={isGeneratingActionPlan}
                                   className="bg-blue-600 hover:bg-blue-700"
                                 >
-                                  <FileText className="w-4 h-4 mr-2" />
+                                  {isGeneratingActionPlan ? (
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  ) : (
+                                    <FileText className="w-4 h-4 mr-2" />
+                                  )}
                                   {isGeneratingActionPlan
                                     ? "Generating Action Plan..."
                                     : `Generate Action Plan (${selectedResources.length} selected)`}
@@ -2501,19 +3091,47 @@ export default function ReferralTool() {
                           </div>
                         )}
 
+                        {/* Action Plan Loading State */}
+                        {isGeneratingActionPlan && !actionPlan && (
+                          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-pulse">
+                            <div className="flex items-center gap-3 mb-4">
+                              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                              <span className="font-medium text-blue-900">Generating your personalized action plan...</span>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="h-4 bg-blue-100 rounded w-3/4"></div>
+                              <div className="h-4 bg-blue-100 rounded w-full"></div>
+                              <div className="h-4 bg-blue-100 rounded w-5/6"></div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Action Plan Content (streaming or complete) */}
                         {actionPlan && (
-                          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                            <h4 className="font-medium text-blue-900 mb-3 flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-blue-600" />
-                              {actionPlan.title}
-                            </h4>
-                            <div className="mb-3 text-black text-base">{actionPlan.summary}</div>
-                            <div
-                              className="prose prose-sm max-w-none text-gray-800"
-                              dangerouslySetInnerHTML={{
-                                __html: parseMarkdownToHTML(actionPlan.content),
-                              }}
-                            />
+                          <div className="mt-6 bg-white rounded-xl border-2 border-blue-100 shadow-sm overflow-hidden">
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
+                              <h4 className="font-semibold text-blue-900 text-lg flex items-center gap-2">
+                                {isGeneratingActionPlan ? (
+                                  <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                                ) : (
+                                  <FileText className="w-5 h-5 text-blue-600" />
+                                )}
+                                {actionPlan.title}
+                              </h4>
+                              <p className="mt-2 text-blue-800 text-sm leading-relaxed">{actionPlan.summary}</p>
+                            </div>
+
+                            {/* Content */}
+                            <div className="px-6 py-5">
+                              <ActionPlanContent content={actionPlan.content} />
+                              {isGeneratingActionPlan && (
+                                <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-blue-600 flex items-center gap-2">
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                  Streaming content...
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>

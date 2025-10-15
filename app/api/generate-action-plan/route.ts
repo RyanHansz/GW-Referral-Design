@@ -16,7 +16,9 @@ export async function POST(request: Request) {
       )
       .join("\n")
 
-    const aiPrompt = `Generate a CONCISE action plan for accessing the following selected resources. Keep ALL content brief and scannable. Return your response as a JSON object with the following structure:
+    const aiPrompt = `You are creating an action plan for a client who is already enrolled in Goodwill Central Texas's Workforce Advancement Program and receives career coaching support from a Goodwill case manager.
+
+Generate a CONCISE action plan for accessing the following selected resources. Keep ALL content brief and scannable. Return your response as a JSON object with the following structure:
 
 {
   "title": "Action Plan",
@@ -44,6 +46,7 @@ For each resource, provide:
 
 CRITICAL SPECIFICITY REQUIREMENTS:
 - Use web search to find ACTUAL application links, forms, and portals
+- For GCTA courses, check https://gctatraining.org/class-schedule/ for current offerings and application information
 - Include specific URLs when available (e.g., "Apply at: goodwillcentraltexas.org/apply")
 - Mention specific phone numbers or email addresses found via web search
 - Reference actual program names, locations, or offices
