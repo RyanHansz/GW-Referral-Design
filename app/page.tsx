@@ -2386,31 +2386,23 @@ export default function ReferralTool() {
                                       </div>
 
                                       <h3 className="font-bold text-black text-lg">
-                                        {resource.title} - <span className="font-semibold">{resource.service}</span>
+                                        {resource.title}
                                       </h3>
 
-                                      {/* Updated to use structured fields for eligibility, services, and support */}
+                                      {/* Simplified content display without headers */}
                                       {resource.eligibility && (
-                                        <p className="text-black mt-2 leading-relaxed">
-                                          <strong>Eligibility:</strong> {resource.eligibility}
-                                        </p>
+                                        <p className="text-black mt-2 text-sm leading-relaxed">{resource.eligibility}</p>
                                       )}
                                       {resource.services && (
-                                        <p className="text-black mt-2 leading-relaxed">
-                                          <strong>Services:</strong> {resource.services}
-                                        </p>
+                                        <p className="text-black mt-1 text-sm leading-relaxed">{resource.services}</p>
                                       )}
                                       {resource.support && (
-                                        <p className="text-black mt-2 leading-relaxed">
-                                          <strong>Support:</strong> {resource.support}
-                                        </p>
+                                        <p className="text-black mt-1 text-sm leading-relaxed">{resource.support}</p>
                                       )}
 
                                       {/* Fallback to original whyItFits if structured fields aren't sufficient or present */}
                                       {!resource.eligibility && !resource.services && !resource.support && (
-                                        <p className="text-black mt-2 leading-relaxed">
-                                          <strong>Why it fits:</strong> {resource.whyItFits}
-                                        </p>
+                                        <p className="text-black mt-2 text-sm leading-relaxed">{resource.whyItFits}</p>
                                       )}
 
                                       {/* Category-specific details */}
@@ -2426,17 +2418,14 @@ export default function ReferralTool() {
                                           ))}
                                       </div>
 
-                                      <p className="text-black mt-3">
-                                        <strong>Contact:</strong> {resource.contact}
-                                      </p>
+                                      <p className="text-black mt-3 text-sm">{resource.contact}</p>
 
-                                      <p className="text-black text-sm mt-2">
-                                        <strong>Source:</strong> {resource.source}
+                                      <p className="text-black text-xs mt-2 text-gray-600">
                                         <a
                                           href={`https://${resource.badge}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="ml-2 text-blue-600 hover:text-blue-800 underline text-xs"
+                                          className="text-blue-600 hover:text-blue-800 underline"
                                         >
                                           {resource.badge}
                                         </a>

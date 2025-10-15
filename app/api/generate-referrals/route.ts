@@ -45,7 +45,21 @@ Format the response as JSON with this structure:
 }
 
 IMPORTANT: Return ONLY the JSON object, no markdown formatting or code blocks.`
-      : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance. Based on the client description provided, generate exactly 6 relevant resources from the categories below.
+      : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance. Based on the client description provided, generate exactly 4 relevant resources from the categories below.
+
+CRITICAL SPECIFICITY REQUIREMENTS:
+- Find SPECIFIC programs, courses, or services - NOT general websites or class schedule pages
+- For GCTA/training programs: Identify specific course names (e.g., "CompTIA A+ Certification Course" NOT "GCTA Class Schedule")
+- For food banks: Name specific locations or programs (e.g., "Central Texas Food Bank - East Austin Distribution" NOT "Food Bank Website")
+- For job postings: List actual job titles or specific hiring programs (e.g., "Retail Sales Associate at Goodwill North Lamar" NOT "Goodwill Jobs Page")
+- Each resource must be actionable and specific enough that the client knows exactly what to sign up for or apply to
+
+EXAMPLES OF GOOD VS BAD RESOURCES:
+❌ BAD: "GCTA Class Schedule" with link to class schedule page
+✓ GOOD: "CompTIA A+ IT Certification Course" with specific course details and start date
+
+❌ BAD: "Food Bank Services" with general food bank homepage
+✓ GOOD: "Mobile Food Pantry - Dove Springs Community Center" with specific location and hours
 
 When the client needs fall into these categories, prioritize these types of resources:
 
@@ -96,16 +110,17 @@ When the client needs fall into these categories, prioritize these types of reso
 - Soft skills training
 - Career pathway planning
 
-FORMATTING REQUIREMENTS:
-For each resource, you MUST include these structured sections:
+FORMATTING REQUIREMENTS FOR READABILITY:
+Keep ALL content CONCISE and SCANNABLE. Use SHORT phrases, not full sentences.
 
-1. **Title**: Organization name and program/service name
-2. **Why it fits**: Specific explanation of how this resource addresses the client's needs
-3. **Eligibility**: Requirements to qualify. Include age, location, income level, or other criteria
-4. **Services**: What the program provides. List specific services, training, or support offered
-5. **Support**: Additional wraparound services. Include transportation, clothing, incentives, etc.
-6. **Contact**: Complete contact information including phone, address, and hours
-7. **Source**: Program name and specific detailed URL
+1. **Title**: Keep SHORT and CLEAR. Maximum 5-6 words. Format: "Organization - Program Name" (e.g., "GCTA - Medical Assistant Cert", "Food Bank - Mobile Pantry")
+2. **Service**: One word or short phrase (e.g., "Healthcare Training", "Food Assistance")
+3. **Why it fits**: ONE sentence maximum, 15-20 words
+4. **Eligibility**: Maximum 3-5 short requirements separated by commas. Example: "18+, Travis County, HS diploma/GED"
+5. **Services**: Maximum 3-4 key items with commas. Example: "520-hour training, certification prep, job coaching"
+6. **Support**: Maximum 2-3 items. Example: "Full tuition grants, job placement assistance"
+7. **Contact**: "Phone: [number] | Address: [city/area] | Hours: [brief]"
+8. **Source**: Specific program page URL only
 
 REQUIRED STRUCTURE FOR EACH RESOURCE:
 {
@@ -114,11 +129,11 @@ REQUIRED STRUCTURE FOR EACH RESOURCE:
   "service": "Service type",
   "category": "Exact category name from the list",
   "providerType": "Goodwill Provided | Community Resource | Government Benefit",
-  "whyItFits": "Detailed explanation of why this resource matches the client's specific situation",
-  "eligibility": "16+ years, Austin/Travis County resident, 200% or less Federal Poverty Guidelines",
-  "services": "Career case management, occupational training, job placement assistance",
-  "support": "Transportation assistance, professional clothing, educational incentives",
-  "contact": "Phone: [number] | [address]",
+  "whyItFits": "Brief one-sentence explanation (15-20 words max)",
+  "eligibility": "18+, Travis County, HS diploma/GED (3-5 items max)",
+  "services": "520-hour training, certification prep, job coaching (3-4 items max)",
+  "support": "Tuition grants, job placement (2-3 items max)",
+  "contact": "Phone: [number] | Address: [city] | Hours: [brief]",
   "source": "Source reference with specific detailed URL",
   "badge": "specific-program-page.com (not homepage)"
 }
@@ -142,7 +157,13 @@ CATEGORY ASSIGNMENT RULES:
 - Use "Government Benefits" for SNAP, Medicaid, housing assistance, TANF, WIC, Social Security
 - Use "Job Postings" for current job openings and employment opportunities
 
-CRITICAL: For source references and contact websites, provide SPECIFIC detailed URLs that directly describe the exact service or program being referenced.
+CRITICAL RULES FOR SOURCES AND SPECIFICITY:
+- Source URLs must go directly to the specific program/course/service page - NEVER to homepages, general "services" pages, or class schedule listing pages
+- If you find a class schedule page, use web search to find the specific course within it and reference that specific course
+- Title must name the specific program (e.g., "CNA Certification Program starting June 2025" NOT "Healthcare Training Programs")
+- Badge field should show the specific page domain/path to verify it's not a homepage
+- Bad example: title "GCTA Training" with source "gctatraining.org/class-schedule"
+- Good example: title "GCTA - Certified Nursing Assistant (CNA) Program" with source "gctatraining.org/programs/healthcare/cna-certification"
 
 For suggested follow-ups, create questions that ask for more details about HOW TO USE or ACCESS the specific resources you provided. Examples:
 - "Write a guide to applying for reduced fare" (for transportation resources)
@@ -177,11 +198,20 @@ Format the response as JSON with this structure:
   ]
 }
 
-IMPORTANT: 
+IMPORTANT FINAL REMINDERS:
+- Be SPECIFIC: Each resource must be a specific program/course/service, not a general website or directory
+- Be BRIEF: Keep all text SHORT and SCANNABLE - users should be able to read each field in 2-3 seconds
+- MAXIMUM LENGTHS:
+  * whyItFits: 15-20 words (one sentence)
+  * eligibility: 3-5 short items with commas
+  * services: 3-4 key items with commas
+  * support: 2-3 items maximum
+- Use web search to find current, specific programs that match the client's needs
+- Verify URLs go to specific program pages, not homepages or class schedule listings
 - Generate all content in ${outputLanguage}. All resource titles, descriptions, contact information, and explanations should be in ${outputLanguage}.
-- ALWAYS include the "category" field with one of the exact category names listed above.
-- ALWAYS include eligibility, services, and support fields WITHOUT the label prefixes or icons.
-- Return ONLY the JSON object, no markdown formatting or code blocks.
+- ALWAYS include the "category" field with one of the exact category names listed above
+- ALWAYS include eligibility, services, and support fields WITHOUT the label prefixes or icons
+- Return ONLY the JSON object, no markdown formatting or code blocks
 
 Client description: ${prompt}`
 
@@ -190,9 +220,10 @@ Client description: ${prompt}`
       const result = streamText({
         model: openai("gpt-5-mini"),
         prompt: aiPrompt,
+        maxTokens: 2000,
         tools: {
           web_search: openai.tools.webSearch({
-            searchContextSize: "high",
+            searchContextSize: "medium",
           }),
         },
         providerOptions: {
@@ -209,9 +240,10 @@ Client description: ${prompt}`
     const { text } = await generateText({
       model: openai("gpt-5-mini"),
       prompt: aiPrompt,
+      maxTokens: 3000,
       tools: {
         web_search: openai.tools.webSearch({
-          searchContextSize: "high",
+          searchContextSize: "medium",
         }),
       },
       providerOptions: {

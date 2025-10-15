@@ -16,12 +16,12 @@ export async function POST(request: Request) {
       )
       .join("\n")
 
-    const aiPrompt = `Generate a comprehensive action plan for accessing the following selected resources. Return your response as a JSON object with the following structure:
+    const aiPrompt = `Generate a CONCISE action plan for accessing the following selected resources. Keep ALL content brief and scannable. Return your response as a JSON object with the following structure:
 
 {
-  "title": "Action Plan for Selected Resources",
-  "summary": "A brief 2-3 sentence overview of the action plan",
-  "content": "Detailed markdown content with the full action plan"
+  "title": "Action Plan",
+  "summary": "ONE sentence overview (15-20 words max)",
+  "content": "Brief markdown content with action steps"
 }
 
 Selected Resources:
@@ -29,20 +29,33 @@ ${resourceList}
 
 For the content field, provide markdown-formatted text that includes:
 
-## Action Plan Summary
-- Priority order for approaching the resources
-- Common preparation steps that apply to multiple resources
-- Overall timeline and coordination strategy
-- Key documents or information needed across resources
+## Action Plan
+- Priority order (1-2 sentences)
+- Common documents needed (bullet list, 3-5 items max)
+- Overall timeline (1 sentence)
 
-## Individual Resource Details
+## Resource Steps
 For each resource, provide:
-### [Resource Name]
-1. **Step-by-step application/enrollment process**
-2. **Required documents or information needed**
-3. **Timeline expectations (how long it takes)**
-4. **Tips for success or common pitfalls to avoid**
-5. **Next steps after initial contact**
+### [Short Resource Name]
+1. **How to apply** (2-3 specific steps with actual links/locations. Use web search to find application forms, online portals, or contact info)
+2. **Documents needed** (3-4 specific items)
+3. **Timeline** (1 specific phrase with actual timeframe, e.g., "2-4 weeks" or "Same day")
+4. **Key tip** (1 specific, actionable tip based on web search findings)
+
+CRITICAL SPECIFICITY REQUIREMENTS:
+- Use web search to find ACTUAL application links, forms, and portals
+- Include specific URLs when available (e.g., "Apply at: goodwillcentraltexas.org/apply")
+- Mention specific phone numbers or email addresses found via web search
+- Reference actual program names, locations, or offices
+- Provide ACTIONABLE steps with real-world details, not generic advice
+
+CRITICAL FORMATTING RULES:
+- Keep ALL text BRIEF and SCANNABLE
+- Use SHORT phrases, not long sentences
+- Each section should take 5-10 seconds to read
+- Limit bullet points to 3-5 items
+- Limit numbered steps to 2-4 items
+- Avoid repetition and unnecessary details
 
 Use markdown formatting in the content:
 - Use **bold** for emphasis
@@ -53,15 +66,22 @@ Use markdown formatting in the content:
 IMPORTANT:
 - Generate all content in ${outputLanguage}. All instructions, steps, and explanations should be in ${outputLanguage}.
 - Return ONLY a valid JSON object with title, summary, and content fields.
-- The content field should contain the full markdown-formatted action plan.`
+- The content field should contain the brief markdown-formatted action plan.
+- KEEP IT CONCISE - users should be able to scan the entire plan in 30-60 seconds.`
 
     const result = streamText({
-      model: openai("gpt-5"),
+      model: openai("gpt-5-mini"),
       prompt: aiPrompt,
+      maxTokens: 2500,
       tools: {
         web_search: openai.tools.webSearch({
-          searchContextSize: "high",
+          searchContextSize: "medium",
         }),
+      },
+      providerOptions: {
+        openai: {
+          reasoningEffort: "low",
+        },
       },
     })
 
