@@ -1921,7 +1921,7 @@ export default function ReferralTool() {
                             placeholder="Share anything that would help us find the perfect resources for your client - their goals, challenges, timeline, or what success looks like for them..."
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
-                            className="min-h-[200px] text-base border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                            className="min-h-[100px] text-base border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                           />
                         </div>
 
