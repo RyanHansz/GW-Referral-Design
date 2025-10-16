@@ -2044,6 +2044,28 @@ export default function ReferralTool() {
                       </div>
                     </div>
 
+                    {/* Show streaming metadata (question and summary) */}
+                    {isStreaming && (streamingQuestion || streamingSummary) && (
+                      <div className="space-y-4 pb-6">
+                        {/* Question Header */}
+                        {streamingQuestion && (
+                          <div className="bg-gray-100 rounded-2xl p-4 text-center border">
+                            <h2 className="text-lg font-medium text-gray-900">{streamingQuestion}</h2>
+                          </div>
+                        )}
+
+                        {/* Processing Time - shown during streaming */}
+                        <div className="text-sm text-gray-600">Thinking...</div>
+
+                        {/* Summary */}
+                        {streamingSummary && (
+                          <div className="text-gray-900">
+                            <p className="font-medium mb-4">{streamingSummary}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Show empty loading state when streaming starts */}
                     {isStreaming && streamingResources.length === 0 && (
                       <div className="space-y-4 pb-6">
@@ -2069,28 +2091,6 @@ export default function ReferralTool() {
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
-
-                    {/* Show streaming metadata (question and summary) */}
-                    {isStreaming && (streamingQuestion || streamingSummary) && (
-                      <div className="space-y-4 pb-6">
-                        {/* Question Header */}
-                        {streamingQuestion && (
-                          <div className="bg-gray-100 rounded-2xl p-4 text-center border">
-                            <h2 className="text-lg font-medium text-gray-900">{streamingQuestion}</h2>
-                          </div>
-                        )}
-
-                        {/* Processing Time - shown during streaming */}
-                        <div className="text-sm text-gray-600">Thinking...</div>
-
-                        {/* Summary */}
-                        {streamingSummary && (
-                          <div className="text-gray-900">
-                            <p className="font-medium mb-4">{streamingSummary}</p>
-                          </div>
-                        )}
                       </div>
                     )}
 
