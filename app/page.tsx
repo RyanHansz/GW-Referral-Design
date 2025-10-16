@@ -2124,65 +2124,65 @@ export default function ReferralTool() {
                       <div className="space-y-4 pb-6">
                         {/* Question Header */}
                         {streamingQuestion && (
-                          <div className="bg-gray-100 rounded-2xl p-4 text-center border">
-                            <h2 className="text-lg font-medium text-gray-900">{streamingQuestion}</h2>
+                          <div className="bg-gray-100 rounded-2xl p-4 border">
+                            <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
+
+                            {/* Active Filters - show when filters are applied */}
+                            {(outputLanguage !== "English" ||
+                              selectedCategories.length > 0 ||
+                              selectedResourceTypes.length > 0 ||
+                              location ||
+                              selectedLocations.length > 0 ||
+                              selectedLanguages.length > 0) && (
+                              <div className="mt-3 pt-3 border-t border-gray-300">
+                                <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
+                                  <Filter className="w-4 h-4" />
+                                  Active Filters:
+                                </div>
+                                <div className="space-y-1 text-gray-700 text-sm">
+                                  {outputLanguage !== "English" && (
+                                    <div>
+                                      <span className="font-medium">Output Language:</span> {outputLanguage}
+                                    </div>
+                                  )}
+                                  {selectedCategories.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Categories:</span>{" "}
+                                      {selectedCategories
+                                        .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedResourceTypes.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Resource Types:</span>{" "}
+                                      {selectedResourceTypes.join(", ")}
+                                    </div>
+                                  )}
+                                  {location && (
+                                    <div>
+                                      <span className="font-medium">Location:</span> {location}
+                                    </div>
+                                  )}
+                                  {selectedLocations.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedLanguages.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
 
                         {/* Processing Time - shown during streaming */}
                         <div className="text-sm text-gray-600">Thinking...</div>
-
-                        {/* Active Filters - show when filters are applied */}
-                        {(outputLanguage !== "English" ||
-                          selectedCategories.length > 0 ||
-                          selectedResourceTypes.length > 0 ||
-                          location ||
-                          selectedLocations.length > 0 ||
-                          selectedLanguages.length > 0) && (
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                            <div className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                              <Filter className="w-4 h-4" />
-                              Active Filters:
-                            </div>
-                            <div className="space-y-1 text-blue-800">
-                              {outputLanguage !== "English" && (
-                                <div>
-                                  <span className="font-medium">Output Language:</span> {outputLanguage}
-                                </div>
-                              )}
-                              {selectedCategories.length > 0 && (
-                                <div>
-                                  <span className="font-medium">Categories:</span>{" "}
-                                  {selectedCategories
-                                    .map((id) => resourceCategories.find((c) => c.id === id)?.label)
-                                    .filter(Boolean)
-                                    .join(", ")}
-                                </div>
-                              )}
-                              {selectedResourceTypes.length > 0 && (
-                                <div>
-                                  <span className="font-medium">Resource Types:</span>{" "}
-                                  {selectedResourceTypes.join(", ")}
-                                </div>
-                              )}
-                              {location && (
-                                <div>
-                                  <span className="font-medium">Location:</span> {location}
-                                </div>
-                              )}
-                              {selectedLocations.length > 0 && (
-                                <div>
-                                  <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
-                                </div>
-                              )}
-                              {selectedLanguages.length > 0 && (
-                                <div>
-                                  <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
 
                         {/* Summary */}
                         {streamingSummary && (
@@ -2392,67 +2392,67 @@ export default function ReferralTool() {
                     {conversationHistory.map((exchange, index) => (
                       <div key={index} className="space-y-4 pb-6 border-b border-gray-200 last:border-b-0">
                         {/* Question Header */}
-                        <div className="bg-gray-100 rounded-2xl p-4 text-center border">
-                          <h2 className="text-lg font-medium text-gray-900">{exchange.response.question}</h2>
+                        <div className="bg-gray-100 rounded-2xl p-4 border">
+                          <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{exchange.response.question}</h2>
+
+                          {/* Active Filters - show when filters are applied (only for latest) */}
+                          {index === conversationHistory.length - 1 &&
+                            (outputLanguage !== "English" ||
+                              selectedCategories.length > 0 ||
+                              selectedResourceTypes.length > 0 ||
+                              location ||
+                              selectedLocations.length > 0 ||
+                              selectedLanguages.length > 0) && (
+                              <div className="mt-3 pt-3 border-t border-gray-300">
+                                <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
+                                  <Filter className="w-4 h-4" />
+                                  Active Filters:
+                                </div>
+                                <div className="space-y-1 text-gray-700 text-sm">
+                                  {outputLanguage !== "English" && (
+                                    <div>
+                                      <span className="font-medium">Output Language:</span> {outputLanguage}
+                                    </div>
+                                  )}
+                                  {selectedCategories.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Categories:</span>{" "}
+                                      {selectedCategories
+                                        .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedResourceTypes.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Resource Types:</span>{" "}
+                                      {selectedResourceTypes.join(", ")}
+                                    </div>
+                                  )}
+                                  {location && (
+                                    <div>
+                                      <span className="font-medium">Location:</span> {location}
+                                    </div>
+                                  )}
+                                  {selectedLocations.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedLanguages.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
                         </div>
 
                         {/* Processing Time - only show for latest */}
                         {index === conversationHistory.length - 1 && (
                           <div className="text-sm text-gray-600">Thought for {processingTime}</div>
                         )}
-
-                        {/* Active Filters - show when filters are applied */}
-                        {index === conversationHistory.length - 1 &&
-                          (outputLanguage !== "English" ||
-                            selectedCategories.length > 0 ||
-                            selectedResourceTypes.length > 0 ||
-                            location ||
-                            selectedLocations.length > 0 ||
-                            selectedLanguages.length > 0) && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                              <div className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                                <Filter className="w-4 h-4" />
-                                Active Filters:
-                              </div>
-                              <div className="space-y-1 text-blue-800">
-                                {outputLanguage !== "English" && (
-                                  <div>
-                                    <span className="font-medium">Output Language:</span> {outputLanguage}
-                                  </div>
-                                )}
-                                {selectedCategories.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Categories:</span>{" "}
-                                    {selectedCategories
-                                      .map((id) => resourceCategories.find((c) => c.id === id)?.label)
-                                      .filter(Boolean)
-                                      .join(", ")}
-                                  </div>
-                                )}
-                                {selectedResourceTypes.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Resource Types:</span>{" "}
-                                    {selectedResourceTypes.join(", ")}
-                                  </div>
-                                )}
-                                {location && (
-                                  <div>
-                                    <span className="font-medium">Location:</span> {location}
-                                  </div>
-                                )}
-                                {selectedLocations.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
-                                  </div>
-                                )}
-                                {selectedLanguages.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
 
                         {/* Summary */}
                         <div className="text-gray-900">
