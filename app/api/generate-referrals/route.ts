@@ -36,10 +36,11 @@ YOU MUST:
 - If there are fewer than 4 matching resources, return fewer resources (minimum 1)
 - If you find more than 4 matching resources, return the best 4
 - NEVER include resources from categories not in the filter list
+- ❌ NEVER hallucinate or invent resources to reach 4 - only return REAL resources found via web search
 
 Example: If filtered for "GCTA Trainings" ONLY → return ONLY GCTA training programs, nothing else
 Example: If filtered for "Job Postings" ONLY → return ONLY job postings, no trainings or other resources\n`
-      : "\n\nBased on the client description provided, generate exactly 4 relevant resources from the categories below.\n"
+      : "\n\nBased on the client description provided, try to find up to 4 relevant resources. If you cannot find 4 quality matches, return fewer (minimum 1). Quality over quantity - never hallucinate resources.\n"
 
     const aiPrompt = isFollowUp
       ? `You are a social services case manager AI assistant for Goodwill Central Texas. You are helping a client who is already enrolled in Goodwill's Workforce Advancement Program and receives career coaching support. This is a follow-up question based on previous conversation.
@@ -152,6 +153,16 @@ When the client needs fall into these categories, prioritize these types of reso
 - City of Austin jobs
 - Major local employers (Dell, IBM, H-E-B, etc.)
 - Apprenticeship programs
+
+⚠️ CRITICAL WARNING FOR JOB POSTINGS:
+- ❌ NEVER hallucinate or invent job postings
+- ❌ NEVER create fake job titles or positions
+- ❌ DO NOT assume jobs exist without web search verification
+- ✓ ONLY return job postings you find via web search
+- ✓ Each job posting must have a real, verifiable application link
+- If you cannot find actual job postings via web search, return FEWER resources
+- It is BETTER to return 1-2 real jobs than to invent 4 fake ones
+- If NO jobs are found: return 0 resources rather than hallucinating
 
 **GCTA Trainings (Goodwill Career Training Academy):**
 - IT certifications (CompTIA, Microsoft, Google)
@@ -289,6 +300,9 @@ IMPORTANT FINAL REMINDERS:
   * support: 2-3 items maximum
 - ⚠️ CRITICAL: ALL URLs must come from web search results - DO NOT guess or hallucinate links
 - ⚠️ CRITICAL: Verify URLs go to specific program pages via web search, not homepages or class schedule listings
+- ⚠️ CRITICAL: ONLY return resources you actually find via web search - NEVER invent or hallucinate resources
+- ⚠️ CRITICAL: Returning 1-3 REAL resources is BETTER than returning 4 fake/hallucinated resources
+- ⚠️ CRITICAL: If you cannot find quality matches, return fewer resources - quality over quantity ALWAYS
 - Use web search for EVERY resource to find current, specific programs and their exact URLs
 - Generate all content in ${outputLanguage}. All resource titles, descriptions, contact information, and explanations should be in ${outputLanguage}.
 - ALWAYS include the "category" field with one of the exact category names listed above
