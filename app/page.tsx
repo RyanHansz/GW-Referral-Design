@@ -2613,7 +2613,7 @@ export default function ReferralTool() {
                             className="min-h-[80px] border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                           />
                           <Button
-                            onClick={() => handleGenerateReferrals(true)}
+                            onClick={() => handleGenerateReferrals(true, followUpPrompt)}
                             disabled={!followUpPrompt.trim() || isLoading}
                             className="bg-blue-600 hover:bg-blue-700"
                           >
