@@ -1009,6 +1009,7 @@ export default function ReferralTool() {
 
         const decoder = new TextDecoder()
         let fullContent = ""
+        let buffer = ""
         setStreamingFollowUpContent("")
 
         try {
@@ -1017,8 +1018,25 @@ export default function ReferralTool() {
             if (done) break
 
             const chunk = decoder.decode(value, { stream: true })
-            fullContent += chunk
-            setStreamingFollowUpContent(fullContent)
+            buffer += chunk
+
+            // Try to extract the content field from the JSON as it streams
+            try {
+              // Look for content field in the buffer
+              const contentMatch = buffer.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)/)
+              if (contentMatch) {
+                // Unescape the content
+                const extractedContent = contentMatch[1]
+                  .replace(/\\n/g, "\n")
+                  .replace(/\\"/g, '"')
+                  .replace(/\\\\/g, "\\")
+                setStreamingFollowUpContent(extractedContent)
+              }
+            } catch (e) {
+              // If parsing fails, continue accumulating
+            }
+
+            fullContent = buffer
           }
 
           const endTime = Date.now()
