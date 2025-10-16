@@ -38,10 +38,14 @@ IMPORTANT GUIDELINES:
 
 ${conversationContext ? `Previous conversation:\n${conversationContext}\n\n` : ""}Current question: ${message}
 
-Provide a helpful response in markdown format with citations. Return your response as a JSON object:
-{
-  "content": "Your markdown-formatted response here with [links](urls) and **emphasis**"
-}`
+Provide a helpful response in markdown format with citations. Use proper markdown formatting including:
+- **Bold** for emphasis
+- [Links](url) for references
+- Bullet points for lists
+- Headers (##) for sections
+- Code blocks when relevant
+
+Respond directly with the markdown content - do not wrap it in JSON or any other format.`
 
     const result = streamText({
       model: openai("gpt-5-mini"),
@@ -49,7 +53,7 @@ Provide a helpful response in markdown format with citations. Return your respon
       maxTokens: 2000,
       tools: {
         web_search: openai.tools.webSearch({
-          searchContextSize: "large",
+          searchContextSize: "high",
         }),
       },
       providerOptions: {

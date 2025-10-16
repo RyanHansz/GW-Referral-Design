@@ -1146,53 +1146,29 @@ export default function ReferralTool() {
           const chunk = decoder.decode(value, { stream: true })
           buffer += chunk
 
-          // Try to extract content as it streams
-          try {
-            const contentMatch = buffer.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/)
-            if (contentMatch) {
-              const extractedContent = contentMatch[1]
-                .replace(/\\n/g, "\n")
-                .replace(/\\"/g, '"')
-                .replace(/\\\\/g, "\\")
-              setStreamingChatContent(extractedContent)
-            }
-          } catch (e) {
-            // Continue streaming
-          }
+          // Update streaming content directly with accumulated buffer
+          setStreamingChatContent(buffer)
         }
       }
 
-      // Parse final complete response
-      let cleanedText = buffer.trim()
-      if (cleanedText.startsWith("```json")) {
-        cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
-      } else if (cleanedText.startsWith("```")) {
-        cleanedText = cleanedText.replace(/^```\s*/, "").replace(/\s*```$/, "")
-      }
-
-      try {
-        const finalData = JSON.parse(cleanedText)
+      // Add the final assistant message with the complete buffer
+      if (buffer.trim()) {
         const assistantMessage = {
           role: "assistant" as const,
-          content: finalData.content || "",
+          content: buffer.trim(),
           timestamp: new Date().toISOString(),
         }
         setChatMessages((prev) => [...prev, assistantMessage])
-      } catch (parseError) {
-        console.error("Failed to parse chat response:", parseError)
-        // Use the streaming content as fallback
-        if (streamingChatContent) {
-          const assistantMessage = {
-            role: "assistant" as const,
-            content: streamingChatContent,
-            timestamp: new Date().toISOString(),
-          }
-          setChatMessages((prev) => [...prev, assistantMessage])
-        }
       }
     } catch (error) {
       console.error("Error sending chat message:", error)
-      alert("Failed to get response. Please try again.")
+      // Don't alert - the streaming content should have been displayed
+      const errorMessage = {
+        role: "assistant" as const,
+        content: "I apologize, but I encountered an error processing your request. Please try again.",
+        timestamp: new Date().toISOString(),
+      }
+      setChatMessages((prev) => [...prev, errorMessage])
     } finally {
       setIsChatStreaming(false)
       setStreamingChatContent("")
