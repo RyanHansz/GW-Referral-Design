@@ -449,6 +449,7 @@ export default function ReferralTool() {
   const [streamingSummary, setStreamingSummary] = useState("")
   const [isStreaming, setIsStreaming] = useState(false)
   const [showActionPlanSection, setShowActionPlanSection] = useState(false)
+  const [streamingFollowUpContent, setStreamingFollowUpContent] = useState("")
 
   const generatePrintHTML = () => {
     return `
@@ -997,22 +998,61 @@ export default function ReferralTool() {
           setIsStreaming(false)
         }
       } else {
-        // Handle follow-up (non-streaming JSON response)
-        const data = await response.json()
-        const endTime = Date.now()
-        const duration = Math.round((endTime - startTime) / 1000)
+        // Handle follow-up with streaming
+        const reader = response.body?.getReader()
+        if (!reader) throw new Error("No reader available")
 
-        const newEntry = {
-          prompt: fullPrompt,
-          response: data,
-          timestamp: new Date().toISOString(),
+        const decoder = new TextDecoder()
+        let fullContent = ""
+        setStreamingFollowUpContent("")
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+
+            const chunk = decoder.decode(value, { stream: true })
+            fullContent += chunk
+            setStreamingFollowUpContent(fullContent)
+          }
+
+          const endTime = Date.now()
+          const duration = Math.round((endTime - startTime) / 1000)
+
+          // Parse the complete JSON response
+          let parsedData
+          try {
+            // Clean up any markdown code blocks
+            let cleanContent = fullContent.trim()
+            if (cleanContent.startsWith("```json")) {
+              cleanContent = cleanContent.replace(/^```json\s*/, "").replace(/\s*```$/, "")
+            } else if (cleanContent.startsWith("```")) {
+              cleanContent = cleanContent.replace(/^```\s*/, "").replace(/\s*```$/, "")
+            }
+            parsedData = JSON.parse(cleanContent)
+          } catch (parseError) {
+            console.error("Failed to parse follow-up response:", parseError)
+            parsedData = {
+              question: fullPrompt,
+              summary: "Response received",
+              content: fullContent,
+            }
+          }
+
+          const newEntry = {
+            prompt: fullPrompt,
+            response: parsedData,
+            timestamp: new Date().toISOString(),
+          }
+
+          setConversationHistory((prev) => [...prev, newEntry])
+          setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
+          setStreamingFollowUpContent("")
+          setFollowUpPrompt("")
+        } catch (streamError) {
+          console.error("Follow-up streaming error:", streamError)
+          setError("Error while streaming follow-up response")
         }
-
-        setConversationHistory((prev) => [...prev, newEntry])
-        setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
-        setShowResults(true)
-        setSuggestedFollowUps(data.suggestedFollowUps || [])
-        setFollowUpPrompt("")
       }
     } catch (error: any) {
       console.error("Error generating referrals:", error)
@@ -2314,6 +2354,24 @@ export default function ReferralTool() {
                                 </div>
                               </div>
                             ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Show streaming follow-up content */}
+                    {streamingFollowUpContent && (
+                      <div className="space-y-4 pb-6 border-b border-gray-200">
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                          <span className="text-blue-900 font-medium">Generating response...</span>
+                        </div>
+
+                        <div className="prose max-w-none text-slate-700">
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: parseMarkdownToHTML(streamingFollowUpContent),
+                            }}
+                          />
                         </div>
                       </div>
                     )}
