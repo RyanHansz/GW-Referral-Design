@@ -1757,7 +1757,7 @@ export default function ReferralTool() {
                             <Sparkles className="w-8 h-8 text-purple-600" />
                           </div>
                           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                            Let's Find the Right Resources Together
+                            Let's Find the Right Resources for Your Clients
                           </h2>
                           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                             Share some details about your client's situation, and we'll help you discover the perfect
