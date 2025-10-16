@@ -65,6 +65,15 @@ IMPORTANT: Return ONLY the JSON object, no markdown formatting or code blocks.`
       : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance.
 
 IMPORTANT CONTEXT: The client is already enrolled in Goodwill Central Texas's Workforce Advancement Program and receives career coaching and case management support from a Goodwill career case manager. Do NOT recommend general career coaching, case management, or workforce advancement programs from Goodwill since they already have this support.
+
+CRITICAL INSTRUCTION - STAY ON TOPIC:
+- ONLY return resources that directly match what the user is asking for
+- Do NOT add tangentially related resources to be "helpful"
+- If user asks for "GCTA courses" → ONLY return GCTA courses, not food banks or other support services
+- If user asks for "food assistance" → ONLY return food programs, not job training
+- If user asks for "transportation help" → ONLY return transportation resources, not housing
+- Stay narrowly focused on the specific topic requested
+- If you cannot find 4 resources that directly match the topic, return fewer resources (minimum 1)
 ${strictFilterInstructions}
 
 CRITICAL: Generate resources in STRICT NUMERICAL ORDER (1, 2, 3, 4). Start writing resource #1 first, then #2, then #3, then #4. Do NOT skip ahead to generate other resources first.
