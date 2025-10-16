@@ -373,6 +373,142 @@ const translateCategory = (category: string, language: string): string => {
   return translations[language]?.[category] || category
 }
 
+const translateLabels = (category: string, language: string) => {
+  const defaultLabels = {
+    eligibility: "📋 Eligibility:",
+    services: "🔧 Services:",
+    support: "🤲 Support:",
+    contact: "📞 Contact:",
+  }
+
+  const labelTranslations: Record<string, Record<string, any>> = {
+    Spanish: {
+      "GCTA Trainings": {
+        eligibility: "📋 Quién Puede Inscribirse:",
+        services: "📚 Lo Que Aprenderás:",
+        support: "💰 Apoyo Financiero:",
+        contact: "📞 Información de Inscripción:",
+      },
+      "CAT Trainings": {
+        eligibility: "📋 Quién Puede Inscribirse:",
+        services: "📚 Lo Que Aprenderás:",
+        support: "💰 Apoyo Financiero:",
+        contact: "📞 Información de Inscripción:",
+      },
+      "Job Postings": {
+        eligibility: "✅ Requisitos:",
+        services: "💼 Detalles del Puesto:",
+        support: "🎯 Beneficios y Ventajas:",
+        contact: "📧 Aplicar Aquí:",
+      },
+      "Government Benefits": {
+        eligibility: "👥 Quién Califica:",
+        services: "🏛️ Beneficios Incluidos:",
+        support: "📝 Ayuda con la Solicitud:",
+        contact: "📍 Comenzar:",
+      },
+      "Local Community Resources": {
+        eligibility: "🎫 Quién Puede Usar Esto:",
+        services: "🤝 Servicios Proporcionados:",
+        support: "💙 Apoyo Adicional:",
+        contact: "📍 Ubicación y Horario:",
+      },
+      "Goodwill Resources & Programs": {
+        eligibility: "✨ Elegibilidad:",
+        services: "🛠️ Servicios Ofrecidos:",
+        support: "🎁 Qué Está Incluido:",
+        contact: "📞 Información de Contacto:",
+      },
+    },
+    French: {
+      "GCTA Trainings": {
+        eligibility: "📋 Qui Peut S'Inscrire:",
+        services: "📚 Ce Que Vous Apprendrez:",
+        support: "💰 Soutien Financier:",
+        contact: "📞 Informations d'Inscription:",
+      },
+      "CAT Trainings": {
+        eligibility: "📋 Qui Peut S'Inscrire:",
+        services: "📚 Ce Que Vous Apprendrez:",
+        support: "💰 Soutien Financier:",
+        contact: "📞 Informations d'Inscription:",
+      },
+      "Job Postings": {
+        eligibility: "✅ Exigences:",
+        services: "💼 Détails du Poste:",
+        support: "🎯 Avantages:",
+        contact: "📧 Postuler Ici:",
+      },
+      "Government Benefits": {
+        eligibility: "👥 Qui Est Admissible:",
+        services: "🏛️ Prestations Incluses:",
+        support: "📝 Aide à la Demande:",
+        contact: "📍 Commencer:",
+      },
+      "Local Community Resources": {
+        eligibility: "🎫 Qui Peut Utiliser Ceci:",
+        services: "🤝 Services Fournis:",
+        support: "💙 Soutien Supplémentaire:",
+        contact: "📍 Lieu et Horaires:",
+      },
+      "Goodwill Resources & Programs": {
+        eligibility: "✨ Admissibilité:",
+        services: "🛠️ Services Offerts:",
+        support: "🎁 Ce Qui Est Inclus:",
+        contact: "📞 Coordonnées:",
+      },
+    },
+  }
+
+  const categoryLabels = labelTranslations[language]?.[category]
+
+  if (categoryLabels) {
+    return categoryLabels
+  }
+
+  // Return default English labels based on category
+  switch (category) {
+    case "GCTA Trainings":
+    case "CAT Trainings":
+      return {
+        eligibility: "📋 Who Can Enroll:",
+        services: "📚 What You'll Learn:",
+        support: "💰 Financial Support:",
+        contact: "📞 Enrollment Info:",
+      }
+    case "Job Postings":
+      return {
+        eligibility: "✅ Requirements:",
+        services: "💼 Position Details:",
+        support: "🎯 Benefits & Perks:",
+        contact: "📧 Apply Here:",
+      }
+    case "Government Benefits":
+      return {
+        eligibility: "👥 Who Qualifies:",
+        services: "🏛️ Benefits Included:",
+        support: "📝 Application Help:",
+        contact: "📍 Get Started:",
+      }
+    case "Local Community Resources":
+      return {
+        eligibility: "🎫 Who Can Use This:",
+        services: "🤝 Services Provided:",
+        support: "💙 Additional Support:",
+        contact: "📍 Location & Hours:",
+      }
+    case "Goodwill Resources & Programs":
+      return {
+        eligibility: "✨ Eligibility:",
+        services: "🛠️ Services Offered:",
+        support: "🎁 What's Included:",
+        contact: "📞 Contact Info:",
+      }
+    default:
+      return defaultLabels
+  }
+}
+
 export default function ReferralTool() {
   const [userInput, setUserInput] = useState("")
   const [clientDescription, setClientDescription] = useState("") // This state is no longer directly used for user input but might be for other purposes.
@@ -2138,56 +2274,7 @@ export default function ReferralTool() {
                                     <h3 className="font-bold text-black text-lg mb-3">{resource.title}</h3>
 
                                     {(() => {
-                                      // Define context-specific labels based on category
-                                      const getLabels = (category) => {
-                                        switch (category) {
-                                          case "GCTA Trainings":
-                                          case "CAT Trainings":
-                                            return {
-                                              eligibility: "📋 Who Can Enroll:",
-                                              services: "📚 What You'll Learn:",
-                                              support: "💰 Financial Support:",
-                                              contact: "📞 Enrollment Info:",
-                                            }
-                                          case "Job Postings":
-                                            return {
-                                              eligibility: "✅ Requirements:",
-                                              services: "💼 Position Details:",
-                                              support: "🎯 Benefits & Perks:",
-                                              contact: "📧 Apply Here:",
-                                            }
-                                          case "Government Benefits":
-                                            return {
-                                              eligibility: "👥 Who Qualifies:",
-                                              services: "🏛️ Benefits Included:",
-                                              support: "📝 Application Help:",
-                                              contact: "📍 Get Started:",
-                                            }
-                                          case "Local Community Resources":
-                                            return {
-                                              eligibility: "🎫 Who Can Use This:",
-                                              services: "🤝 Services Provided:",
-                                              support: "💙 Additional Support:",
-                                              contact: "📍 Location & Hours:",
-                                            }
-                                          case "Goodwill Resources & Programs":
-                                            return {
-                                              eligibility: "✨ Eligibility:",
-                                              services: "🛠️ Services Offered:",
-                                              support: "🎁 What's Included:",
-                                              contact: "📞 Contact Info:",
-                                            }
-                                          default:
-                                            return {
-                                              eligibility: "📋 Eligibility:",
-                                              services: "🔧 Services:",
-                                              support: "🤲 Support:",
-                                              contact: "📞 Contact:",
-                                            }
-                                        }
-                                      }
-
-                                      const labels = getLabels(resource.category)
+                                      const labels = translateLabels(resource.category, outputLanguage)
 
                                       return (
                                         <>
@@ -2359,56 +2446,7 @@ export default function ReferralTool() {
                                       </h3>
 
                                       {(() => {
-                                        // Define context-specific labels based on category
-                                        const getLabels = (category) => {
-                                          switch (category) {
-                                            case "GCTA Trainings":
-                                            case "CAT Trainings":
-                                              return {
-                                                eligibility: "📋 Who Can Enroll:",
-                                                services: "📚 What You'll Learn:",
-                                                support: "💰 Financial Support:",
-                                                contact: "📞 Enrollment Info:",
-                                              }
-                                            case "Job Postings":
-                                              return {
-                                                eligibility: "✅ Requirements:",
-                                                services: "💼 Position Details:",
-                                                support: "🎯 Benefits & Perks:",
-                                                contact: "📧 Apply Here:",
-                                              }
-                                            case "Government Benefits":
-                                              return {
-                                                eligibility: "👥 Who Qualifies:",
-                                                services: "🏛️ Benefits Included:",
-                                                support: "📝 Application Help:",
-                                                contact: "📍 Get Started:",
-                                              }
-                                            case "Local Community Resources":
-                                              return {
-                                                eligibility: "🎫 Who Can Use This:",
-                                                services: "🤝 Services Provided:",
-                                                support: "💙 Additional Support:",
-                                                contact: "📍 Location & Hours:",
-                                              }
-                                            case "Goodwill Resources & Programs":
-                                              return {
-                                                eligibility: "✨ Eligibility:",
-                                                services: "🛠️ Services Offered:",
-                                                support: "🎁 What's Included:",
-                                                contact: "📞 Contact Info:",
-                                              }
-                                            default:
-                                              return {
-                                                eligibility: "📋 Eligibility:",
-                                                services: "🔧 Services:",
-                                                support: "🤲 Support:",
-                                                contact: "📞 Contact:",
-                                              }
-                                          }
-                                        }
-
-                                        const labels = getLabels(resource.category)
+                                        const labels = translateLabels(resource.category, outputLanguage)
 
                                         return (
                                           <>
