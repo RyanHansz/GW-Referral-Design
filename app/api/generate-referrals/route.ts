@@ -263,101 +263,25 @@ IMPORTANT FINAL REMINDERS:
 
 Client description: ${prompt}`
 
-    // Use streaming for follow-up questions with reasoning display
+    // Use streaming for follow-up questions
     if (isFollowUp) {
-      const stream = new TransformStream()
-      const writer = stream.writable.getWriter()
-      const encoder = new TextEncoder()
-
-      // Start async generation
-      ;(async () => {
-        try {
-          await writer.write(encoder.encode(JSON.stringify({ type: "status", message: "Thinking..." }) + "\n"))
-
-          const result = streamText({
-            model: openai("gpt-5-mini"),
-            prompt: aiPrompt,
-            maxTokens: 2000,
-            tools: {
-              web_search: openai.tools.webSearch({
-                searchContextSize: "medium",
-              }),
-            },
-            providerOptions: {
-              openai: {
-                reasoningEffort: "medium", // Increased from "low" to "medium" for better reasoning
-                includeReasoningContent: true,
-              },
-            },
-          })
-
-          let buffer = ""
-          let hasStartedResponse = false
-
-          // Stream reasoning and response
-          for await (const chunk of result.fullStream) {
-            // Handle reasoning tokens
-            if (chunk.type === "reasoning") {
-              await writer.write(
-                encoder.encode(
-                  JSON.stringify({
-                    type: "reasoning",
-                    content: chunk.content,
-                  }) + "\n",
-                ),
-              )
-            }
-
-            // Handle regular text chunks
-            if (chunk.type === "text-delta") {
-              if (!hasStartedResponse) {
-                await writer.write(encoder.encode(JSON.stringify({ type: "status", message: "Generating response..." }) + "\n"))
-                hasStartedResponse = true
-              }
-
-              buffer += chunk.textDelta
-              await writer.write(
-                encoder.encode(
-                  JSON.stringify({
-                    type: "text",
-                    content: chunk.textDelta,
-                  }) + "\n",
-                ),
-              )
-            }
-          }
-
-          // Send complete signal with full text
-          await writer.write(
-            encoder.encode(
-              JSON.stringify({
-                type: "complete",
-                fullText: buffer,
-              }) + "\n",
-            ),
-          )
-          await writer.close()
-        } catch (error) {
-          console.error("Follow-up streaming error:", error)
-          await writer.write(
-            encoder.encode(
-              JSON.stringify({
-                type: "error",
-                error: "Failed to generate follow-up response",
-              }) + "\n",
-            ),
-          )
-          await writer.close()
-        }
-      })()
-
-      return new Response(stream.readable, {
-        headers: {
-          "Content-Type": "text/event-stream",
-          "Cache-Control": "no-cache",
-          "Connection": "keep-alive",
+      const result = streamText({
+        model: openai("gpt-5-mini"),
+        prompt: aiPrompt,
+        maxTokens: 2000,
+        tools: {
+          web_search: openai.tools.webSearch({
+            searchContextSize: "medium",
+          }),
+        },
+        providerOptions: {
+          openai: {
+            reasoningEffort: "low",
+          },
         },
       })
+
+      return result.toTextStreamResponse()
     }
 
     // Use streaming for referrals with progressive resource display

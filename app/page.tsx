@@ -446,9 +446,6 @@ export default function ReferralTool() {
   const [streamingStatus, setStreamingStatus] = useState("")
   const [streamingResources, setStreamingResources] = useState<any[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
-  const [reasoningContent, setReasoningContent] = useState("")
-  const [showReasoning, setShowReasoning] = useState(false)
-  const [followUpResponse, setFollowUpResponse] = useState("")
 
   const generatePrintHTML = () => {
     return `
@@ -987,80 +984,22 @@ export default function ReferralTool() {
           setIsStreaming(false)
         }
       } else {
-        // Handle follow-up with streaming
-        setReasoningContent("")
-        setFollowUpResponse("")
-        setShowResults(true)
+        // Handle follow-up (non-streaming JSON response)
+        const data = await response.json()
+        const endTime = Date.now()
+        const duration = Math.round((endTime - startTime) / 1000)
 
-        const reader = response.body?.getReader()
-        if (!reader) throw new Error("No reader available")
-
-        const decoder = new TextDecoder()
-        let buffer = ""
-        let responseText = ""
-        let reasoning = ""
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-
-            buffer += decoder.decode(value, { stream: true })
-            const lines = buffer.split("\n")
-            buffer = lines.pop() || ""
-
-            for (const line of lines) {
-              if (!line.trim()) continue
-
-              try {
-                const message = JSON.parse(line)
-
-                switch (message.type) {
-                  case "status":
-                    setStreamingStatus(message.message)
-                    break
-
-                  case "reasoning":
-                    reasoning += message.content
-                    setReasoningContent(reasoning)
-                    break
-
-                  case "text":
-                    responseText += message.content
-                    setFollowUpResponse(responseText)
-                    break
-
-                  case "complete":
-                    const endTime = Date.now()
-                    const duration = Math.round((endTime - startTime) / 1000)
-
-                    const newEntry = {
-                      prompt: fullPrompt,
-                      response: {
-                        content: message.fullText || responseText,
-                        reasoning: reasoning,
-                      },
-                      timestamp: new Date().toISOString(),
-                    }
-
-                    setConversationHistory((prev) => [...prev, newEntry])
-                    setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
-                    setFollowUpPrompt("")
-                    setStreamingStatus("")
-                    break
-
-                  case "error":
-                    throw new Error(message.error)
-                }
-              } catch (e) {
-                console.error("Failed to parse follow-up message:", line, e)
-              }
-            }
-          }
-        } catch (streamError) {
-          console.error("Follow-up streaming error:", streamError)
-          setError("Error while streaming follow-up response")
+        const newEntry = {
+          prompt: fullPrompt,
+          response: data,
+          timestamp: new Date().toISOString(),
         }
+
+        setConversationHistory((prev) => [...prev, newEntry])
+        setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
+        setShowResults(true)
+        setSuggestedFollowUps(data.suggestedFollowUps || [])
+        setFollowUpPrompt("")
       }
     } catch (error: any) {
       console.error("Error generating referrals:", error)
@@ -2567,44 +2506,13 @@ export default function ReferralTool() {
                             })}
                           </div>
                         ) : exchange.response.content ? (
-                          <>
-                            {/* Reasoning Display (Collapsible) */}
-                            {exchange.response.reasoning && (
-                              <div className="mb-4 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                                <button
-                                  onClick={() => setShowReasoning(!showReasoning)}
-                                  className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-100 transition-colors"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-lg">🧠</span>
-                                    <span className="font-medium text-sm text-gray-700">Model Reasoning</span>
-                                    <span className="text-xs text-gray-500">
-                                      ({exchange.response.reasoning.length} chars)
-                                    </span>
-                                  </div>
-                                  <ChevronDown
-                                    className={`w-4 h-4 text-gray-600 transition-transform ${showReasoning ? "rotate-180" : ""}`}
-                                  />
-                                </button>
-                                {showReasoning && (
-                                  <div className="p-4 border-t border-gray-200 bg-white">
-                                    <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono leading-relaxed">
-                                      {exchange.response.reasoning}
-                                    </pre>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Response Content */}
-                            <div className="prose max-w-none text-slate-700">
-                              <div
-                                dangerouslySetInnerHTML={{
-                                  __html: parseMarkdownToHTML(exchange.response.content),
-                                }}
-                              />
-                            </div>
-                          </>
+                          <div className="prose max-w-none text-slate-700">
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: parseMarkdownToHTML(exchange.response.content),
+                              }}
+                            />
+                          </div>
                         ) : null}
 
                         {exchange.response.resources && exchange.response.resources.length > 0 && (
@@ -2714,52 +2622,6 @@ export default function ReferralTool() {
                         )}
                       </div>
                     ))}
-
-                    {/* Streaming Follow-up Response */}
-                    {followUpResponse && isLoading && (
-                      <div className="space-y-4 pb-6 border-b border-gray-200">
-                        {/* Reasoning Display (While Streaming) */}
-                        {reasoningContent && (
-                          <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
-                            <button
-                              onClick={() => setShowReasoning(!showReasoning)}
-                              className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-100 transition-colors"
-                            >
-                              <div className="flex items-center gap-2">
-                                <span className="text-lg">🧠</span>
-                                <span className="font-medium text-sm text-gray-700">Model Reasoning (live)</span>
-                                <span className="text-xs text-gray-500">
-                                  ({reasoningContent.length} chars)
-                                </span>
-                              </div>
-                              <ChevronDown
-                                className={`w-4 h-4 text-gray-600 transition-transform ${showReasoning ? "rotate-180" : ""}`}
-                              />
-                            </button>
-                            {showReasoning && (
-                              <div className="p-4 border-t border-gray-200 bg-white">
-                                <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono leading-relaxed">
-                                  {reasoningContent}
-                                </pre>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Streaming Response */}
-                        <div className="prose max-w-none text-slate-700">
-                          <div className="text-sm text-gray-600 mb-2 flex items-center gap-2">
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            {streamingStatus || "Generating response..."}
-                          </div>
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: parseMarkdownToHTML(followUpResponse),
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
 
                     {/* Follow-up input */}
                     {conversationHistory.length > 0 && (
