@@ -33,11 +33,12 @@ export function InlineCitation({ citation }: InlineCitationProps) {
           href={citation.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 no-underline ml-1"
+          className="inline-flex items-center gap-0.5 text-blue-600 hover:text-blue-800 no-underline whitespace-nowrap align-baseline"
+          style={{ fontSize: "0.7em", marginLeft: "0.15em" }}
           onClick={(e) => e.stopPropagation()}
         >
-          <span className="text-xs font-medium">{getDomain(citation.url)}</span>
-          <span className="text-xs font-medium">+{citation.number}</span>
+          <span className="font-medium">{getDomain(citation.url)}</span>
+          <span className="font-medium">+{citation.number}</span>
         </a>
       </HoverCard.Trigger>
       <HoverCard.Portal>
