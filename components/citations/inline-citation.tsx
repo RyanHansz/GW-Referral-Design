@@ -16,6 +16,16 @@ interface InlineCitationProps {
 }
 
 export function InlineCitation({ citation }: InlineCitationProps) {
+  // Extract domain from URL
+  const getDomain = (url: string) => {
+    try {
+      const urlObj = new URL(url)
+      return urlObj.hostname.replace("www.", "")
+    } catch {
+      return url
+    }
+  }
+
   return (
     <HoverCard.Root openDelay={300}>
       <HoverCard.Trigger asChild>
@@ -23,10 +33,11 @@ export function InlineCitation({ citation }: InlineCitationProps) {
           href={citation.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-baseline text-blue-600 hover:text-blue-800 no-underline"
+          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 no-underline ml-1"
           onClick={(e) => e.stopPropagation()}
         >
-          <sup className="ml-0.5 text-xs font-medium">[{citation.number}]</sup>
+          <span className="text-xs font-medium">{getDomain(citation.url)}</span>
+          <span className="text-xs font-medium">+{citation.number}</span>
         </a>
       </HoverCard.Trigger>
       <HoverCard.Portal>
