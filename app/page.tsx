@@ -1949,26 +1949,26 @@ export default function ReferralTool() {
                           {isLoading ? (
                             <>
                               <RefreshCw className="w-5 h-5 animate-spin" />
-                              Generating Referrals...
+                              Finding Resources...
                             </>
                           ) : (
                             <>
                               <Sparkles className="w-5 h-5" />
-                              Generate Referrals
+                              Find Resources
                             </>
                           )}
                         </button>
 
                         <div className="mt-4 pt-4 border-t border-gray-200">
                           <p className="text-sm text-gray-600 mb-3 text-center">
-                            Want to see how it works? Try our sample referrals:
+                            Want to see how it works? Try example resources:
                           </p>
                           <button
                             onClick={generateSampleReferrals}
                             className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 border border-gray-300"
                           >
                             <Eye className="w-5 h-5" />
-                            View Sample Referrals
+                            View Example Resources
                           </button>
                         </div>
                       </div>
