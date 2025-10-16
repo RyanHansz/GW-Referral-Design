@@ -24,8 +24,22 @@ export async function POST(request: Request) {
       contextPrompt += "\nCurrent follow-up question: "
     }
 
-    // Build strict filtering instructions if filters are provided
+    // Build filter context and instructions
     const hasResourceTypeFilters = filters?.resourceTypes && filters.resourceTypes.length > 0
+    const hasLocationFilter = filters?.location
+
+    let filterContext = ""
+    if (hasResourceTypeFilters || hasLocationFilter) {
+      filterContext += "\n\nFILTER INFORMATION PROVIDED BY USER:"
+      if (hasResourceTypeFilters) {
+        filterContext += `\n- Resource Types: ${filters.resourceTypes.join(", ")}`
+      }
+      if (hasLocationFilter) {
+        filterContext += `\n- Location: ${filters.location} (ZIP code or city)`
+      }
+      filterContext += "\n\n⚠️ CRITICAL: DO NOT ask the user for this information - it has already been provided! Use it directly in your web searches."
+    }
+
     const strictFilterInstructions = hasResourceTypeFilters
       ? `\n\nCRITICAL FILTER REQUIREMENT - STRICT FILTERING ENABLED:
 The user has filtered for ONLY these resource types: ${filters.resourceTypes.join(", ")}
@@ -76,6 +90,14 @@ IMPORTANT: Return ONLY the JSON object, no markdown formatting or code blocks.`
       : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance.
 
 IMPORTANT CONTEXT: The client is already enrolled in Goodwill Central Texas's Workforce Advancement Program and receives career coaching and case management support from a Goodwill career case manager. Do NOT recommend general career coaching, case management, or workforce advancement programs from Goodwill since they already have this support.
+${filterContext}
+
+CRITICAL INSTRUCTION - DO NOT ASK FOR INFORMATION ALREADY PROVIDED:
+- ❌ NEVER ask the user for ZIP codes, city names, or other location information if filters.location is provided
+- ❌ NEVER ask "I need your city or ZIP code" - check the filters first!
+- ✓ If location information is provided in filters, use it IMMEDIATELY in your web searches
+- ✓ Proceed directly to finding resources without asking clarifying questions
+- ✓ Example: If Location: 78660 is provided → immediately search "Central Texas Food Bank Pflugerville 78660"
 
 CRITICAL INSTRUCTION - STAY ON TOPIC:
 - ONLY return resources that directly match what the user is asking for
@@ -354,6 +376,7 @@ IMPORTANT FINAL REMINDERS:
 - ⚠️ CRITICAL: ONLY return resources you actually find via web search - NEVER invent or hallucinate resources
 - ⚠️ CRITICAL: Returning 1-3 REAL resources is BETTER than returning 4 fake/hallucinated resources
 - ⚠️ CRITICAL: If you cannot find quality matches, return fewer resources - quality over quantity ALWAYS
+- ⚠️ CRITICAL: NEVER ASK USERS FOR INFORMATION - if location/filters are provided, use them directly without asking
 - Use web search for EVERY resource to find current, specific programs and their exact URLs
 - Generate all content in ${outputLanguage}. All resource titles, descriptions, contact information, and explanations should be in ${outputLanguage}.
 - ALWAYS include the "category" field with one of the exact category names listed above
