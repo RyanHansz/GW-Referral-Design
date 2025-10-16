@@ -1,30 +1,116 @@
-# Referral tool UI
+# Goodwill Referral Tool
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+An AI-powered resource referral system built for Goodwill Central Texas to help case managers connect clients with relevant resources, programs, and services.
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/itnavapbccoms-projects/v0-goodwill-referral)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/DIZnBPMItrE)
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+This application helps Goodwill Central Texas case managers generate personalized resource referrals for clients in the Workforce Advancement Program. It uses AI to match client needs with relevant resources including:
+
+- **Goodwill Resources & Programs**: Job postings, Digital Navigator, retail stores
+- **GCTA Trainings**: IT certifications, healthcare training, manufacturing programs
+- **CAT Trainings**: Advanced skill development and professional certifications
+- **Local Community Resources**: Food banks, shelters, transportation assistance
+- **Government Benefits**: SNAP, Medicaid, housing assistance, TANF, WIC
+- **Job Postings**: Current employment opportunities in Central Texas
+
+## Features
+
+- **AI-Powered Matching**: Uses GPT-5 with web search to find current, specific resources
+- **Conversational Interface**: Natural language interaction with follow-up questions
+- **Action Plans**: Generate step-by-step guides for accessing resources
+- **Multi-Language Support**: Generate referrals in multiple languages
+- **Resource Filtering**: Filter results by resource type
+- **Streaming Results**: Real-time progressive display of resources
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (React 18)
+- **AI**: OpenAI GPT-5 with web search capabilities via Vercel AI SDK
+- **UI Components**: Radix UI + Tailwind CSS
+- **Styling**: Tailwind CSS 4
+- **TypeScript**: Full type safety
+- **Deployment**: Vercel
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- OpenAI API key
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/RyanHansz/GW-Referral-Design.git
+cd GW-Referral-Design
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+```bash
+# Create .env.local file
+OPENAI_API_KEY=your_api_key_here
+```
+
+4. Run the development server:
+```bash
+npm run dev
+```
+
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run lint` - Run ESLint
+
+### Project Structure
+
+```
+├── app/
+│   ├── api/
+│   │   ├── generate-referrals/    # Main referral generation endpoint
+│   │   └── generate-action-plan/  # Action plan generation endpoint
+│   ├── page.tsx                   # Main application page
+│   └── layout.tsx                 # Root layout
+├── components/                    # React components
+├── lib/                          # Utility functions
+└── public/                       # Static assets
+```
 
 ## Deployment
 
-Your project is live at:
+This project is deployed on Vercel:
 
 **[https://vercel.com/itnavapbccoms-projects/v0-goodwill-referral](https://vercel.com/itnavapbccoms-projects/v0-goodwill-referral)**
 
-## Build your app
+## Key Features Explained
 
-Continue building your app on:
+### Web Search Integration
+All resource URLs and contact information are verified through web search to ensure accuracy and prevent hallucinated links.
 
-**[https://v0.app/chat/projects/DIZnBPMItrE](https://v0.app/chat/projects/DIZnBPMItrE)**
+### Streaming Architecture
+Resources are displayed progressively as they're generated, providing a responsive user experience.
 
-## How It Works
+### Context-Aware Responses
+The system maintains conversation history to provide relevant follow-up answers and suggestions.
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## License
+
+Private - Goodwill Central Texas
+
+## Support
+
+For issues or questions, please contact the development team.
