@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -104,10 +104,10 @@ interface ActionPlan {
 
 // Component for rendering action plan with collapsible resource sections
 function ActionPlanContent({ content }: { content: string }) {
-  const [expandedSections, setExpandedSections] = React.useState<Set<number>>(new Set([0, 1, 2, 3, 4]))
+  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0, 1, 2, 3, 4]))
 
   // Parse the content to split into sections
-  const sections = React.useMemo(() => {
+  const sections = useMemo(() => {
     const html = parseMarkdownToHTML(content)
     const parser = new DOMParser()
     const doc = parser.parseFromString(html, "text/html")
