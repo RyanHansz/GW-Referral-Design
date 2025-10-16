@@ -48,6 +48,16 @@ ${contextPrompt}${prompt}
 
 Provide a helpful, conversational response that directly answers the follow-up question. You can respond in any format that's most appropriate - it could be a simple explanation, additional resources, clarification, or guidance. Be natural and helpful.
 
+CRITICAL: WEB SEARCH REQUIREMENT FOR ALL INFORMATION:
+- ⚠️ ALWAYS use web search to find current, accurate information for your response
+- ⚠️ DO NOT rely on foundation knowledge or memory for facts, URLs, phone numbers, addresses, or program details
+- ⚠️ If mentioning any URLs, phone numbers, addresses, or specific program details, verify them through web search FIRST
+- ❌ DO NOT guess, hallucinate, or construct URLs from memory
+- ❌ DO NOT use URLs that just go to homepages when a specific page exists
+- ✓ ONLY use information that you have verified through web search results
+- ✓ Use web search for EVERY factual claim, contact detail, or link you include
+- If you cannot find specific information via web search, state "Contact the organization for details" rather than guessing
+
 Use markdown formatting for better readability:
 - Use **bold** for emphasis
 - Use bullet points with * for lists
