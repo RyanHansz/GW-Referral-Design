@@ -50,6 +50,7 @@ import {
 
 // Import the new parseMarkdownToHTML function
 import { parseMarkdownToHTML } from "@/lib/markdown"
+import { InlineCitation, parseContentWithCitations, type Citation } from "@/components/citations/inline-citation"
 
 interface Resource {
   number: number
@@ -456,11 +457,27 @@ export default function ReferralTool() {
       role: "user" | "assistant"
       content: string
       timestamp: string
+      citations?: Array<{
+        number: string
+        title: string
+        url: string
+        description?: string
+        quote?: string
+      }>
     }>
   >([])
   const [chatInput, setChatInput] = useState("")
   const [isChatStreaming, setIsChatStreaming] = useState(false)
   const [streamingChatContent, setStreamingChatContent] = useState("")
+  const [streamingChatCitations, setStreamingChatCitations] = useState<
+    Array<{
+      number: string
+      title: string
+      url: string
+      description?: string
+      quote?: string
+    }>
+  >([])
 
   const generatePrintHTML = () => {
     return `
@@ -1117,6 +1134,7 @@ export default function ReferralTool() {
     setChatInput("")
     setIsChatStreaming(true)
     setStreamingChatContent("")
+    setStreamingChatCitations([])
 
     try {
       const response = await fetch("/api/chat", {
@@ -1146,17 +1164,69 @@ export default function ReferralTool() {
           const chunk = decoder.decode(value, { stream: true })
           buffer += chunk
 
-          // Update streaming content directly with accumulated buffer
-          setStreamingChatContent(buffer)
+          // Try to parse the partial JSON to extract content and citations
+          try {
+            // Try to extract content field as it streams
+            const contentMatch = buffer.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/)
+            if (contentMatch) {
+              const extractedContent = contentMatch[1]
+                .replace(/\\n/g, "\n")
+                .replace(/\\"/g, '"')
+                .replace(/\\\\/g, "\\")
+              setStreamingChatContent(extractedContent)
+            }
+
+            // Try to extract citations array
+            const citationsMatch = buffer.match(/"citations"\s*:\s*(\[[\s\S]*?\])\s*\}/)
+            if (citationsMatch) {
+              try {
+                const citations = JSON.parse(citationsMatch[1])
+                setStreamingChatCitations(citations)
+              } catch (e) {
+                // Citations not complete yet
+              }
+            }
+          } catch (e) {
+            // Continue accumulating
+          }
         }
       }
 
-      // Add the final assistant message with the complete buffer
-      if (buffer.trim()) {
+      // Parse final complete response
+      let finalContent = ""
+      let finalCitations: any[] = []
+
+      try {
+        // Try parsing as complete JSON
+        const parsed = JSON.parse(buffer)
+        finalContent = parsed.content || ""
+        finalCitations = parsed.citations || []
+      } catch (e) {
+        // Fallback to regex extraction
+        const contentMatch = buffer.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/)
+        if (contentMatch) {
+          finalContent = contentMatch[1]
+            .replace(/\\n/g, "\n")
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, "\\")
+        }
+        const citationsMatch = buffer.match(/"citations"\s*:\s*(\[[\s\S]*?\])\s*\}/)
+        if (citationsMatch) {
+          try {
+            finalCitations = JSON.parse(citationsMatch[1])
+          } catch (e) {
+            finalCitations = streamingChatCitations
+          }
+        }
+      }
+
+      // Add the final assistant message
+      if (finalContent) {
         const assistantMessage = {
           role: "assistant" as const,
-          content: buffer.trim(),
+          content: finalContent,
           timestamp: new Date().toISOString(),
+          citations: finalCitations,
         }
         setChatMessages((prev) => [...prev, assistantMessage])
       }
@@ -1989,12 +2059,24 @@ export default function ReferralTool() {
                                 }`}
                               >
                                 {message.role === "assistant" ? (
-                                  <div
-                                    className="prose prose-sm max-w-none"
-                                    dangerouslySetInnerHTML={{
-                                      __html: parseMarkdownToHTML(message.content),
-                                    }}
-                                  />
+                                  <div className="prose prose-sm max-w-none">
+                                    {message.citations && message.citations.length > 0 ? (
+                                      <>
+                                        {parseContentWithCitations(message.content, message.citations).map((part, idx) =>
+                                          part.type === "text" ? (
+                                            <span
+                                              key={idx}
+                                              dangerouslySetInnerHTML={{ __html: parseMarkdownToHTML(part.content) }}
+                                            />
+                                          ) : (
+                                            <InlineCitation key={idx} citation={part.citation!} />
+                                          ),
+                                        )}
+                                      </>
+                                    ) : (
+                                      <div dangerouslySetInnerHTML={{ __html: parseMarkdownToHTML(message.content) }} />
+                                    )}
+                                  </div>
                                 ) : (
                                   <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                                 )}
@@ -2015,12 +2097,29 @@ export default function ReferralTool() {
                                   <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
                                   <span className="text-sm text-indigo-600 font-medium">Responding...</span>
                                 </div>
-                                <div
-                                  className="prose prose-sm max-w-none"
-                                  dangerouslySetInnerHTML={{
-                                    __html: parseMarkdownToHTML(streamingChatContent),
-                                  }}
-                                />
+                                <div className="prose prose-sm max-w-none">
+                                  {streamingChatCitations && streamingChatCitations.length > 0 ? (
+                                    <>
+                                      {parseContentWithCitations(streamingChatContent, streamingChatCitations).map(
+                                        (part, idx) =>
+                                          part.type === "text" ? (
+                                            <span
+                                              key={idx}
+                                              dangerouslySetInnerHTML={{ __html: parseMarkdownToHTML(part.content) }}
+                                            />
+                                          ) : (
+                                            <InlineCitation key={idx} citation={part.citation!} />
+                                          ),
+                                      )}
+                                    </>
+                                  ) : (
+                                    <div
+                                      dangerouslySetInnerHTML={{
+                                        __html: parseMarkdownToHTML(streamingChatContent),
+                                      }}
+                                    />
+                                  )}
+                                </div>
                               </div>
                             </div>
                           )}
