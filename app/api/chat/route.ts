@@ -1,6 +1,5 @@
-import { streamObject } from "ai"
+import { streamText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { z } from "zod"
 
 export async function POST(request: Request) {
   try {
@@ -39,50 +38,17 @@ IMPORTANT GUIDELINES:
 
 ${conversationContext ? `Previous conversation:\n${conversationContext}\n\n` : ""}Current question: ${message}
 
-Provide a helpful response in markdown format with inline citations. Use proper markdown formatting including:
+Provide a helpful response in markdown format with citations. Use proper markdown formatting including:
 - **Bold** for emphasis
+- [Links](url) for references
 - Bullet points for lists
 - Headers (##) for sections
 - Code blocks when relevant
 
-CRITICAL CITATION REQUIREMENTS:
-- Include inline citations in your response using numbered markers like [1], [2], [3]
-- Place citations immediately after the relevant information
-- Each citation should reference a specific web source you used
-- Provide a complete citations array with:
-  - number: The citation number as a string (e.g., "1", "2")
-  - title: The title of the source page
-  - url: The full URL of the source
-  - description: A brief description of what information came from this source
-  - quote: (optional) A relevant quote from the source if applicable
+Respond directly with the markdown content - do not wrap it in JSON or any other format.`
 
-Return your response in JSON format with:
-{
-  "content": "Your markdown-formatted response with inline citations like [1], [2]",
-  "citations": [
-    {"number": "1", "title": "Source Title", "url": "https://example.com", "description": "Description of what this source provided"},
-    {"number": "2", "title": "Another Source", "url": "https://example.org", "description": "Another description"}
-  ]
-}`
-
-    const responseSchema = z.object({
-      content: z.string().describe("The markdown-formatted response with inline citation markers like [1], [2]"),
-      citations: z
-        .array(
-          z.object({
-            number: z.string().describe("Citation number as a string"),
-            title: z.string().describe("Title of the source"),
-            url: z.string().describe("URL of the source"),
-            description: z.string().describe("Description of what information came from this source"),
-            quote: z.string().optional().describe("Optional relevant quote from the source"),
-          }),
-        )
-        .describe("Array of citations corresponding to the numbered markers in the content"),
-    })
-
-    const result = streamObject({
+    const result = streamText({
       model: openai("gpt-5-mini"),
-      schema: responseSchema,
       prompt: aiPrompt,
       maxTokens: 2000,
       tools: {
@@ -103,7 +69,6 @@ Return your response in JSON format with:
     return Response.json(
       {
         content: "I apologize, but I encountered an error processing your request. Please try again.",
-        citations: [],
       },
       { status: 500 },
     )
