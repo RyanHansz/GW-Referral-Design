@@ -1568,44 +1568,6 @@ export default function ReferralTool() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Top Header */}
-      <div className="bg-blue-600 text-white">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-blue-700"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-bold text-sm">CW</span>
-              </div>
-              <span className="font-semibold text-lg hidden sm:block">CaseWorthy</span>
-            </div>
-            <div className="bg-blue-700 px-3 py-1 rounded text-sm font-medium hidden md:block">CASE MANAGEMENT</div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-blue-700">
-              <Grid3X3 className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Avatar className="w-8 h-8">
-                <AvatarFallback className="bg-white text-blue-600 text-sm font-semibold">RH</AvatarFallback>
-              </Avatar>
-              <div className="text-sm hidden sm:block">
-                <div className="font-medium">Ryan Hansz</div>
-                <div className="text-blue-200 text-xs">Auditor</div>
-              </div>
-              <ChevronDown className="w-4 h-4 text-blue-200" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="flex flex-1 relative">
         {isMobileMenuOpen && (
           <div
