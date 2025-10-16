@@ -29,20 +29,21 @@ Generate a CONCISE action plan for accessing the following selected resources. K
 Selected Resources:
 ${resourceList}
 
-For the content field, provide markdown-formatted text that includes:
+For the content field, provide markdown-formatted text with simple, clean formatting:
 
-## Action Plan
-- Priority order (1-2 sentences)
-- Common documents needed (bullet list, 3-5 items max)
-- Overall timeline (1 sentence)
-
-## Resource Steps
 For each resource, provide:
 ### [Short Resource Name]
-1. **How to apply** (2-3 specific steps with actual links/locations. Use web search to find application forms, online portals, or contact info)
-2. **Documents needed** (3-4 specific items)
-3. **Timeline** (1 specific phrase with actual timeframe, e.g., "2-4 weeks" or "Same day")
-4. **Key tip** (1 specific, actionable tip based on web search findings)
+**How to apply:**
+- 2-3 specific steps with actual links/locations. Use web search to find application forms, online portals, or contact info
+
+**Documents needed:**
+- 3-4 specific items
+
+**Timeline:**
+- 1 specific phrase with actual timeframe (e.g., "2-4 weeks" or "Same day")
+
+**Key tip:**
+- 1 specific, actionable tip based on web search findings
 
 CRITICAL SPECIFICITY REQUIREMENTS:
 - Use web search to find ACTUAL application links, forms, and portals
@@ -56,15 +57,17 @@ CRITICAL FORMATTING RULES:
 - Keep ALL text BRIEF and SCANNABLE
 - Use SHORT phrases, not long sentences
 - Each section should take 5-10 seconds to read
-- Limit bullet points to 3-5 items
-- Limit numbered steps to 2-4 items
+- Limit bullet points to 3-4 items
 - Avoid repetition and unnecessary details
+- DO NOT use arrows (→) or special symbols
+- DO NOT add extra styling or formatting beyond basic markdown
+- Keep formatting simple and clean like follow-up responses
 
 Use markdown formatting in the content:
-- Use **bold** for emphasis
-- Use bullet points with * for lists
-- Use ## and ### for headers
-- Use numbered lists for step-by-step processes
+- Use **bold** for section labels
+- Use bullet points with - for lists
+- Use ### for resource headers
+- Keep formatting minimal and clean
 
 IMPORTANT:
 - Generate all content in ${outputLanguage}. All instructions, steps, and explanations should be in ${outputLanguage}.
