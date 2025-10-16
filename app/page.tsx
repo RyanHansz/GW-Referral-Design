@@ -102,7 +102,7 @@ interface ActionPlan {
 
 // Component for rendering action plan with collapsible resource sections
 function ActionPlanContent({ content }: { content: string }) {
-  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set([0, 1, 2, 3, 4]))
+  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set())
 
   // Parse the content to split into sections
   const sections = useMemo(() => {
