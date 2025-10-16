@@ -1,0 +1,57 @@
+# Test Prompts for Goodwill Referral Tool
+
+## Basic Needs
+
+1. Food Assistance
+Single mother with 2 kids needs food assistance. Living in East Austin, no car.
+
+2. Emergency Shelter
+Homeless veteran needs emergency shelter and housing assistance in Austin. Has PTSD.
+
+## Job Training & Education
+
+3. Healthcare Training
+25-year-old wants to become a CNA. Has high school diploma. Looking for free training programs.
+
+4. IT Certification
+Career changer interested in IT. Needs CompTIA A+ certification training. Can attend weekday classes.
+
+## Employment
+
+5. Entry-Level Jobs
+18-year-old recent high school graduate needs first job. Has reliable transportation. Interested in retail or customer service.
+
+6. Manufacturing Career
+Looking for manufacturing or warehouse job training. Has forklift experience. Wants to advance career.
+
+## Government Benefits & Services
+
+7. Healthcare Coverage
+Uninsured 35-year-old with diabetes needs health insurance and medical care. Low income.
+
+8. Childcare Assistance
+Working single parent needs affordable childcare for 3-year-old in South Austin. Income qualified.
+
+## Transportation & Multiple Needs
+
+9. Transportation Help
+Need reduced fare bus pass for Capital Metro. Going to work and medical appointments. Limited income.
+
+## Complex/Combined Needs
+
+10. Multiple Barriers
+Recently incarcerated, needs job training, professional clothing for interviews, and help with background-friendly employers. Interested in construction or hospitality.
+
+---
+
+## Testing Notes
+
+These prompts test:
+- Different resource categories (GCTA, community, government, jobs)
+- Various demographics (youth, veterans, parents, formerly incarcerated)
+- Geographic specificity (East Austin, South Austin)
+- Single vs. multiple needs
+- Specific programs (CNA, CompTIA A+, Capital Metro)
+- Realistic client scenarios
+
+Try them in different orders and with the language selector to fully test the tool!
