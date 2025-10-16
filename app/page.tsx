@@ -1002,9 +1002,11 @@ export default function ReferralTool() {
     setIsLoading(true)
     setError("") // Clear previous errors
 
-    // Clear action plan when starting new search or follow-up
-    setActionPlan(null)
-    setSelectedResources([])
+    // Only clear action plan when starting new search, not for follow-ups
+    if (!isFollowUp) {
+      setActionPlan(null)
+      setSelectedResources([])
+    }
 
     try {
       const promptFromFilters = buildPrompt()
@@ -2127,13 +2129,14 @@ export default function ReferralTool() {
                           <div className="bg-gray-100 rounded-2xl p-4 border">
                             <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
 
-                            {/* Active Filters - show when filters are applied */}
-                            {(outputLanguage !== "English" ||
-                              selectedCategories.length > 0 ||
-                              selectedResourceTypes.length > 0 ||
-                              location ||
-                              selectedLocations.length > 0 ||
-                              selectedLanguages.length > 0) && (
+                            {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
+                            {conversationHistory.length === 0 &&
+                              (outputLanguage !== "English" ||
+                                selectedCategories.length > 0 ||
+                                selectedResourceTypes.length > 0 ||
+                                location ||
+                                selectedLocations.length > 0 ||
+                                selectedLanguages.length > 0) && (
                               <div className="mt-3 pt-3 border-t border-gray-300">
                                 <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
                                   <Filter className="w-4 h-4" />
@@ -2395,8 +2398,8 @@ export default function ReferralTool() {
                         <div className="bg-gray-100 rounded-2xl p-4 border">
                           <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{exchange.response.question}</h2>
 
-                          {/* Active Filters - show when filters are applied (only for latest) */}
-                          {index === conversationHistory.length - 1 &&
+                          {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
+                          {index === 0 &&
                             (outputLanguage !== "English" ||
                               selectedCategories.length > 0 ||
                               selectedResourceTypes.length > 0 ||
