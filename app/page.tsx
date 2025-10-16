@@ -1596,6 +1596,17 @@ export default function ReferralTool() {
                   </div>
                 </div>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-white hover:bg-amber-50 border-amber-300 text-amber-900 hover:text-amber-950 flex items-center gap-2 whitespace-nowrap"
+                onClick={() => {
+                  window.location.href = "mailto:feedback@goodwillcentraltexas.org?subject=GenAI Referral Tool Feedback&body=Please share your feedback, issues, or suggestions about the GenAI Referral Tool:%0D%0A%0D%0A"
+                }}
+              >
+                <MessageCircle className="w-4 h-4" />
+                Share Feedback
+              </Button>
             </div>
           </div>
 
