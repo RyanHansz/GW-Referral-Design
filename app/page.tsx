@@ -861,6 +861,10 @@ export default function ReferralTool() {
     setIsLoading(true)
     setError("") // Clear previous errors
 
+    // Clear action plan when starting new search or follow-up
+    setActionPlan(null)
+    setSelectedResources([])
+
     try {
       const promptFromFilters = buildPrompt()
       const userText = isFollowUp ? followUpText : userInput.trim()
