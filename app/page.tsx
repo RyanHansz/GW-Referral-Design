@@ -380,7 +380,6 @@ export default function ReferralTool() {
   const [clientDescription, setClientDescription] = useState("") // This state is no longer directly used for user input but might be for other purposes.
 
   const [showResults, setShowResults] = useState(false)
-  const [showHistory, setShowHistory] = useState(false)
   const [caseNotes, setCaseNotes] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [processingTime, setProcessingTime] = useState("")
@@ -455,59 +454,6 @@ export default function ReferralTool() {
   const [streamingStatus, setStreamingStatus] = useState("")
   const [streamingResources, setStreamingResources] = useState<any[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
-
-  const mockHistory = [
-    {
-      id: 1,
-      clientName: "Sarah Johnson",
-      searchQuery: "Housing assistance for single mother with two children",
-      date: "2024-01-15",
-      status: "Completed",
-      resourceTypes: ["Housing & Shelter", "Financial Assistance"],
-      providerTypes: ["Government", "Community"],
-      resultsCount: 8,
-    },
-    {
-      id: 2,
-      clientName: "Michael Rodriguez",
-      searchQuery: "Employment training for veteran with PTSD",
-      date: "2024-01-12",
-      status: "Pending Follow-up",
-      resourceTypes: ["Employment & Job Training", "Healthcare & Mental Health", "Veterans Services"],
-      providerTypes: ["Government", "Goodwill Internal"],
-      resultsCount: 12,
-    },
-    {
-      id: 3,
-      clientName: "Lisa Chen",
-      searchQuery: "Childcare assistance for working parent",
-      date: "2024-01-10",
-      status: "Completed",
-      resourceTypes: ["Childcare", "Financial Assistance"],
-      providerTypes: ["Community", "Government"],
-      resultsCount: 6,
-    },
-    {
-      id: 4,
-      clientName: "Robert Williams",
-      searchQuery: "Substance abuse treatment and legal services",
-      date: "2024-01-08",
-      status: "In Progress",
-      resourceTypes: ["Substance Abuse Treatment", "Legal Services"],
-      providerTypes: ["Government", "Community"],
-      resultsCount: 15,
-    },
-    {
-      id: 5,
-      clientName: "Maria Garcia",
-      searchQuery: "Food assistance and transportation for elderly client",
-      date: "2024-01-05",
-      status: "Completed",
-      resourceTypes: ["Food Assistance", "Transportation"],
-      providerTypes: ["Community", "Government"],
-      resultsCount: 9,
-    },
-  ]
 
   const generatePrintHTML = () => {
     return `
@@ -1576,112 +1522,18 @@ export default function ReferralTool() {
             <div className="border-2 border-gray-300 rounded-lg p-6 bg-white min-h-full">
               {/* Referral Tool Content */}
               <div className="max-w-4xl mx-auto">
-                {showHistory ? (
-                  <>
-                    {/* History Header */}
-                    <div className="mb-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowHistory(false)}
-                            className="text-gray-600"
-                          >
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Search
-                          </Button>
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white shadow-lg">
-                              <ClipboardList className="w-6 h-6" />
-                            </div>
-                            <div>
-                              <h2 className="text-2xl font-bold text-gray-900">Search History</h2>
-                              <p className="text-muted-foreground">Review your past searches and referral requests</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Search and Filter Bar */}
-                    <div className="mb-6">
-                      <div className="flex gap-4 items-center">
-                        <div className="flex-1">
-                          <Input placeholder="Search history by client name or query..." className="w-full" />
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Filter className="w-4 h-4 mr-2" />
-                          Filter
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* History Cards */}
-                    <div className="space-y-4">
-                      {mockHistory.map((item) => (
-                        <Card
-                          key={item.id}
-                          className="p-6 hover:shadow-md transition-shadow cursor-pointer bg-transparent"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="font-semibold text-lg text-gray-900">{item.clientName}</h3>
-                              </div>
-                              <p className="text-gray-600 mb-3">{item.searchQuery}</p>
-                              <div className="flex flex-wrap gap-2 mb-3">
-                                {item.resourceTypes.map((type) => (
-                                  <span key={type} className="px-2 py-1 bg-muted text-muted-foreground rounded text-sm">
-                                    {type}
-                                  </span>
-                                ))}
-                              </div>
-                              <div className="flex items-center gap-4 text-sm text-gray-500">
-                                <span>{new Date(item.date).toLocaleDateString()}</span>
-                                <span>•</span>
-                                <span>{item.resultsCount} resources found</span>
-                                <span>•</span>
-                                <span>{item.providerTypes.join(", ")}</span>
-                              </div>
-                            </div>
-                            <div className="flex gap-2 ml-4">
-                              <Button variant="outline" size="sm">
-                                <Eye className="w-4 h-4 mr-2" />
-                                View
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <RefreshCw className="w-4 h-4 mr-2" />
-                                Re-run
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </>
-                ) : !showResults ? (
+                {!showResults ? (
                   <>
                     {/* Header */}
                     <div className="mb-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white shadow-lg">
-                            <Heart className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Find Resources </h2>
-                            <p className="text-blue-600 font-medium">GenAI Referral Tool</p>
-                          </div>
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white shadow-lg">
+                          <Heart className="w-6 h-6" />
                         </div>
-                        <Button
-                          variant="outline"
-                          onClick={() => setShowHistory(true)}
-                          className="flex items-center gap-2"
-                        >
-                          <ClipboardList className="w-4 h-4" />
-                          View History
-                        </Button>
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">Find Resources </h2>
+                          <p className="text-blue-600 font-medium">GenAI Referral Tool</p>
+                        </div>
                       </div>
                     </div>
 
