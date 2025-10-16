@@ -58,7 +58,7 @@ Respond directly with the markdown content - do not wrap it in JSON or any other
       },
       providerOptions: {
         openai: {
-          reasoningEffort: "medium",
+          reasoningEffort: "low",
         },
       },
     })
