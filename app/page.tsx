@@ -19,7 +19,6 @@ import {
   Sparkles,
   Printer,
   CheckCircle,
-  Copy,
   MessageCircle,
   Heart,
   Briefcase,
@@ -1453,11 +1452,6 @@ export default function ReferralTool() {
     // </CHANGE>
   }
 
-  const handleCopyToClipboard = () => {
-    // This function would typically copy the content of the chat or a specific part of it.
-    // For now, it's a placeholder.
-    alert("Copy to clipboard functionality not yet implemented.")
-  }
 
   const handleFileProcessed = (extractedText: string) => {
     setUserInput(extractedText)
@@ -2102,9 +2096,6 @@ export default function ReferralTool() {
                         Back to Search
                       </Button>
                       <div className="flex items-center gap-2">
-                        <Button onClick={handleCopyToClipboard} variant="ghost" size="sm">
-                          <Copy className="w-4 h-4" />
-                        </Button>
                         <Button
                           onClick={handlePrintChatThread}
                           variant="ghost"
@@ -2767,9 +2758,6 @@ export default function ReferralTool() {
 
                     {/* Action Buttons */}
                     <div className="flex items-center gap-3 pt-6 border-t border-gray-200">
-                      <Button onClick={handleCopyToClipboard} variant="ghost" size="sm">
-                        <Copy className="w-4 h-4" />
-                      </Button>
                       <Button
                         onClick={handlePrintChatThread}
                         variant="ghost"
