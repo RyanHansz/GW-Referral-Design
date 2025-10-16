@@ -15,7 +15,6 @@ import {
   Search,
   MapPin,
   FileText,
-  Upload,
   Sparkles,
   Printer,
   CheckCircle,
@@ -389,9 +388,6 @@ export default function ReferralTool() {
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
   const [locationLoading, setLocationLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("text-summary")
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [isProcessingPDF, setIsProcessingPDF] = useState(false)
-  const [pdfAnalysisResult, setPdfAnalysisResult] = useState<string>("")
   const [conversationHistory, setConversationHistory] = useState<
     Array<{
       prompt: string
@@ -413,10 +409,8 @@ export default function ReferralTool() {
     location: "",
     situation: "",
   })
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [isGenerating, setIsGenerating] = useState(false)
   const [urgencyLevel, setUrgencyLevel] = useState<"immediate" | "within_week" | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isInteractingWithDropdown, setIsInteractingWithDropdown] = useState(false)
 
@@ -863,9 +857,9 @@ export default function ReferralTool() {
   ])
 
   const handleGenerateReferrals = async (isFollowUp = false, followUpText = "") => {
-    // Add check for user input or uploaded files
-    if (!isFollowUp && !userInput.trim() && uploadedFiles.length === 0) {
-      alert("Please provide some information about your client or upload a file.")
+    // Add check for user input
+    if (!isFollowUp && !userInput.trim()) {
+      alert("Please provide some information about your client.")
       return
     }
 
@@ -1175,77 +1169,6 @@ export default function ReferralTool() {
     }
   }
 
-  const handleFileUploadSingle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const supportedTypes = ["application/pdf", "image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"]
-
-      if (supportedTypes.includes(file.type)) {
-        setUploadedFile(file)
-        setPdfAnalysisResult("")
-      } else {
-        alert("Please upload a PDF or image file (PNG, JPEG, WEBP, GIF).")
-      }
-    }
-  }
-
-  const handleProcessFile = async () => {
-    if (!uploadedFile) return
-
-    setIsProcessingPDF(true)
-    setError("") // Clear previous errors
-    const startTime = Date.now()
-
-    try {
-      const formData = new FormData()
-      formData.append("file", uploadedFile)
-      formData.append(
-        "filters",
-        JSON.stringify({
-          resourceTypes: selectedResourceTypes,
-          locations: selectedLocations,
-          ageGroups: selectedAgeGroups,
-          incomeRanges: selectedIncomeRanges,
-          languages: selectedLanguages,
-          accessibilityNeeds: selectedAccessibilityNeeds,
-        }),
-      )
-
-      const response = await fetch("/api/process-file", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Failed to process file")
-      }
-
-      const data = await response.json()
-      const endTime = Date.now()
-      const duration = Math.round((endTime - startTime) / 1000)
-
-      setPdfAnalysisResult(data.extractedText)
-      setUserInput(data.extractedText)
-      setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
-
-      // Automatically generate referrals after file processing
-      if (data.extractedText) {
-        await handleGenerateReferrals(false, data.extractedText) // Pass extracted text as user input
-      }
-    } catch (error: any) {
-      console.error("Error processing file:", error)
-      setError(error.message || "Error processing file. Please try again.")
-      alert("Error processing file. Please try again.")
-    } finally {
-      setIsProcessingPDF(false)
-    }
-  }
-
-  const removeUploadedFile = () => {
-    setUploadedFile(null)
-    setPdfAnalysisResult("")
-  }
 
   const handleStartNew = () => {
     setShowResults(false)
@@ -1255,8 +1178,6 @@ export default function ReferralTool() {
     setCaseNotes("")
     setFollowUpPrompt("")
     setConversationHistory([])
-    setUploadedFile(null)
-    setPdfAnalysisResult("")
     setSelectedCategories([])
     setLocation("")
     setSelectedResourceTypes([])
@@ -1275,43 +1196,6 @@ export default function ReferralTool() {
 
   const handleSuggestedFollowUp = (suggestion: string) => {
     handleGenerateReferrals(true, suggestion)
-  }
-
-  // This was causing the filter text to appear in the textarea
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || [])
-    setUploadedFiles((prevFiles) => [...prevFiles, ...files])
-  }
-
-  const removeFile = (index: number) => {
-    setUploadedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index))
-  }
-
-  const generateReferrals = async () => {
-    setIsGenerating(true)
-    setError("")
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      // alert("Referrals generated successfully!") // Placeholder
-      // In a real scenario, this would call the API and update 'results' and 'showResults'
-      setResults([
-        { id: 1, name: "Sample Referral 1" },
-        { id: 2, name: "Sample Referral 2" },
-      ])
-      setShowResults(true)
-    } catch (error) {
-      console.error("Error generating referrals:", error)
-      setError("Failed to generate referrals. Please try again.")
-      // alert("Failed to generate referrals. Please try again.")
-    } finally {
-      setIsGenerating(false)
-    }
-  }
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click()
   }
 
   const sampleReferralData = {
@@ -1725,7 +1609,7 @@ export default function ReferralTool() {
 
                     {/* Tabs */}
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-                      <TabsList className="grid w-full grid-cols-3 bg-gray-100">
+                      <TabsList className="grid w-full grid-cols-2 bg-gray-100">
                         <TabsTrigger
                           value="text-summary"
                           className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
@@ -1739,13 +1623,6 @@ export default function ReferralTool() {
                         >
                           <MessageCircle className="w-4 h-4" />
                           Chat
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="upload-forms"
-                          className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
-                        >
-                          <Upload className="w-4 h-4" />
-                          Upload Forms
                         </TabsTrigger>
                       </TabsList>
                     </Tabs>
@@ -2068,226 +1945,6 @@ export default function ReferralTool() {
                                 )}
                               </Button>
                             </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    )}
-
-                    {activeTab === "upload-forms" && (
-                      <div className="space-y-6">
-                        <div className="text-center py-8">
-                          <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                            <Upload className="w-8 h-8 text-green-600" />
-                          </div>
-                          <h2 className="text-3xl font-bold text-gray-900 mb-4">Smart Form Processing Made Simple</h2>
-                          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Upload any intake form or assessment document, and our AI will automatically extract client
-                            information to generate personalized referrals instantly.
-                          </p>
-                        </div>
-
-                        <Card className="bg-gray-50 border-gray-200">
-                          <CardContent className="p-6 space-y-6">
-                            <div className="text-center">
-                              <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                                <Upload className="w-8 h-8 text-blue-600" />
-                              </div>
-                              <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Intake Form</h3>
-                              <p className="text-gray-600 mb-6">
-                                Upload a PDF or image of a handwritten or completed intake form. Our AI will
-                                automatically extract client information and generate relevant referrals.
-                              </p>
-                            </div>
-
-                            {!uploadedFile ? (
-                              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
-                                <input
-                                  type="file"
-                                  accept=".pdf,.png,.jpg,.jpeg,.webp,.gif"
-                                  onChange={handleFileUploadSingle}
-                                  className="hidden"
-                                  id="file-upload"
-                                />
-                                <div className="flex flex-col items-center">
-                                  <FileText className="w-12 h-12 text-gray-400 mb-4" />
-                                  <span className="text-lg font-medium text-gray-900 mb-2">Choose file to upload</span>
-                                  <span className="text-gray-500 mb-4">PDF or image (PNG, JPEG, WEBP, GIF)</span>
-                                  <Button
-                                    type="button"
-                                    onClick={triggerFileInput}
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                  >
-                                    Select File
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <FileText className="w-8 h-8 text-blue-600" />
-                                    <div>
-                                      <p className="font-medium text-gray-900">{uploadedFile.name}</p>
-                                      <p className="text-sm text-gray-500">
-                                        {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={removeUploadedFile}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                  >
-                                    Remove
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
-
-                            {uploadedFile && (
-                              <div className="space-y-4">
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                  <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
-                                    <Sparkles className="w-4 h-4" />
-                                    AI Processing Options
-                                  </h4>
-                                  <p className="text-blue-800 text-sm mb-4">
-                                    The AI will extract client information from the PDF and automatically apply your
-                                    selected filters below.
-                                  </p>
-
-                                  {/* Same filter options as text summary tab */}
-                                  <div className="space-y-4">
-                                    {/* Resource Categories */}
-                                    <div>
-                                      <h5 className="font-medium text-blue-900 mb-2">
-                                        Focus on Specific Resource Types
-                                      </h5>
-                                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                        {resourceCategories.slice(0, 6).map((category) => {
-                                          const Icon = category.icon
-                                          const isSelected = selectedCategories.includes(category.id)
-                                          return (
-                                            <Button
-                                              key={category.id}
-                                              variant={isSelected ? "default" : "outline"}
-                                              size="sm"
-                                              className={`text-xs ${
-                                                isSelected
-                                                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                                                  : "text-gray-600 hover:bg-gray-100"
-                                              }`}
-                                              onClick={() => toggleCategory(category.id)}
-                                            >
-                                              <Icon className="w-4 h-4 mr-1" />
-                                              {category.label}
-                                            </Button>
-                                          )
-                                        })}
-                                      </div>
-                                    </div>
-
-                                    <div>
-                                      <h5 className="font-medium text-blue-900 mb-2">Resource Provider Types</h5>
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        <Button
-                                          variant={selectedResourceTypes.includes("goodwill") ? "default" : "outline"}
-                                          size="sm"
-                                          className={`text-xs h-10 ${
-                                            selectedResourceTypes.includes("goodwill")
-                                              ? "bg-blue-600 text-white hover:bg-blue-700"
-                                              : "text-gray-600 hover:bg-gray-100"
-                                          }`}
-                                          onClick={() => toggleResourceType("goodwill")}
-                                        >
-                                          <Heart className="w-3 h-3 mr-1" />
-                                          Goodwill
-                                        </Button>
-                                        <Button
-                                          variant={selectedResourceTypes.includes("government") ? "default" : "outline"}
-                                          size="sm"
-                                          className={`text-xs h-10 ${
-                                            selectedResourceTypes.includes("government")
-                                              ? "bg-blue-600 text-white hover:bg-blue-700"
-                                              : "text-gray-600 hover:bg-gray-100"
-                                          }`}
-                                          onClick={() => toggleResourceType("government")}
-                                        >
-                                          <Building className="w-3 h-3 mr-1" />
-                                          Government
-                                        </Button>
-                                        <Button
-                                          variant={selectedResourceTypes.includes("community") ? "default" : "outline"}
-                                          size="sm"
-                                          className={`text-xs h-10 ${
-                                            selectedResourceTypes.includes("community")
-                                              ? "bg-blue-600 text-white hover:bg-blue-700"
-                                              : "text-gray-600 hover:bg-gray-100"
-                                          }`}
-                                          onClick={() => toggleResourceType("community")}
-                                        >
-                                          <Users className="w-3 h-3 mr-1" />
-                                          Community
-                                        </Button>
-                                      </div>
-                                    </div>
-
-                                    {/* Location Filters */}
-                                    <div>
-                                      <h5 className="font-medium text-blue-900 mb-2">Location Preferences</h5>
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                        <Input
-                                          placeholder="ZIP Code"
-                                          value={location}
-                                          onChange={(e) => setLocation(e.target.value)}
-                                          className="border-gray-300"
-                                        />
-                                        <Input
-                                          placeholder="Location"
-                                          value={location}
-                                          onChange={(e) => setLocation(e.target.value)}
-                                          className="border-gray-300"
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <Button
-                                  onClick={handleProcessFile}
-                                  disabled={isProcessingPDF}
-                                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-medium"
-                                >
-                                  {isProcessingPDF ? (
-                                    <>
-                                      <Sparkles className="w-5 h-5 mr-2 animate-spin" />
-                                      Processing File & Generating Referrals...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Sparkles className="w-5 h-5 mr-2" />
-                                      Process File & Generate Referrals
-                                    </>
-                                  )}
-                                </Button>
-                              </div>
-                            )}
-
-                            {pdfAnalysisResult && (
-                              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <h4 className="font-medium text-green-900 mb-2 flex items-center gap-2">
-                                  <CheckCircle className="w-4 h-4" />
-                                  PDF Processed Successfully
-                                </h4>
-                                <p className="text-green-800 text-sm mb-3">
-                                  Client information extracted and referrals generated in {processingTime}
-                                </p>
-                                <div className="bg-white border border-green-200 rounded p-3 max-h-32 overflow-y-auto">
-                                  <p className="text-sm text-gray-700">{pdfAnalysisResult.substring(0, 200)}...</p>
-                                </div>
-                              </div>
-                            )}
                           </CardContent>
                         </Card>
                       </div>
