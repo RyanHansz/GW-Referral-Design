@@ -448,6 +448,7 @@ export default function ReferralTool() {
   const [streamingQuestion, setStreamingQuestion] = useState("")
   const [streamingSummary, setStreamingSummary] = useState("")
   const [isStreaming, setIsStreaming] = useState(false)
+  const [showActionPlanSection, setShowActionPlanSection] = useState(false)
 
   const generatePrintHTML = () => {
     return `
@@ -906,6 +907,7 @@ export default function ReferralTool() {
         setStreamingSummary("")
         setStreamingStatus("Starting...")
         setShowResults(true)
+        setShowActionPlanSection(false)
 
         const reader = response.body?.getReader()
         if (!reader) throw new Error("No reader available")
@@ -984,6 +986,11 @@ export default function ReferralTool() {
 
           setConversationHistory((prev) => [...prev, newEntry])
           setProcessingTime(`${Math.floor(duration / 60)}m ${duration % 60}s`)
+
+          // Show action plan section after a brief delay to let resources render first
+          setTimeout(() => {
+            setShowActionPlanSection(true)
+          }, 500)
         } catch (streamError) {
           console.error("Streaming error:", streamError)
           setError("Error while streaming results")
@@ -2543,8 +2550,8 @@ export default function ReferralTool() {
                           </div>
                         ) : null}
 
-                        {exchange.response.resources && exchange.response.resources.length > 0 && (
-                          <div className="mt-8 p-4 bg-gray-50 rounded-lg border">
+                        {showActionPlanSection && exchange.response.resources && exchange.response.resources.length > 0 && (
+                          <div className="mt-8 p-4 bg-gray-50 rounded-lg border animate-fadeIn">
                             <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                               <CheckSquare className="w-4 h-4 text-blue-600" />
                               Choose resources for an action plan and individual guides:
@@ -2652,8 +2659,8 @@ export default function ReferralTool() {
                     ))}
 
                     {/* Follow-up input */}
-                    {conversationHistory.length > 0 && (
-                      <div className="mt-6 p-4 border rounded-lg bg-gray-50">
+                    {showActionPlanSection && conversationHistory.length > 0 && (
+                      <div className="mt-6 p-4 border rounded-lg bg-gray-50 animate-fadeIn">
                         <h4 className="font-medium text-gray-900 mb-3">Ask a follow-up question:</h4>
                         <div className="space-y-3">
                           <Textarea
