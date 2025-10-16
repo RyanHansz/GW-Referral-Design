@@ -3,15 +3,15 @@
 ## Basic Needs
 
 1. Food Assistance
-Single mother with 2 kids needs food assistance. Living in East Austin, no car.
+Single mother with 2 kids needs food assistance. Living in East Austin (78721), no car.
 
 2. Emergency Shelter
-Homeless veteran needs emergency shelter and housing assistance in Austin. Has PTSD.
+Homeless veteran needs emergency shelter and housing assistance in Austin (78704). Has PTSD.
 
 ## Job Training & Education
 
 3. Healthcare Training
-25-year-old wants to become a CNA. Has high school diploma. Looking for free training programs.
+25-year-old wants to become a CNA. Has high school diploma. Looking for free training programs. Lives in Round Rock (78664).
 
 4. IT Certification
 Career changer interested in IT. Needs CompTIA A+ certification training. Can attend weekday classes.
@@ -19,7 +19,7 @@ Career changer interested in IT. Needs CompTIA A+ certification training. Can at
 ## Employment
 
 5. Entry-Level Jobs
-18-year-old recent high school graduate needs first job. Has reliable transportation. Interested in retail or customer service.
+18-year-old recent high school graduate needs first job. Has reliable transportation. Interested in retail or customer service. Located in Pflugerville (78660).
 
 6. Manufacturing Career
 Looking for manufacturing or warehouse job training. Has forklift experience. Wants to advance career.
@@ -27,20 +27,20 @@ Looking for manufacturing or warehouse job training. Has forklift experience. Wa
 ## Government Benefits & Services
 
 7. Healthcare Coverage
-Uninsured 35-year-old with diabetes needs health insurance and medical care. Low income.
+Uninsured 35-year-old with diabetes needs health insurance and medical care. Low income. Lives in South Austin (78745).
 
 8. Childcare Assistance
-Working single parent needs affordable childcare for 3-year-old in South Austin. Income qualified.
+Working single parent needs affordable childcare for 3-year-old in South Austin (78741). Income qualified.
 
 ## Transportation & Multiple Needs
 
 9. Transportation Help
-Need reduced fare bus pass for Capital Metro. Going to work and medical appointments. Limited income.
+Need reduced fare bus pass for Capital Metro. Going to work and medical appointments. Limited income. Lives in North Austin (78758).
 
 ## Complex/Combined Needs
 
 10. Multiple Barriers
-Recently incarcerated, needs job training, professional clothing for interviews, and help with background-friendly employers. Interested in construction or hospitality.
+Recently incarcerated, needs job training, professional clothing for interviews, and help with background-friendly employers. Interested in construction or hospitality. Located in East Austin (78723).
 
 ---
 
