@@ -93,130 +93,7 @@ interface ReferralResponse {
   content?: string
 }
 
-// Added interface for Action Plan
-interface ActionPlan {
-  title: string
-  summary: string
-  content: string
-}
-
-// Component for rendering action plan with collapsible resource sections
-function ActionPlanContent({ content }: { content: string }) {
-  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set())
-
-  // Parse the content to split into sections
-  const sections = useMemo(() => {
-    const html = parseMarkdownToHTML(content)
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(html, "text/html")
-
-    const result: Array<{ title: string; content: string; isResourceSection: boolean }> = []
-    let currentSection: { title: string; content: string; isResourceSection: boolean } | null = null
-
-    doc.body.childNodes.forEach((node) => {
-      if (node.nodeName === "H3") {
-        // Save previous section
-        if (currentSection) {
-          result.push(currentSection)
-        }
-        // Start new resource section
-        currentSection = {
-          title: node.textContent || "",
-          content: "",
-          isResourceSection: true,
-        }
-      } else if (node.nodeName === "H2") {
-        // Save previous section
-        if (currentSection) {
-          result.push(currentSection)
-        }
-        // Start new major section (not collapsible)
-        currentSection = {
-          title: node.textContent || "",
-          content: "",
-          isResourceSection: false,
-        }
-      } else if (currentSection) {
-        // Add content to current section
-        const div = document.createElement("div")
-        div.appendChild(node.cloneNode(true))
-        currentSection.content += div.innerHTML
-      } else {
-        // Content before any heading
-        const div = document.createElement("div")
-        div.appendChild(node.cloneNode(true))
-        result.push({
-          title: "",
-          content: div.innerHTML,
-          isResourceSection: false,
-        })
-      }
-    })
-
-    // Push final section
-    if (currentSection) {
-      result.push(currentSection)
-    }
-
-    return result
-  }, [content])
-
-  const toggleSection = (index: number) => {
-    const newExpanded = new Set(expandedSections)
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index)
-    } else {
-      newExpanded.add(index)
-    }
-    setExpandedSections(newExpanded)
-  }
-
-  return (
-    <div className="action-plan-content">
-      {sections.map((section, index) => {
-        if (section.isResourceSection) {
-          const isExpanded = expandedSections.has(index)
-          return (
-            <div key={index} className="mb-4 border border-gray-200 rounded-lg overflow-hidden print:border-0">
-              <button
-                onClick={() => toggleSection(index)}
-                className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors text-left print:pointer-events-none print:bg-white"
-              >
-                <h3 className="text-lg font-semibold text-blue-900 m-0">{section.title}</h3>
-                <span className="print:hidden">
-                  {isExpanded ? (
-                    <ChevronUp className="w-5 h-5 text-gray-600" />
-                  ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-600" />
-                  )}
-                </span>
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-200 print:block ${isExpanded ? "block" : "hidden"}`}
-              >
-                <div
-                  className="p-4 prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: section.content }}
-                />
-              </div>
-            </div>
-          )
-        } else {
-          // Non-collapsible section
-          return (
-            <div key={index} className="mb-4">
-              {section.title && <h2 className="text-xl font-bold text-blue-900 mb-3">{section.title}</h2>}
-              <div
-                className="prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: section.content }}
-              />
-            </div>
-          )
-        }
-      })}
-    </div>
-  )
-}
+// Component for rendering action plan with collapsible resource sections (removed - now using simple markdown streaming)
 
 const resourceCategories = [
   {
@@ -560,7 +437,7 @@ export default function ReferralTool() {
   const [suggestedFollowUps, setSuggestedFollowUps] = useState<string[]>([])
 
   const [selectedResources, setSelectedResources] = useState<any[]>([])
-  const [actionPlan, setActionPlan] = useState<ActionPlan | null>(null)
+  const [actionPlanContent, setActionPlanContent] = useState("")
   const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false)
 
   const [outputLanguage, setOutputLanguage] = useState<string>("English")
@@ -794,21 +671,12 @@ export default function ReferralTool() {
               
               ${/* Added action plan to print output */ ""}
               ${
-                index === conversationHistory.length - 1 && actionPlan
+                index === conversationHistory.length - 1 && actionPlanContent
                   ? `
                 <div class="action-plan">
-                  <h3>${actionPlan.title}</h3>
-                  <div class="action-plan-summary">${actionPlan.summary}</div>
+                  <h3>Action Plan</h3>
                   <div class="action-plan-content">
-                    ${actionPlan.content
-                      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                      .replace(/### (.*?)\n/g, "<h4>$1</h4>")
-                      .replace(/## (.*?)\n/g, "<h3>$1</h3>")
-                      .replace(/- (.*?)\n/g, "<li>$1</li>")
-                      .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
-                      .replace(/\n\n/g, "</p><p>")
-                      .replace(/^(.)/g, "<p>$1")
-                      .replace(/(.)$/g, "$1</p>")}
+                    ${parseMarkdownToHTML(actionPlanContent)}
                   </div>
                 </div>
               `
@@ -1004,7 +872,7 @@ export default function ReferralTool() {
 
     // Only clear action plan when starting new search, not for follow-ups
     if (!isFollowUp) {
-      setActionPlan(null)
+      setActionPlanContent("")
       setSelectedResources([])
     }
 
@@ -1329,7 +1197,7 @@ export default function ReferralTool() {
     setActiveTab("text-summary") // Reset to default tab
     // Clear action plan related states
     setSelectedResources([])
-    setActionPlan(null)
+    setActionPlanContent("")
   }
 
   const handleSuggestedFollowUp = (suggestion: string) => {
@@ -1556,7 +1424,7 @@ export default function ReferralTool() {
 
     setConversationHistory([initialEntry, followUpEntry])
     setSelectedResources([])
-    setActionPlan(null)
+    setActionPlanContent("")
     setShowResults(true)
     setSuggestedFollowUps(sampleFollowUpData.suggestedFollowUps || [])
     // </CHANGE>
@@ -1577,7 +1445,7 @@ export default function ReferralTool() {
     setShowResults(false) // Hide results when clearing
     // Clear action plan related states
     setSelectedResources([])
-    setActionPlan(null)
+    setActionPlanContent("")
   }
 
   const handleResourceSelection = (resource: Resource, isSelected: boolean) => {
@@ -1602,7 +1470,7 @@ export default function ReferralTool() {
     if (selectedResources.length === 0) return
 
     setIsGeneratingActionPlan(true)
-    setActionPlan(null)
+    setActionPlanContent("")
 
     try {
       const response = await fetch("/api/generate-action-plan", {
@@ -1620,64 +1488,20 @@ export default function ReferralTool() {
         throw new Error("Failed to generate action plan")
       }
 
-      // Handle streaming response
+      // Handle streaming response - plain markdown
       const reader = response.body?.getReader()
       if (!reader) throw new Error("No reader available")
 
       const decoder = new TextDecoder()
-      let buffer = ""
+      let accumulatedContent = ""
 
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
-        buffer += decoder.decode(value, { stream: true })
-
-        // Try to parse complete JSON from buffer
-        let cleanBuffer = buffer.trim()
-
-        // Remove markdown code blocks if present
-        if (cleanBuffer.startsWith("```json")) {
-          cleanBuffer = cleanBuffer.replace(/^```json\s*/, "")
-        } else if (cleanBuffer.startsWith("```")) {
-          cleanBuffer = cleanBuffer.replace(/^```\s*/, "")
-        }
-        if (cleanBuffer.endsWith("```")) {
-          cleanBuffer = cleanBuffer.replace(/\s*```$/, "")
-        }
-
-        // Try to parse and update progressively
-        try {
-          // Look for content field in partial JSON
-          const contentMatch = cleanBuffer.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/s)
-          const titleMatch = cleanBuffer.match(/"title"\s*:\s*"([^"]*)"/)
-          const summaryMatch = cleanBuffer.match(/"summary"\s*:\s*"([^"]*)"/)
-
-          if (titleMatch || summaryMatch || contentMatch) {
-            setActionPlan({
-              title: titleMatch ? titleMatch[1] : "Action Plan",
-              summary: summaryMatch ? summaryMatch[1] : "Generating...",
-              content: contentMatch ? contentMatch[1].replace(/\\n/g, "\n").replace(/\\"/g, '"') : "",
-            })
-          }
-        } catch (e) {
-          // Continue accumulating
-        }
-      }
-
-      // Parse final complete response
-      let cleanedText = buffer.trim()
-      if (cleanedText.startsWith("```json")) {
-        cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
-      } else if (cleanedText.startsWith("```")) {
-        cleanedText = cleanedText.replace(/^```\s*/, "").replace(/\s*```$/, "")
-      }
-
-      try {
-        const finalData: ActionPlan = JSON.parse(cleanedText)
-        setActionPlan(finalData)
-      } catch (parseError) {
-        console.error("Failed to parse final action plan:", parseError)
+        const chunk = decoder.decode(value, { stream: true })
+        accumulatedContent += chunk
+        setActionPlanContent(accumulatedContent)
       }
     } catch (error) {
       console.error("Error generating action plan:", error)
@@ -2690,44 +2514,24 @@ export default function ReferralTool() {
                           </div>
                         )}
 
-                        {/* Action Plan Loading State */}
-                        {isGeneratingActionPlan && !actionPlan && (
-                          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 animate-pulse">
-                            <div className="flex items-center gap-3 mb-4">
-                              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-                              <span className="font-medium text-blue-900">Generating your personalized action plan...</span>
-                            </div>
-                            <div className="space-y-3">
-                              <div className="h-4 bg-blue-100 rounded w-3/4"></div>
-                              <div className="h-4 bg-blue-100 rounded w-full"></div>
-                              <div className="h-4 bg-blue-100 rounded w-5/6"></div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Action Plan Content (streaming or complete) */}
-                        {actionPlan && (
-                          <div className="mt-6 bg-white rounded-xl border-2 border-blue-100 shadow-sm overflow-hidden">
-                            {/* Header */}
-                            <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-blue-200">
-                              <h4 className="font-semibold text-blue-900 text-lg flex items-center gap-2">
-                                {isGeneratingActionPlan ? (
-                                  <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
-                                ) : (
-                                  <FileText className="w-5 h-5 text-blue-600" />
-                                )}
-                                {actionPlan.title}
-                              </h4>
-                              <p className="mt-2 text-blue-800 text-sm leading-relaxed">{actionPlan.summary}</p>
-                            </div>
-
-                            {/* Content */}
-                            <div className="px-6 py-5">
-                              <ActionPlanContent content={actionPlan.content} />
+                        {/* Action Plan - streaming or complete */}
+                        {(isGeneratingActionPlan || actionPlanContent) && (
+                          <div className="mt-6">
+                            <div className="space-y-4 pb-6 border-b border-gray-200">
                               {isGeneratingActionPlan && (
-                                <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-blue-600 flex items-center gap-2">
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                  Streaming content...
+                                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                                  <span className="text-blue-900 font-medium">Generating action plan...</span>
+                                </div>
+                              )}
+
+                              {actionPlanContent && (
+                                <div className="prose max-w-none text-slate-700">
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: parseMarkdownToHTML(actionPlanContent),
+                                    }}
+                                  />
                                 </div>
                               )}
                             </div>

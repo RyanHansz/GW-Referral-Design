@@ -18,18 +18,12 @@ export async function POST(request: Request) {
 
     const aiPrompt = `You are creating an action plan for a client who is already enrolled in Goodwill Central Texas's Workforce Advancement Program and receives career coaching support from a Goodwill case manager.
 
-Generate a CONCISE action plan for accessing the following selected resources. Keep ALL content brief and scannable. Return your response as a JSON object with the following structure:
-
-{
-  "title": "Action Plan",
-  "summary": "ONE sentence overview (15-20 words max)",
-  "content": "Brief markdown content with action steps"
-}
+Generate a CONCISE action plan for accessing the following selected resources. Keep ALL content brief and scannable.
 
 Selected Resources:
 ${resourceList}
 
-For the content field, provide markdown-formatted text with simple, clean formatting:
+Provide markdown-formatted text with simple, clean formatting:
 
 For each resource, provide:
 ### [Short Resource Name]
@@ -71,7 +65,7 @@ CRITICAL FORMATTING RULES:
 - DO NOT add extra styling or formatting beyond basic markdown
 - Keep formatting simple and clean like follow-up responses
 
-Use markdown formatting in the content:
+Use markdown formatting:
 - Use **bold** for section labels
 - Use bullet points with - for lists
 - Use ### for resource headers
@@ -79,8 +73,7 @@ Use markdown formatting in the content:
 
 IMPORTANT:
 - Generate all content in ${outputLanguage}. All instructions, steps, and explanations should be in ${outputLanguage}.
-- Return ONLY a valid JSON object with title, summary, and content fields.
-- The content field should contain the brief markdown-formatted action plan.
+- Return ONLY the markdown content directly, no JSON wrapping.
 - KEEP IT CONCISE - users should be able to scan the entire plan in 30-60 seconds.`
 
     const result = streamText({
