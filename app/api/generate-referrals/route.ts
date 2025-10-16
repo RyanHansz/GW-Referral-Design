@@ -69,6 +69,13 @@ ${strictFilterInstructions}
 
 CRITICAL: Generate resources in STRICT NUMERICAL ORDER (1, 2, 3, 4). Start writing resource #1 first, then #2, then #3, then #4. Do NOT skip ahead to generate other resources first.
 
+CRITICAL STREAMING REQUIREMENT FOR RESOURCE #1:
+- You MUST write and complete resource #1 FIRST before any other resource
+- DO NOT wait for web search results before starting to write resource #1
+- If you need web search for resource #1, begin writing it with available information IMMEDIATELY
+- You can use web search for resources #2, #3, #4 without delays
+- Resource #1 should appear in the output stream before resources #2, #3, #4
+
 RESOURCE PRIORITIZATION:${
         hasResourceTypeFilters
           ? `
@@ -164,7 +171,8 @@ Keep ALL content CONCISE and SCANNABLE. Use SHORT phrases, not full sentences.
 
 SPECIAL REQUIREMENTS FOR TRAINING/CLASS RESOURCES:
 - Use web search efficiently to find upcoming class start dates and session schedules
-- For GCTA courses, quickly check https://gctatraining.org/class-schedule/ for the latest course offerings and start dates (don't let web search delay generating resource #1)
+- CRITICAL: If resource #1 is a GCTA course, write it IMMEDIATELY with general information (e.g., "GCTA - Medical Assistant Training" with standard details). Do NOT wait for web search to complete. You can use web search for resources #2-#4 without timing concerns.
+- For resources #2-#4 only: You may wait for web search results from https://gctatraining.org/class-schedule/ to get specific dates
 - Include class timing in eligibility or services field (e.g., "Next cohort: March 2026" or "Rolling enrollment - classes start monthly")
 - Include class duration and schedule in services field (e.g., "10-week course, Tuesdays/Thursdays 6-9pm")
 - Be specific about enrollment windows if available (e.g., "Applications open Nov 1st")
