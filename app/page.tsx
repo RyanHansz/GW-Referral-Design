@@ -1571,23 +1571,6 @@ export default function ReferralTool() {
       <div className="flex flex-1 relative">
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Content Header */}
-          <div className="bg-white border-b border-gray-200 px-4 lg:px-6 py-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">Client Dashboard</h1>
-                <p className="text-sm text-gray-600 mt-1">Generate AI-powered referrals for your client</p>
-              </div>
-              <Button
-                variant="outline"
-                className="text-orange-600 border-orange-600 hover:bg-orange-50 text-sm px-3 py-1.5 bg-transparent"
-              >
-                <span className="hidden sm:inline">📄 PAGE OPTIONS</span>
-                <span className="sm:hidden">OPTIONS</span>
-              </Button>
-            </div>
-          </div>
-
           {/* Main Content Area */}
           <div className="flex-1 p-4 lg:p-6 space-y-6 overflow-auto">
             <div className="border-2 border-gray-300 rounded-lg p-6 bg-white min-h-full">
