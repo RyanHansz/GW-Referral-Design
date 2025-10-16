@@ -861,7 +861,7 @@ export default function ReferralTool() {
       const promptFromFilters = buildPrompt()
       const userText = isFollowUp ? followUpText : userInput.trim()
 
-      const fullPrompt = `${promptFromFilters} ${userText}`.trim()
+      const fullPrompt = promptFromFilters ? `${userText} ${promptFromFilters}`.trim() : userText.trim()
 
       if (!fullPrompt.trim()) {
         setError("Please provide more details to generate referrals.")
