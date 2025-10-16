@@ -24,6 +24,23 @@ export async function POST(request: Request) {
       contextPrompt += "\nCurrent follow-up question: "
     }
 
+    // Build strict filtering instructions if filters are provided
+    const hasResourceTypeFilters = filters?.resourceTypes && filters.resourceTypes.length > 0
+    const strictFilterInstructions = hasResourceTypeFilters
+      ? `\n\nCRITICAL FILTER REQUIREMENT - STRICT FILTERING ENABLED:
+The user has filtered for ONLY these resource types: ${filters.resourceTypes.join(", ")}
+
+YOU MUST:
+- ONLY return resources that exactly match one of these filtered types
+- DO NOT add other resource types to "fill slots"
+- If there are fewer than 4 matching resources, return fewer resources (minimum 1)
+- If you find more than 4 matching resources, return the best 4
+- NEVER include resources from categories not in the filter list
+
+Example: If filtered for "GCTA Trainings" ONLY → return ONLY GCTA training programs, nothing else
+Example: If filtered for "Job Postings" ONLY → return ONLY job postings, no trainings or other resources\n`
+      : "\n\nBased on the client description provided, generate exactly 4 relevant resources from the categories below.\n"
+
     const aiPrompt = isFollowUp
       ? `You are a social services case manager AI assistant for Goodwill Central Texas. You are helping a client who is already enrolled in Goodwill's Workforce Advancement Program and receives career coaching support. This is a follow-up question based on previous conversation.
 
@@ -48,17 +65,22 @@ IMPORTANT: Return ONLY the JSON object, no markdown formatting or code blocks.`
       : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance.
 
 IMPORTANT CONTEXT: The client is already enrolled in Goodwill Central Texas's Workforce Advancement Program and receives career coaching and case management support from a Goodwill career case manager. Do NOT recommend general career coaching, case management, or workforce advancement programs from Goodwill since they already have this support.
-
-Based on the client description provided, generate exactly 4 relevant resources from the categories below.
+${strictFilterInstructions}
 
 CRITICAL: Generate resources in STRICT NUMERICAL ORDER (1, 2, 3, 4). Start writing resource #1 first, then #2, then #3, then #4. Do NOT skip ahead to generate other resources first.
 
-RESOURCE PRIORITIZATION:
+RESOURCE PRIORITIZATION:${
+        hasResourceTypeFilters
+          ? `
+- STRICT FILTERING IS ACTIVE - Only return resources matching the filtered types
+- Within the filtered types, prioritize SPECIFIC Goodwill programs when they match`
+          : `
 - ALWAYS prioritize SPECIFIC Goodwill programs (GCTA Trainings, CAT Trainings, job postings, Digital Navigator) FIRST when they match the client's needs
-- DO NOT recommend general "Goodwill Workforce Advancement" or "Career Coaching" since the client already receives this
 - List Goodwill/GCTA resources as resource #1 and #2 whenever applicable
 - Only use Community Resources and Government Benefits to fill remaining slots after considering all relevant specific Goodwill/GCTA options
-- Example: If a client needs job training, prioritize GCTA trainings over community college programs
+- Example: If a client needs job training, prioritize GCTA trainings over community college programs`
+      }
+- DO NOT recommend general "Goodwill Workforce Advancement" or "Career Coaching" since the client already receives this
 - Generate each resource completely (with all details) before moving to the next one
 
 CRITICAL SPECIFICITY REQUIREMENTS:
