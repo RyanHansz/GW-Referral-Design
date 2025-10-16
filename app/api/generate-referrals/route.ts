@@ -314,6 +314,7 @@ Client description: ${prompt}`
         let buffer = ""
         const sentResources = new Set<number>()
         let metadata: any = null
+        let metadataSent = false
 
         // Stream and parse incrementally
         for await (const chunk of result.textStream) {
@@ -325,6 +326,31 @@ Client description: ${prompt}`
             cleanBuffer = cleanBuffer.replace(/^```json\s*/, "")
           } else if (cleanBuffer.startsWith("```")) {
             cleanBuffer = cleanBuffer.replace(/^```\s*/, "")
+          }
+
+          // Try to extract and send metadata early (question and summary)
+          if (!metadataSent) {
+            try {
+              const questionMatch = cleanBuffer.match(/"question"\s*:\s*"([^"]+)"/)
+              const summaryMatch = cleanBuffer.match(/"summary"\s*:\s*"([^"]+)"/)
+
+              if (questionMatch && summaryMatch) {
+                await writer.write(
+                  encoder.encode(
+                    JSON.stringify({
+                      type: "metadata",
+                      data: {
+                        question: questionMatch[1],
+                        summary: summaryMatch[1],
+                      },
+                    }) + "\n",
+                  ),
+                )
+                metadataSent = true
+              }
+            } catch (e) {
+              // Metadata not ready yet, continue
+            }
           }
 
           // Try to parse complete resources from buffer
