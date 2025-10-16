@@ -423,7 +423,7 @@ Client description: ${prompt}`
           maxTokens: 3000,
           tools: {
             web_search: openai.tools.webSearch({
-              searchContextSize: "medium",
+              searchContextSize: "low",
             }),
           },
           providerOptions: {
