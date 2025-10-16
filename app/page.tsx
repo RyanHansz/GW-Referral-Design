@@ -1509,6 +1509,23 @@ export default function ReferralTool() {
       <div className="flex flex-1 relative">
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-w-0">
+          {/* Pilot Banner */}
+          <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
+            <div className="max-w-4xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🚧</span>
+                  <div>
+                    <h3 className="font-semibold text-amber-900 text-sm">Pilot Version - Work in Progress</h3>
+                    <p className="text-amber-800 text-xs">
+                      This tool is being tested with Goodwill staff. Please share feedback if you spot issues or have suggestions!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Main Content Area */}
           <div className="flex-1 p-4 lg:p-6 space-y-6 overflow-auto">
             <div className="border-2 border-gray-300 rounded-lg p-6 bg-white min-h-full">
@@ -1524,7 +1541,12 @@ export default function ReferralTool() {
                         </div>
                         <div>
                           <h2 className="text-2xl font-bold text-gray-900">Find Resources </h2>
-                          <p className="text-blue-600 font-medium">GenAI Referral Tool</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-blue-600 font-medium">GenAI Referral Tool</p>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">
+                              PILOT
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
