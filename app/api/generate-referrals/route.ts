@@ -132,11 +132,16 @@ When the client needs fall into these categories, prioritize these types of reso
 - DO NOT recommend: General career coaching, case management, or workforce advancement (client already has this)
 
 **Local Community Resources:**
-- Food banks: Central Texas Food Bank, local pantries, mobile food markets
+- Food banks: Central Texas Food Bank (with specific location pages), local pantries, mobile food markets
+  * IMPORTANT: Use web search with zip codes to find location-specific pages (e.g., "Central Texas Food Bank Pflugerville 78660")
+  * Link to specific location pages like centraltexasfoodbank.org/location/[city-name], NOT just the homepage
 - Shelters: ARCH, Salvation Army, local homeless services
+  * Search for shelters near the client's zip code or neighborhood
 - Community organizations: United Way, local churches, neighborhood centers
+  * Prioritize organizations in or near the client's area
 - Transportation assistance: Capital Metro reduced fare, rideshare programs
 - Utility assistance: local energy assistance programs
+  * Find programs serving the client's specific utility district or zip code
 
 **Government Benefits:**
 - SNAP (food stamps) through Texas HHS
@@ -266,6 +271,17 @@ CRITICAL: WEB SEARCH REQUIREMENT FOR ALL URLs:
 - If you cannot find a specific URL via web search, use the organization's main contact page and note "Contact for program details"
 - Example: For "CompTIA A+ Course" → web search "GCTA CompTIA A+ course Austin" → use the specific course page URL from search results
 - Example: For "Food Bank Mobile Pantry" → web search "Central Texas Food Bank mobile pantry locations" → use the specific locations/schedule page URL
+
+CRITICAL: GEOGRAPHIC SPECIFICITY FOR WEB SEARCHES:
+- ⚠️ ALWAYS include the zip code or city name in your web search queries
+- ⚠️ Prioritize resources that are geographically close to the client's location
+- ⚠️ For community resources (food banks, shelters, pantries), find location-specific pages when available
+- Example: Client in 78660 (Pflugerville) needs food → web search "Central Texas Food Bank Pflugerville 78660" → find https://www.centraltexasfoodbank.org/location/pflugerville-tx-mobile-food-pantry
+- Example: Client in 78721 (East Austin) needs shelter → web search "homeless shelter East Austin 78721" → find specific location pages
+- Example: Client in 78664 (Round Rock) needs childcare → web search "childcare assistance Round Rock 78664"
+- ✓ Include city/neighborhood names in searches: "East Austin", "Pflugerville", "Round Rock", "South Austin"
+- ✓ Look for location-specific program pages, not just organization homepages
+- ✓ If multiple locations exist, return the one closest to the client's zip code
 
 TRUSTED SOURCES BY RESOURCE TYPE:
 **Training Programs:**
