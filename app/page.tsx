@@ -2358,24 +2358,6 @@ export default function ReferralTool() {
                       </div>
                     )}
 
-                    {/* Show streaming follow-up content */}
-                    {streamingFollowUpContent && (
-                      <div className="space-y-4 pb-6 border-b border-gray-200">
-                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
-                          <span className="text-blue-900 font-medium">Generating response...</span>
-                        </div>
-
-                        <div className="prose max-w-none text-slate-700">
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: parseMarkdownToHTML(streamingFollowUpContent),
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
                     {conversationHistory.map((exchange, index) => (
                       <div key={index} className="space-y-4 pb-6 border-b border-gray-200 last:border-b-0">
                         {/* Question Header */}
@@ -2715,6 +2697,24 @@ export default function ReferralTool() {
                         )}
                       </div>
                     ))}
+
+                    {/* Show streaming follow-up content */}
+                    {streamingFollowUpContent && (
+                      <div className="space-y-4 pb-6 border-b border-gray-200">
+                        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                          <span className="text-blue-900 font-medium">Generating response...</span>
+                        </div>
+
+                        <div className="prose max-w-none text-slate-700">
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: parseMarkdownToHTML(streamingFollowUpContent),
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     {/* Follow-up input */}
                     {showActionPlanSection && conversationHistory.length > 0 && (
