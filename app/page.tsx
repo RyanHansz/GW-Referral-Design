@@ -450,6 +450,18 @@ export default function ReferralTool() {
   const [showActionPlanSection, setShowActionPlanSection] = useState(false)
   const [streamingFollowUpContent, setStreamingFollowUpContent] = useState("")
 
+  // Chat mode state
+  const [chatMessages, setChatMessages] = useState<
+    Array<{
+      role: "user" | "assistant"
+      content: string
+      timestamp: string
+    }>
+  >([])
+  const [chatInput, setChatInput] = useState("")
+  const [isChatStreaming, setIsChatStreaming] = useState(false)
+  const [streamingChatContent, setStreamingChatContent] = useState("")
+
   const generatePrintHTML = () => {
     return `
       <!DOCTYPE html>
@@ -1087,6 +1099,106 @@ export default function ReferralTool() {
     }
   }
 
+  const handleSendChatMessage = async () => {
+    if (!chatInput.trim() || isChatStreaming) return
+
+    const userMessage = chatInput.trim()
+    const timestamp = new Date().toISOString()
+
+    // Add user message to chat
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: userMessage,
+        timestamp,
+      },
+    ])
+    setChatInput("")
+    setIsChatStreaming(true)
+    setStreamingChatContent("")
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          history: chatMessages.slice(-10), // Send last 10 messages for context
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to get chat response")
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+
+          // Try to extract content as it streams
+          try {
+            const contentMatch = buffer.match(/"content"\s*:\s*"((?:[^"\\]|\\.)*)"/)
+            if (contentMatch) {
+              const extractedContent = contentMatch[1]
+                .replace(/\\n/g, "\n")
+                .replace(/\\"/g, '"')
+                .replace(/\\\\/g, "\\")
+              setStreamingChatContent(extractedContent)
+            }
+          } catch (e) {
+            // Continue streaming
+          }
+        }
+      }
+
+      // Parse final complete response
+      let cleanedText = buffer.trim()
+      if (cleanedText.startsWith("```json")) {
+        cleanedText = cleanedText.replace(/^```json\s*/, "").replace(/\s*```$/, "")
+      } else if (cleanedText.startsWith("```")) {
+        cleanedText = cleanedText.replace(/^```\s*/, "").replace(/\s*```$/, "")
+      }
+
+      try {
+        const finalData = JSON.parse(cleanedText)
+        const assistantMessage = {
+          role: "assistant" as const,
+          content: finalData.content || "",
+          timestamp: new Date().toISOString(),
+        }
+        setChatMessages((prev) => [...prev, assistantMessage])
+      } catch (parseError) {
+        console.error("Failed to parse chat response:", parseError)
+        // Use the streaming content as fallback
+        if (streamingChatContent) {
+          const assistantMessage = {
+            role: "assistant" as const,
+            content: streamingChatContent,
+            timestamp: new Date().toISOString(),
+          }
+          setChatMessages((prev) => [...prev, assistantMessage])
+        }
+      }
+    } catch (error) {
+      console.error("Error sending chat message:", error)
+      alert("Failed to get response. Please try again.")
+    } finally {
+      setIsChatStreaming(false)
+      setStreamingChatContent("")
+    }
+  }
+
   const handleFileUploadSingle = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -1637,13 +1749,20 @@ export default function ReferralTool() {
 
                     {/* Tabs */}
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-                      <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+                      <TabsList className="grid w-full grid-cols-3 bg-gray-100">
                         <TabsTrigger
                           value="text-summary"
                           className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
                         >
                           <Sparkles className="w-4 h-4" />
                           Find Referrals
+                        </TabsTrigger>
+                        <TabsTrigger
+                          value="chat"
+                          className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          Chat
                         </TabsTrigger>
                         <TabsTrigger
                           value="upload-forms"
@@ -1863,6 +1982,118 @@ export default function ReferralTool() {
                             View Sample Referrals
                           </button>
                         </div>
+                      </div>
+                    )}
+
+                    {activeTab === "chat" && (
+                      <div className="space-y-6">
+                        <div className="text-center py-8">
+                          <div className="w-16 h-16 mx-auto mb-4 bg-indigo-100 rounded-full flex items-center justify-center">
+                            <MessageCircle className="w-8 h-8 text-indigo-600" />
+                          </div>
+                          <h2 className="text-3xl font-bold text-gray-900 mb-4">Chat About Goodwill Resources</h2>
+                          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                            Ask questions about Goodwill programs, services, and community resources. Get helpful information
+                            with citations from our knowledge base.
+                          </p>
+                        </div>
+
+                        {/* Chat Messages */}
+                        <div className="space-y-4">
+                          {chatMessages.map((message, index) => (
+                            <div
+                              key={index}
+                              className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                            >
+                              <div
+                                className={`max-w-3xl rounded-lg p-4 ${
+                                  message.role === "user"
+                                    ? "bg-blue-600 text-white"
+                                    : "bg-gray-100 text-gray-900 border border-gray-200"
+                                }`}
+                              >
+                                {message.role === "assistant" ? (
+                                  <div
+                                    className="prose prose-sm max-w-none"
+                                    dangerouslySetInnerHTML={{
+                                      __html: parseMarkdownToHTML(message.content),
+                                    }}
+                                  />
+                                ) : (
+                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                )}
+                                <p
+                                  className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"}`}
+                                >
+                                  {new Date(message.timestamp).toLocaleTimeString()}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+
+                          {/* Streaming Message */}
+                          {isChatStreaming && streamingChatContent && (
+                            <div className="flex justify-start">
+                              <div className="max-w-3xl rounded-lg p-4 bg-gray-100 text-gray-900 border border-gray-200">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                  <span className="text-sm text-indigo-600 font-medium">Responding...</span>
+                                </div>
+                                <div
+                                  className="prose prose-sm max-w-none"
+                                  dangerouslySetInnerHTML={{
+                                    __html: parseMarkdownToHTML(streamingChatContent),
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Chat Input */}
+                        <Card className="bg-gray-50 border-gray-200">
+                          <CardContent className="p-4">
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="chat-input" className="text-sm font-medium text-gray-700 mb-2 block">
+                                  Your Question
+                                </Label>
+                                <Textarea
+                                  id="chat-input"
+                                  placeholder="Ask about Goodwill programs, training opportunities, community resources, or any other questions..."
+                                  value={chatInput}
+                                  onChange={(e) => setChatInput(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                      e.preventDefault()
+                                      handleSendChatMessage()
+                                    }
+                                  }}
+                                  className="min-h-[100px] resize-none"
+                                  disabled={isChatStreaming}
+                                />
+                                <p className="text-xs text-gray-500 mt-2">Press Enter to send, Shift+Enter for new line</p>
+                              </div>
+                              <Button
+                                onClick={handleSendChatMessage}
+                                disabled={!chatInput.trim() || isChatStreaming}
+                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                              >
+                                {isChatStreaming ? (
+                                  <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Responding...
+                                  </>
+                                ) : (
+                                  <>
+                                    <MessageCircle className="w-4 h-4 mr-2" />
+                                    Send Message
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
                       </div>
                     )}
 
