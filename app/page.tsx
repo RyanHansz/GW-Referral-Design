@@ -389,15 +389,10 @@ export default function ReferralTool() {
   const [locationSuggestions, setLocationSuggestions] = useState<Array<{ display_name: string; formatted: string }>>([])
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
   const [locationLoading, setLocationLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("text-summary") // Set text-summary as default active tab instead of client-referrals
+  const [activeTab, setActiveTab] = useState("text-summary")
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isProcessingPDF, setIsProcessingPDF] = useState(false)
   const [pdfAnalysisResult, setPdfAnalysisResult] = useState<string>("")
-  const [selectedAssessments, setSelectedAssessments] = useState<string[]>([])
-  const [dateRange, setDateRange] = useState({ start: "", end: "" })
-  const [includeAssessments, setIncludeAssessments] = useState(true)
-  const [includeCaseNotes, setIncludeCaseNotes] = useState(false)
-  const [isGeneratingClientReferrals, setIsGeneratingClientReferrals] = useState(false)
   const [conversationHistory, setConversationHistory] = useState<
     Array<{
       prompt: string
@@ -408,9 +403,6 @@ export default function ReferralTool() {
 
   const [selectedResourceTypes, setSelectedResourceTypes] = useState<string[]>([])
   const [results, setResults] = useState<any[]>([])
-  const [includeDemographics, setIncludeDemographics] = useState(false)
-  const [additionalNotes, setAdditionalNotes] = useState("")
-
   const [filtersExpanded, setFiltersExpanded] = useState(false)
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -1109,7 +1101,7 @@ export default function ReferralTool() {
     setSelectedAccessibilityNeeds([])
     setError("")
     setSuggestedFollowUps([])
-    setActiveTab("client-referrals") // Reset to default tab
+    setActiveTab("text-summary") // Reset to default tab
     // Clear action plan related states
     setSelectedResources([])
     setActionPlan(null)
@@ -1539,21 +1531,13 @@ export default function ReferralTool() {
 
                     {/* Tabs */}
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-                      <TabsList className="grid w-full grid-cols-3 bg-gray-100">
-                        <TabsTrigger
-                          value="client-referrals"
-                          className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
-                        >
-                          <Users className="w-4 h-4" />
-                          Suggest based on Client Info{" "}
-                          {/* Renamed from "Client Referrals" to shorter "Client Record" */}
-                        </TabsTrigger>
+                      <TabsList className="grid w-full grid-cols-2 bg-gray-100">
                         <TabsTrigger
                           value="text-summary"
                           className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-600"
                         >
                           <Sparkles className="w-4 h-4" />
-                          Find Referrals {/* Renamed from "Text Summary" to "Find Referrals" */}
+                          Find Referrals
                         </TabsTrigger>
                         <TabsTrigger
                           value="upload-forms"
@@ -1993,252 +1977,6 @@ export default function ReferralTool() {
                             )}
                           </CardContent>
                         </Card>
-                      </div>
-                    )}
-
-                    {activeTab === "client-referrals" && (
-                      <div className="space-y-6">
-                        <div className="text-center py-8">
-                          <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                            <Users className="w-8 h-8 text-blue-600" />
-                          </div>
-                          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                            Personalized Referrals from Client Records
-                          </h2>
-                          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                            Generate targeted referrals using your client's existing assessments, case notes, and
-                            demographic information for the most relevant recommendations.
-                          </p>
-                        </div>
-
-                        {/* Client Description */}
-
-                        {/* Client Info Display */}
-                        <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
-                          <div className="flex items-center gap-3 mb-3">
-                            <Avatar className="w-10 h-10">
-                              <AvatarFallback className="bg-blue-100 text-blue-600 font-semibold">TC</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <h4 className="font-semibold text-gray-900">Test Client</h4>
-                              <p className="text-sm text-gray-600">Client ID: TC-001</p>
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-4 mt-4 pt-3 border-t border-gray-100">
-                            <div className="text-sm">
-                              <span className="text-gray-600">Age:</span>
-                              <span className="ml-2 font-medium">32 years old</span>
-                            </div>
-                            <div className="text-sm">
-                              <span className="text-gray-600">Location:</span>
-                              <span className="ml-2 font-medium">Austin, TX 78701</span>
-                            </div>
-                            <div className="text-sm">
-                              <span className="text-gray-600">Language:</span>
-                              <span className="ml-2 font-medium">English, Spanish</span>
-                            </div>
-                            <div className="text-sm">
-                              <span className="text-gray-600">Citizenship:</span>
-                              <span className="ml-2 font-medium">US Citizen</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Information Source Selection */}
-                        <div className="space-y-4">
-                          <h4 className="font-semibold text-gray-900">Select Information Sources</h4>
-
-                          <div className="space-y-3">
-                            <label className="flex items-center space-x-3">
-                              <input
-                                type="checkbox"
-                                checked={includeDemographics}
-                                onChange={(e) => setIncludeDemographics(e.target.checked)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                              />
-                              <span className="text-sm font-medium text-gray-900">Include Demographic Information</span>
-                            </label>
-                            {includeDemographics && (
-                              <div className="ml-7">
-                                <p className="text-xs text-gray-600">
-                                  Age, location, language preferences, and citizenship status will be included in
-                                  referral generation.
-                                </p>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Assessment Selection */}
-                          <div className="space-y-3">
-                            <label className="flex items-center space-x-3">
-                              <input
-                                type="checkbox"
-                                checked={includeAssessments}
-                                onChange={(e) => setIncludeAssessments(e.target.checked)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                              />
-                              <span className="text-sm font-medium text-gray-900">Include Assessments</span>
-                            </label>
-
-                            {includeAssessments && (
-                              <div className="ml-7 space-y-2">
-                                <p className="text-sm text-gray-600 mb-3">Select which assessments to include:</p>
-                                <div className="grid grid-cols-1 gap-2">
-                                  {[
-                                    { id: "intake", name: "Intake Assessment", icon: "🤝" },
-                                    { id: "holistic", name: "Holistic Assessment", icon: "📋" },
-                                    { id: "ccm", name: "CCM Assessment", icon: "👥" },
-                                    { id: "job-readiness", name: "Job Readiness Assessment", icon: "💼" },
-                                    { id: "business-solution", name: "Business Solution Assessment", icon: "🧳" },
-                                  ].map((assessment) => (
-                                    <label key={assessment.id} className="flex items-center space-x-3">
-                                      <input
-                                        type="checkbox"
-                                        checked={selectedAssessments.includes(assessment.id)}
-                                        onChange={(e) => {
-                                          if (e.target.checked) {
-                                            setSelectedAssessments([...selectedAssessments, assessment.id])
-                                          } else {
-                                            setSelectedAssessments(
-                                              selectedAssessments.filter((id) => id !== assessment.id),
-                                            )
-                                          }
-                                        }}
-                                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                      />
-                                      <span className="text-sm text-gray-700 flex items-center gap-2">
-                                        <span>{assessment.icon}</span>
-                                        {assessment.name}
-                                      </span>
-                                    </label>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Case Notes Selection */}
-                          <div className="space-y-3">
-                            <label className="flex items-center space-x-3">
-                              <input
-                                type="checkbox"
-                                checked={includeCaseNotes}
-                                onChange={(e) => setIncludeCaseNotes(e.target.checked)}
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                              />
-                              <span className="text-sm font-medium text-gray-900">Include Case Notes</span>
-                            </label>
-
-                            {includeCaseNotes && (
-                              <div className="ml-7 space-y-3">
-                                <p className="text-sm text-gray-600 mb-3">Select date range for case notes:</p>
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">Start Date</label>
-                                    <Input
-                                      type="date"
-                                      value={dateRange.start}
-                                      onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                                      className="text-sm"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="block text-xs font-medium text-gray-700 mb-1">End Date</label>
-                                    <Input
-                                      type="date"
-                                      value={dateRange.end}
-                                      onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                                      className="text-sm"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900">Additional Notes</h4>
-                          <div className="space-y-2">
-                            <label className="block text-sm text-gray-600">
-                              Add any additional context or specific needs for referral generation:
-                            </label>
-                            <textarea
-                              value={additionalNotes}
-                              onChange={(e) => setAdditionalNotes(e.target.value)}
-                              placeholder="e.g., Client has transportation challenges, prefers morning appointments, has young children at home..."
-                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white"
-                              rows={4}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Generate Button */}
-                        <button
-                          onClick={async () => {
-                            if (!includeAssessments && !includeCaseNotes && !includeDemographics) {
-                              alert("Please select at least one information source.")
-                              return
-                            }
-
-                            setIsGeneratingClientReferrals(true)
-
-                            try {
-                              const sources = []
-                              if (includeDemographics) {
-                                sources.push(
-                                  "Client demographics: 32 years old, Austin TX 78701, English/Spanish speaking, US Citizen",
-                                )
-                              }
-                              if (includeAssessments && selectedAssessments.length > 0) {
-                                sources.push(`Selected assessments: ${selectedAssessments.join(", ")}`)
-                              }
-                              if (includeCaseNotes && dateRange.start && dateRange.end) {
-                                sources.push(`Case notes from ${dateRange.start} to ${dateRange.end}`)
-                              }
-
-                              let prompt = `Generate personalized referrals for Test Client based on the following information sources: ${sources.join("; ")}. Focus on relevant community resources and services that would benefit this client.`
-
-                              if (additionalNotes.trim()) {
-                                prompt += ` Additional context: ${additionalNotes.trim()}`
-                              }
-
-                              const response = await fetch("/api/generate-referrals", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ prompt, zipCode: "78701", outputLanguage: outputLanguage }),
-                              })
-
-                              if (!response.ok) throw new Error("Failed to generate referrals")
-
-                              const data = await response.json()
-                              setResults(data.referrals || [])
-                              setShowResults(true)
-                            } catch (error) {
-                              console.error("Error generating client referrals:", error)
-                              alert("Failed to generate referrals. Please try again.")
-                            } finally {
-                              setIsGeneratingClientReferrals(false)
-                            }
-                          }}
-                          disabled={
-                            isGeneratingClientReferrals ||
-                            (!includeAssessments && !includeCaseNotes && !includeDemographics)
-                          }
-                          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                        >
-                          {isGeneratingClientReferrals ? (
-                            <>
-                              <RefreshCw className="w-4 h-4 animate-spin" />
-                              Generating Referrals...
-                            </>
-                          ) : (
-                            <>
-                              <Users className="w-4 h-4" />
-                              Generate Client Referrals
-                            </>
-                          )}
-                        </button>
                       </div>
                     )}
 
