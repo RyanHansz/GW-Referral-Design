@@ -78,12 +78,10 @@ ${strictFilterInstructions}
 
 CRITICAL: Generate resources in STRICT NUMERICAL ORDER (1, 2, 3, 4). Start writing resource #1 first, then #2, then #3, then #4. Do NOT skip ahead to generate other resources first.
 
-CRITICAL STREAMING REQUIREMENT FOR RESOURCE #1:
-- You MUST write and complete resource #1 FIRST before any other resource
-- DO NOT wait for web search results before starting to write resource #1
-- If you need web search for resource #1, begin writing it with available information IMMEDIATELY
-- You can use web search for resources #2, #3, #4 without delays
-- Resource #1 should appear in the output stream before resources #2, #3, #4
+CRITICAL STREAMING REQUIREMENT:
+- Generate resources in strict numerical order: 1, 2, 3, 4
+- Resource #1 should be written and completed before moving to resource #2
+- DO NOT skip ahead to other resources
 
 RESOURCE PRIORITIZATION:${
         hasResourceTypeFilters
@@ -179,13 +177,11 @@ Keep ALL content CONCISE and SCANNABLE. Use SHORT phrases, not full sentences.
 8. **Source**: Specific program page URL only
 
 SPECIAL REQUIREMENTS FOR TRAINING/CLASS RESOURCES:
-- Use web search efficiently to find upcoming class start dates and session schedules
-- CRITICAL: If resource #1 is a GCTA course, write it IMMEDIATELY with general information (e.g., "GCTA - Medical Assistant Training" with standard details). Do NOT wait for web search to complete. You can use web search for resources #2-#4 without timing concerns.
-- For resources #2-#4 only: You may wait for web search results from https://gctatraining.org/class-schedule/ to get specific dates
+- ALWAYS use web search to find upcoming class start dates and session schedules from https://gctatraining.org/class-schedule/
 - Include class timing in eligibility or services field (e.g., "Next cohort: March 2026" or "Rolling enrollment - classes start monthly")
 - Include class duration and schedule in services field (e.g., "10-week course, Tuesdays/Thursdays 6-9pm")
 - Be specific about enrollment windows if available (e.g., "Applications open Nov 1st")
-- If exact dates aren't immediately available, use "Contact for next session dates" and continue generating the resource
+- If exact dates aren't available via web search, use "Contact for next session dates" and continue generating the resource
 
 REQUIRED STRUCTURE FOR EACH RESOURCE:
 {
@@ -230,6 +226,16 @@ CRITICAL RULES FOR SOURCES AND SPECIFICITY:
 - Bad example: title "GCTA Training" with generic description
 - Good example: title "GCTA - Patient Care Technician (Oct 20, 2025)" with specific start date and detailed course info
 
+CRITICAL: WEB SEARCH REQUIREMENT FOR ALL URLs:
+- ❌ DO NOT guess, hallucinate, or construct URLs from memory or foundation knowledge
+- ❌ DO NOT use URLs that just go to homepages when a specific program page exists
+- ✓ ONLY use URLs that you have verified through web search results
+- ✓ ONLY link to specific program/course/service pages, not general directories or homepages
+- ✓ Use web search to find the most specific, direct URL for each resource
+- If you cannot find a specific URL via web search, use the organization's main contact page and note "Contact for program details"
+- Example: For "CompTIA A+ Course" → web search "GCTA CompTIA A+ course Austin" → use the specific course page URL from search results
+- Example: For "Food Bank Mobile Pantry" → web search "Central Texas Food Bank mobile pantry locations" → use the specific locations/schedule page URL
+
 For suggested follow-ups, create questions that ask for more details about HOW TO USE or ACCESS the specific resources you provided. Examples:
 - "Write a guide to applying for reduced fare" (for transportation resources)
 - "Explain the application process for food assistance" (for food resources)
@@ -271,8 +277,9 @@ IMPORTANT FINAL REMINDERS:
   * eligibility: 3-5 short items with commas
   * services: 3-4 key items with commas
   * support: 2-3 items maximum
-- Use web search to find current, specific programs that match the client's needs
-- Verify URLs go to specific program pages, not homepages or class schedule listings
+- ⚠️ CRITICAL: ALL URLs must come from web search results - DO NOT guess or hallucinate links
+- ⚠️ CRITICAL: Verify URLs go to specific program pages via web search, not homepages or class schedule listings
+- Use web search for EVERY resource to find current, specific programs and their exact URLs
 - Generate all content in ${outputLanguage}. All resource titles, descriptions, contact information, and explanations should be in ${outputLanguage}.
 - ALWAYS include the "category" field with one of the exact category names listed above
 - ALWAYS include eligibility, services, and support fields WITHOUT the label prefixes or icons

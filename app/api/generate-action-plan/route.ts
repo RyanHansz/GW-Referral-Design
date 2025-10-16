@@ -53,6 +53,14 @@ CRITICAL SPECIFICITY REQUIREMENTS:
 - Reference actual program names, locations, or offices
 - Provide ACTIONABLE steps with real-world details, not generic advice
 
+CRITICAL: WEB SEARCH REQUIREMENT FOR ALL URLs AND CONTACT INFO:
+- ❌ DO NOT guess, hallucinate, or construct URLs from memory or foundation knowledge
+- ❌ DO NOT use URLs that just go to homepages when a specific application page exists
+- ✓ ONLY use URLs, phone numbers, and contact info that you have verified through web search results
+- ✓ ONLY link to specific application forms, program pages, or contact pages - not general homepages
+- ✓ Use web search to find the most specific, direct URL for applications and program information
+- If you cannot find specific contact info via web search, state "Contact organization for details"
+
 CRITICAL FORMATTING RULES:
 - Keep ALL text BRIEF and SCANNABLE
 - Use SHORT phrases, not long sentences
