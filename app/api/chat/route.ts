@@ -53,7 +53,7 @@ Respond directly with the markdown content - do not wrap it in JSON or any other
       maxTokens: 2000,
       tools: {
         web_search: openai.tools.webSearch({
-          searchContextSize: "high",
+          searchContextSize: "low",
         }),
       },
       providerOptions: {
