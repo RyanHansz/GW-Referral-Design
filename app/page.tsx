@@ -904,7 +904,7 @@ export default function ReferralTool() {
       if (!isFollowUp) {
         setIsStreaming(true)
         setStreamingResources([])
-        setStreamingQuestion("")
+        setStreamingQuestion(userText) // Set to original user input immediately
         setStreamingSummary("")
         setStreamingStatus("Starting...")
         setShowResults(true)
@@ -948,7 +948,7 @@ export default function ReferralTool() {
 
                   case "metadata":
                     metadata = message.data
-                    setStreamingQuestion(message.data.question || "")
+                    // Don't overwrite question - keep original user input
                     setStreamingSummary(message.data.summary || "")
                     break
 
@@ -976,8 +976,9 @@ export default function ReferralTool() {
           // Create final conversation entry
           const newEntry = {
             prompt: fullPrompt,
+            userPrompt: userText, // Store original user input
             response: {
-              question: metadata.question || fullPrompt,
+              question: userText, // Use original user input instead of AI restatement
               summary: metadata.summary || "",
               resources: resources,
               suggestedFollowUps: followups,
@@ -1030,10 +1031,12 @@ export default function ReferralTool() {
               cleanContent = cleanContent.replace(/^```\s*/, "").replace(/\s*```$/, "")
             }
             parsedData = JSON.parse(cleanContent)
+            // Override question with original user input
+            parsedData.question = userText
           } catch (parseError) {
             console.error("Failed to parse follow-up response:", parseError)
             parsedData = {
-              question: fullPrompt,
+              question: userText, // Use original user input
               summary: "Response received",
               content: fullContent,
             }
@@ -1041,6 +1044,7 @@ export default function ReferralTool() {
 
           const newEntry = {
             prompt: fullPrompt,
+            userPrompt: userText, // Store original user input
             response: parsedData,
             timestamp: new Date().toISOString(),
           }
