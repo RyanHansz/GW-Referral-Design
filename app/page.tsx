@@ -2234,7 +2234,7 @@ export default function ReferralTool() {
                         )}
 
                         {/* Chat Messages */}
-                        <div className="space-y-4">
+                        <div className="space-y-4" role="log" aria-live="polite" aria-atomic="false">
                           {chatMessages.map((message, index) => (
                             <div
                               key={index}
@@ -2268,7 +2268,11 @@ export default function ReferralTool() {
 
                           {/* Streaming Message */}
                           {isChatStreaming && streamingChatContent && (
-                            <div className="flex justify-start" role="status" aria-live="polite" aria-atomic="false">
+                            <div className="flex justify-start" aria-live="off">
+                              {/* Screen reader only status announcement */}
+                              <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                                Generating response, please wait...
+                              </span>
                               <div className="max-w-3xl rounded-lg p-4 bg-gray-100 text-gray-900 border border-gray-200">
                                 <div className="flex items-center gap-2 mb-2">
                                   <Loader2 className="w-4 h-4 animate-spin text-indigo-600" aria-hidden="true" />
@@ -2958,17 +2962,31 @@ export default function ReferralTool() {
 
                         {/* Action Plan - streaming or complete */}
                         {(isGeneratingActionPlan || actionPlanContent) && (
-                          <div className="mt-6" role="status" aria-live="polite" aria-atomic="false">
+                          <div className="mt-6">
                             <div className="space-y-4 pb-6 border-b border-gray-200">
                               {isGeneratingActionPlan && (
                                 <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                  {/* Screen reader only status announcement */}
+                                  <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                                    Generating action plan, please wait...
+                                  </span>
                                   <Loader2 className="w-5 h-5 animate-spin text-blue-600" aria-hidden="true" />
                                   <span className="text-blue-900 font-medium">Generating action plan...</span>
                                 </div>
                               )}
 
-                              {actionPlanContent && (
-                                <div className="prose max-w-none text-slate-700">
+                              {actionPlanContent && !isGeneratingActionPlan && (
+                                <div className="prose max-w-none text-slate-700" role="region" aria-live="polite" aria-atomic="true">
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: parseMarkdownToHTML(actionPlanContent),
+                                    }}
+                                  />
+                                </div>
+                              )}
+
+                              {actionPlanContent && isGeneratingActionPlan && (
+                                <div className="prose max-w-none text-slate-700" aria-live="off">
                                   <div
                                     dangerouslySetInnerHTML={{
                                       __html: parseMarkdownToHTML(actionPlanContent),
@@ -2984,9 +3002,13 @@ export default function ReferralTool() {
 
                     {/* Show streaming follow-up content */}
                     {streamingFollowUpContent && (
-                      <div className="space-y-4 pb-6 border-b border-gray-200">
+                      <div className="space-y-4 pb-6 border-b border-gray-200" aria-live="off">
                         <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                          {/* Screen reader only status announcement */}
+                          <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                            Generating follow-up response, please wait...
+                          </span>
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" aria-hidden="true" />
                           <span className="text-blue-900 font-medium">Generating response...</span>
                         </div>
 
