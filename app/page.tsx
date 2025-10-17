@@ -2085,7 +2085,7 @@ export default function ReferralTool() {
 
                                 <div className="mt-2 text-xs text-gray-600">
                                   <p>
-                                    💡 <strong>Examples:</strong> "Round Rock", "78701", "Austin, TX", "downtown Dallas"
+                                    💡 <strong>Examples:</strong> "Round Rock", "78701", "Austin, TX", "San Marcos"
                                   </p>
                                 </div>
                               </div>
