@@ -103,6 +103,7 @@ const resourceCategories = [
     color: "border-blue-300 bg-blue-50",
     borderColor: "border-blue-300",
     description: "Job training, career services, and Goodwill-specific programs",
+    subCategories: [],
   },
   {
     id: "community",
@@ -111,6 +112,17 @@ const resourceCategories = [
     color: "border-green-300 bg-green-50",
     borderColor: "border-green-300",
     description: "Food banks, shelters, community organizations, and local support",
+    subCategories: [
+      { id: "food", label: "Food & Nutrition", description: "Food banks, meal programs, SNAP enrollment" },
+      { id: "housing", label: "Housing & Shelter", description: "Emergency shelter, rental assistance, utilities" },
+      { id: "healthcare", label: "Healthcare Services", description: "Clinics, mental health, dental care" },
+      { id: "transportation", label: "Transportation", description: "Bus passes, rides, gas assistance" },
+      { id: "childcare", label: "Child Care & Education", description: "Daycare, after-school programs" },
+      { id: "legal", label: "Legal Services", description: "Legal aid, immigration assistance" },
+      { id: "financial", label: "Financial Assistance", description: "Cash assistance, bill payment help" },
+      { id: "clothing", label: "Clothing & Household", description: "Clothing closets, furniture, household items" },
+      { id: "employment", label: "Employment Support", description: "Job search help, resume assistance" },
+    ],
   },
   {
     id: "government",
@@ -119,6 +131,13 @@ const resourceCategories = [
     color: "border-purple-300 bg-purple-50",
     borderColor: "border-purple-300",
     description: "SNAP, Medicaid, housing assistance, and federal/state programs",
+    subCategories: [
+      { id: "food-benefits", label: "Food Assistance", description: "SNAP, WIC, food stamps" },
+      { id: "healthcare-benefits", label: "Healthcare Coverage", description: "Medicaid, CHIP, Medicare" },
+      { id: "housing-benefits", label: "Housing Assistance", description: "Section 8, rental assistance, public housing" },
+      { id: "cash-benefits", label: "Cash Assistance", description: "TANF, SSI, disability benefits" },
+      { id: "family-benefits", label: "Child & Family Services", description: "Child care subsidies, family support" },
+    ],
   },
   {
     id: "jobs",
@@ -127,6 +146,7 @@ const resourceCategories = [
     color: "border-orange-300 bg-orange-50",
     borderColor: "border-orange-300",
     description: "Current job openings, employment opportunities, and hiring events",
+    subCategories: [],
   },
   {
     id: "gcta",
@@ -135,6 +155,7 @@ const resourceCategories = [
     color: "border-blue-300 bg-blue-50",
     borderColor: "border-blue-300",
     description: "Goodwill Career Training Academy programs and certifications",
+    subCategories: [],
   },
   {
     id: "cat",
@@ -143,6 +164,7 @@ const resourceCategories = [
     color: "border-teal-300 bg-teal-50",
     borderColor: "border-teal-300",
     description: "Career Advancement Training and specialized skill development",
+    subCategories: [],
   },
 ]
 
@@ -406,6 +428,8 @@ export default function ReferralTool() {
   const [processingTime, setProcessingTime] = useState("")
   const [followUpPrompt, setFollowUpPrompt] = useState("")
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([])
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([])
   const [location, setLocation] = useState("")
   const [locationSuggestions, setLocationSuggestions] = useState<Array<{ display_name: string; formatted: string }>>([])
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
@@ -899,6 +923,18 @@ export default function ReferralTool() {
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories((prev) =>
       prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
+    )
+  }
+
+  const toggleCategoryExpanded = (categoryId: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
+    )
+  }
+
+  const toggleSubCategory = (subCategoryId: string) => {
+    setSelectedSubCategories((prev) =>
+      prev.includes(subCategoryId) ? prev.filter((id) => id !== subCategoryId) : [...prev, subCategoryId],
     )
   }
 
@@ -1849,54 +1885,131 @@ export default function ReferralTool() {
                                   {resourceCategories.map((category) => {
                                     const Icon = category.icon
                                     const isSelected = selectedCategories.includes(category.id)
+                                    const isExpanded = expandedCategories.includes(category.id)
+                                    const hasSubCategories = category.subCategories && category.subCategories.length > 0
+
                                     return (
-                                      <div
-                                        key={category.id}
-                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
-                                          isSelected
-                                            ? `bg-blue-50 border-blue-300 border-opacity-100 shadow-md ring-2 ring-blue-200`
-                                            : `bg-white border-gray-200 border-opacity-50 hover:border-opacity-75 hover:shadow-sm`
-                                        }`}
-                                        onClick={() => toggleCategory(category.id)}
-                                      >
-                                        <div className="flex items-start gap-3">
-                                          <div
-                                            className={`p-2 rounded-lg ${isSelected ? "bg-blue-100" : "bg-gray-50"}`}
-                                          >
-                                            <Icon
-                                              className={`w-6 h-6 ${isSelected ? "text-blue-700" : "text-gray-600"}`}
-                                            />
-                                          </div>
-                                          <div className="flex-1">
-                                            <h4
-                                              className={`font-semibold mb-2 ${isSelected ? "text-blue-900" : "text-gray-800"}`}
+                                      <div key={category.id} className="col-span-1">
+                                        <div
+                                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                                            isSelected
+                                              ? `bg-blue-50 border-blue-300 border-opacity-100 shadow-md ring-2 ring-blue-200`
+                                              : `bg-white border-gray-200 border-opacity-50 hover:border-opacity-75 hover:shadow-sm`
+                                          }`}
+                                          onClick={() => toggleCategory(category.id)}
+                                        >
+                                          <div className="flex items-start gap-3">
+                                            <div
+                                              className={`p-2 rounded-lg ${isSelected ? "bg-blue-100" : "bg-gray-50"}`}
                                             >
-                                              {category.label}
-                                            </h4>
-                                            <p
-                                              className={`text-sm leading-relaxed ${isSelected ? "text-blue-700" : "text-gray-600"}`}
-                                            >
-                                              {category.description}
-                                            </p>
-                                          </div>
-                                          {isSelected && (
-                                            <div className="flex-shrink-0">
-                                              <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                                                <svg
-                                                  className="w-3 h-3 text-white"
-                                                  fill="currentColor"
-                                                  viewBox="0 0 20 20"
-                                                >
-                                                  <path
-                                                    fillRule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clipRule="evenodd"
-                                                  />
-                                                </svg>
-                                              </div>
+                                              <Icon
+                                                className={`w-6 h-6 ${isSelected ? "text-blue-700" : "text-gray-600"}`}
+                                              />
                                             </div>
-                                          )}
+                                            <div className="flex-1">
+                                              <h4
+                                                className={`font-semibold mb-2 ${isSelected ? "text-blue-900" : "text-gray-800"}`}
+                                              >
+                                                {category.label}
+                                              </h4>
+                                              <p
+                                                className={`text-sm leading-relaxed ${isSelected ? "text-blue-700" : "text-gray-600"}`}
+                                              >
+                                                {category.description}
+                                              </p>
+                                            </div>
+                                            <div className="flex flex-col gap-2 flex-shrink-0">
+                                              {isSelected && (
+                                                <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+                                                  <svg
+                                                    className="w-3 h-3 text-white"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                  >
+                                                    <path
+                                                      fillRule="evenodd"
+                                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                      clipRule="evenodd"
+                                                    />
+                                                  </svg>
+                                                </div>
+                                              )}
+                                              {hasSubCategories && (
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    toggleCategoryExpanded(category.id)
+                                                  }}
+                                                  className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
+                                                    isExpanded ? "bg-blue-100" : "bg-gray-100 hover:bg-gray-200"
+                                                  }`}
+                                                >
+                                                  <ChevronDown
+                                                    className={`w-3 h-3 transition-transform ${
+                                                      isExpanded ? "rotate-180 text-blue-600" : "text-gray-600"
+                                                    }`}
+                                                  />
+                                                </button>
+                                              )}
+                                            </div>
+                                          </div>
                                         </div>
+
+                                        {/* Sub-categories */}
+                                        {hasSubCategories && isExpanded && (
+                                          <div className="mt-2 ml-4 space-y-2">
+                                            {category.subCategories.map((subCat) => {
+                                              const isSubSelected = selectedSubCategories.includes(subCat.id)
+                                              return (
+                                                <div
+                                                  key={subCat.id}
+                                                  onClick={() => toggleSubCategory(subCat.id)}
+                                                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                                                    isSubSelected
+                                                      ? "bg-indigo-50 border-indigo-300 shadow-sm"
+                                                      : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                                                  }`}
+                                                >
+                                                  <div className="flex items-start gap-2">
+                                                    <div className="flex-1">
+                                                      <p
+                                                        className={`text-sm font-medium ${
+                                                          isSubSelected ? "text-indigo-900" : "text-gray-800"
+                                                        }`}
+                                                      >
+                                                        {subCat.label}
+                                                      </p>
+                                                      <p
+                                                        className={`text-xs mt-1 ${
+                                                          isSubSelected ? "text-indigo-600" : "text-gray-500"
+                                                        }`}
+                                                      >
+                                                        {subCat.description}
+                                                      </p>
+                                                    </div>
+                                                    {isSubSelected && (
+                                                      <div className="flex-shrink-0">
+                                                        <div className="w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center">
+                                                          <svg
+                                                            className="w-2.5 h-2.5 text-white"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                          >
+                                                            <path
+                                                              fillRule="evenodd"
+                                                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                              clipRule="evenodd"
+                                                            />
+                                                          </svg>
+                                                        </div>
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              )
+                                            })}
+                                          </div>
+                                        )}
                                       </div>
                                     )
                                   })}
