@@ -1913,10 +1913,11 @@ export default function ReferralTool() {
                               {/* Resource Categories */}
                               <div>
                                 <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                  <Filter className="w-4 h-4 text-blue-600" />
                                   What type of resource does your client need?
                                 </h4>
                                 <p className="text-sm text-gray-600 mb-4">
-                                  Choose the categories that best match your client&#39;s needs.
+                                  <span className="font-medium">Optional:</span> Select categories to get more targeted results, or leave unselected for broader recommendations.
                                 </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                   {resourceCategories.map((category) => {
@@ -1988,7 +1989,7 @@ export default function ReferralTool() {
                                     Refine by Sub-Category
                                   </h4>
                                   <p className="text-sm text-gray-600 mb-4">
-                                    Choose specific types within your selected categories.
+                                    <span className="font-medium">Optional:</span> Select specific types for even more targeted results.
                                   </p>
                                   <div className="space-y-4">
                                     {selectedCategories.map(catId => {
@@ -2063,6 +2064,9 @@ export default function ReferralTool() {
                                   <MapPin className="w-4 h-4 text-blue-600" />
                                   Location Preferences
                                 </h4>
+                                <p className="text-sm text-gray-600 mb-3">
+                                  <span className="font-medium">Optional:</span> Specify a location to find resources nearby.
+                                </p>
                                 <Input
                                   placeholder="Enter location (city, ZIP code, area, etc.)"
                                   value={location}
