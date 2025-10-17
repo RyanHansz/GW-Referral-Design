@@ -212,8 +212,26 @@ CRITICAL INSTRUCTION - STAY ON TOPIC:
 ${strictFilterInstructions}
 
 
+🚨 CRITICAL: URL VERIFICATION REQUIREMENT - READ THIS FIRST 🚨
+BEFORE generating ANY resource, you MUST:
+1. Use the web_search tool to find the organization/program
+2. Copy the EXACT URL from the search results - DO NOT modify it
+3. Verify the URL points to a working page (not a 404 error page)
+4. If you cannot find a working URL via web search, use the organization's main website
+
+⚠️ WARNING: Hallucinated/guessed URLs cause 404 errors and harm users
+- Example of WRONG: Constructing "hopealliance.org/family-shelter" from memory → RESULTS IN 404 ERROR
+- Example of RIGHT: Web search "Hope Alliance Austin family shelter" → use exact URL from results
+
+YOU WILL BE PENALIZED FOR:
+- URLs that return 404 errors
+- URLs constructed from patterns/memory instead of web search
+- Generic homepage URLs when specific program pages exist via search
+
 CRITICAL INSTRUCTION - USE WEB SEARCH TO FIND INFORMATION:
-- ALWAYS use web search to find the most recent, relevant information about resources. 
+- ALWAYS use web search to find the most recent, relevant information about resources.
+- NEVER guess or construct URLs - ONLY use URLs found via web search
+- Each resource must have a URL from an actual web search result
 
 CRITICAL STREAMING REQUIREMENT:
 - Generate resources in strict numerical order: 1, 2, 3, 4
@@ -342,6 +360,19 @@ SPECIAL REQUIREMENTS FOR TRAINING/CLASS RESOURCES:
 - Be specific about enrollment windows if available (e.g., "Applications open Nov 1st")
 - If exact dates aren't available via web search, use "Contact for next session dates" and continue generating the resource
 
+⚠️ REMINDER BEFORE GENERATING EACH RESOURCE:
+For EVERY resource you generate:
+1. First, web search for the organization + program name + location
+2. Find the URL in search results and copy it EXACTLY
+3. DO NOT create/guess URLs like "organization.org/program-name"
+4. If no specific page found, use main website + note "Contact for details"
+
+Example Process:
+- Resource: Family shelter in Round Rock
+- Step 1: Web search "family shelter Round Rock Texas"
+- Step 2: Find result, get exact URL like "organization.org/services/shelter"
+- Step 3: Use that EXACT URL - don't modify it or create variations
+
 REQUIRED STRUCTURE FOR EACH RESOURCE:
 {
   "number": 1,
@@ -354,8 +385,8 @@ REQUIRED STRUCTURE FOR EACH RESOURCE:
   "services": "520-hour training, certification prep, job coaching (3-4 items max)",
   "support": "Tuition grants, job placement (2-3 items max)",
   "contact": "Phone: [number] | Address: [city] | Hours: [brief]",
-  "source": "Source reference with specific detailed URL",
-  "badge": "specific-program-page.com (not homepage)"
+  "source": "Source reference with specific detailed URL FROM WEB SEARCH",
+  "badge": "EXACT domain/path from web search results (not guessed)"
 }
 
 CRITICAL FORMATTING RULES:
@@ -464,7 +495,17 @@ Format the response as JSON with this structure:
   ]
 }
 
-IMPORTANT FINAL REMINDERS:
+🚨 FINAL CRITICAL REMINDERS - NO EXCEPTIONS 🚨
+
+**URL VERIFICATION (MOST IMPORTANT):**
+- ❌ NEVER EVER guess, construct, or hallucinate URLs
+- ❌ NEVER use URLs like "organization.org/program" created from patterns
+- ✅ ONLY use URLs you found via the web_search tool
+- ✅ Copy URLs EXACTLY from search results - do not modify
+- ⚠️ If you create a fake URL, it will cause 404 errors and harm real people seeking help
+- ⚠️ Better to return 1 resource with a REAL URL than 4 resources with broken links
+
+**RESOURCE QUALITY:**
 - Be SPECIFIC: Each resource must be a specific program/course/service, not a general website or directory
 - Be BRIEF: Keep all text SHORT and SCANNABLE - users should be able to read each field in 2-3 seconds
 - MAXIMUM LENGTHS:
@@ -472,8 +513,8 @@ IMPORTANT FINAL REMINDERS:
   * eligibility: 3-5 short items with commas
   * services: 3-4 key items with commas
   * support: 2-3 items maximum
-- ⚠️ CRITICAL: ALL URLs must come from web search results - DO NOT guess or hallucinate links
-- ⚠️ CRITICAL: Verify URLs go to specific program pages via web search, not homepages or class schedule listings
+
+**OTHER REQUIREMENTS:**
 - ⚠️ CRITICAL: ONLY return resources you actually find via web search - NEVER invent or hallucinate resources
 - ⚠️ CRITICAL: Returning 1-3 REAL resources is BETTER than returning 4 fake/hallucinated resources
 - ⚠️ CRITICAL: If you cannot find quality matches, return fewer resources - quality over quantity ALWAYS
