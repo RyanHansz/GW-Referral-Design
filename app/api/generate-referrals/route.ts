@@ -218,6 +218,8 @@ EXAMPLES:
 
 FORMATTING (keep BRIEF & SCANNABLE):
 - **Title**: 5-6 words max (e.g., "GCTA - Medical Assistant Cert")
+  - If resource is in a non-English language: provide bilingual title format: "English Title / Título en Otro Idioma"
+  - Example: "Goodwill Resources & Programs / Recursos y Programas de Goodwill"
 - **Service**: 1-2 words (e.g., "Healthcare Training")
 - **whyItFits**: 15-20 words max
 - **eligibility**: 3-5 items, comma-separated (include class dates for training)
