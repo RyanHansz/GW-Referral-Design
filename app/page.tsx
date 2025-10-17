@@ -148,12 +148,12 @@ const resourceCategories = [
 
 // Suggested chat prompts for users to get started
 const suggestedChatPrompts = [
-  "What job training programs does Goodwill offer?",
-  "How can I get help with resume writing?",
-  "What community resources are available for housing assistance?",
-  "Tell me about career advancement opportunities at Goodwill",
-  "What government benefits might I qualify for?",
-  "How do I access food assistance programs?",
+  "What GCTA training programs are available for clients needing career skills?",
+  "Where can I refer a client for food assistance in the Austin area?",
+  "How do I help a client apply for SNAP benefits?",
+  "What local resources are available for clients experiencing homelessness?",
+  "Tell me about Goodwill's job placement services and career coaching",
+  "What are the CAT training options for clients wanting to advance their careers?",
 ]
 
 const translateCategory = (category: string, language: string): string => {
