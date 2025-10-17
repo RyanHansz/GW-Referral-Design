@@ -483,49 +483,103 @@ export default function ReferralTool() {
   // Generate contextual follow-up prompts based on assistant response
   const generateFollowUpPrompts = (responseContent: string): string[] => {
     const content = responseContent.toLowerCase()
-    const prompts: string[] = []
 
-    // Topic-based follow-ups
-    if (content.includes("job training") || content.includes("career") || content.includes("training program")) {
-      prompts.push("What are the requirements to enroll in these programs?")
-      prompts.push("How long do these training programs typically take?")
+    // Score each topic based on keyword frequency to find the most relevant one
+    const topics = [
+      {
+        name: "housing",
+        score: 0,
+        keywords: ["housing", "shelter", "homeless", "rent", "eviction", "apartment"],
+        prompts: [
+          "What emergency shelter options are available in Austin?",
+          "How can clients get help with rent or utility assistance?",
+          "What documents do clients need for housing assistance?",
+          "Are there transitional housing programs available?"
+        ]
+      },
+      {
+        name: "food",
+        score: 0,
+        keywords: ["food", "snap", "nutrition", "meal", "food bank", "hunger", "wic"],
+        prompts: [
+          "Where are the nearest food banks or food pantries?",
+          "What's the process for helping a client apply for SNAP?",
+          "Are there meal programs for children or families?",
+          "What emergency food resources are available today?"
+        ]
+      },
+      {
+        name: "training",
+        score: 0,
+        keywords: ["gcta", "cat training", "training program", "skill development", "certification"],
+        prompts: [
+          "What are the enrollment requirements for GCTA programs?",
+          "How long do these training programs typically take?",
+          "Are there prerequisites for CAT training courses?",
+          "What certifications can clients earn through these programs?"
+        ]
+      },
+      {
+        name: "employment",
+        score: 0,
+        keywords: ["resume", "interview", "job search", "job placement", "career coaching", "employment"],
+        prompts: [
+          "Does Goodwill offer mock interview practice for clients?",
+          "How can I access job placement services for my client?",
+          "What resume assistance is available?",
+          "Are there job fairs or hiring events coming up?"
+        ]
+      },
+      {
+        name: "healthcare",
+        score: 0,
+        keywords: ["medicaid", "health", "medical", "clinic", "insurance", "doctor"],
+        prompts: [
+          "How do I help a client apply for Medicaid or healthcare?",
+          "Where are free or low-cost health clinics in the area?",
+          "What mental health resources are available?",
+          "Are there dental care resources for clients?"
+        ]
+      },
+      {
+        name: "transportation",
+        score: 0,
+        keywords: ["transportation", "bus", "ride", "transit", "car", "gas"],
+        prompts: [
+          "How can clients get help with transportation costs?",
+          "Are there free bus passes or transit vouchers available?",
+          "What transportation resources exist for job interviews?",
+          "Are there programs that help with car repairs?"
+        ]
+      }
+    ]
+
+    // Score each topic based on keyword matches
+    topics.forEach(topic => {
+      topic.keywords.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}`, "gi")
+        const matches = content.match(regex)
+        if (matches) {
+          topic.score += matches.length
+        }
+      })
+    })
+
+    // Find the highest scoring topic
+    const topTopic = topics.reduce((max, topic) => topic.score > max.score ? topic : max, topics[0])
+
+    // If we have a clear winner (score > 0), return those prompts
+    if (topTopic.score > 0) {
+      return topTopic.prompts
     }
 
-    if (content.includes("resume") || content.includes("interview") || content.includes("job search")) {
-      prompts.push("Do you offer mock interview practice?")
-      prompts.push("Can someone help me apply for jobs online?")
-    }
-
-    if (content.includes("housing") || content.includes("shelter") || content.includes("rent")) {
-      prompts.push("What emergency housing options are available?")
-      prompts.push("How can I get help with utility bills?")
-    }
-
-    if (content.includes("food") || content.includes("snap") || content.includes("nutrition")) {
-      prompts.push("Where are the nearest food banks?")
-      prompts.push("What documents do I need to apply for SNAP?")
-    }
-
-    if (content.includes("medicaid") || content.includes("health") || content.includes("medical")) {
-      prompts.push("How do I apply for healthcare assistance?")
-      prompts.push("Are there free health clinics nearby?")
-    }
-
-    if (content.includes("transportation") || content.includes("bus pass")) {
-      prompts.push("How can I get help with transportation costs?")
-      prompts.push("Are there free transportation options?")
-    }
-
-    // Always add a couple of general follow-ups
-    if (prompts.length < 3) {
-      prompts.push("Can you tell me more about eligibility requirements?")
-    }
-    if (prompts.length < 3) {
-      prompts.push("What documents will I need to bring?")
-    }
-
-    // Return max 4 prompts
-    return prompts.slice(0, 4)
+    // Fallback general prompts if no topic matches
+    return [
+      "Can you provide more details about eligibility requirements?",
+      "What documents should clients bring?",
+      "Are there any income or residency requirements?",
+      "How long does the application process typically take?"
+    ]
   }
 
   const generatePrintHTML = () => {
