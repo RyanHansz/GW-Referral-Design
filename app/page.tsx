@@ -3078,8 +3078,8 @@ export default function ReferralTool() {
               </div>
             </div>
           </div>
-        </div>
       </main>
+      </div>
 
       <Dialog
         open={showPrintDialog}
