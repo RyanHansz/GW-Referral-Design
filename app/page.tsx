@@ -2965,10 +2965,11 @@ export default function ReferralTool() {
 
                         {/* Action Plan - streaming or complete */}
                         {(isGeneratingActionPlan || actionPlanContent) && (
-                          <div className="mt-6">
-                            <div className="space-y-4 pb-6 border-b border-gray-200">
+                          <div className="mt-6 p-4 bg-blue-50 border border-blue-500 rounded-lg max-w-4xl">
+                            <h3 className="text-lg font-semibold text-blue-900 mb-4">Action Plan</h3>
+                            <div className="space-y-4">
                               {isGeneratingActionPlan && (
-                                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-blue-200">
                                   {/* Screen reader only status announcement */}
                                   <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
                                     Generating action plan, please wait...
@@ -2979,7 +2980,7 @@ export default function ReferralTool() {
                               )}
 
                               {actionPlanContent && !isGeneratingActionPlan && (
-                                <div className="prose max-w-none text-slate-700" role="region" aria-live="polite" aria-atomic="true">
+                                <div className="prose prose-slate max-w-none" role="region" aria-live="polite" aria-atomic="true">
                                   <div
                                     dangerouslySetInnerHTML={{
                                       __html: parseMarkdownToHTML(actionPlanContent),
@@ -2989,7 +2990,7 @@ export default function ReferralTool() {
                               )}
 
                               {actionPlanContent && isGeneratingActionPlan && (
-                                <div className="prose max-w-none text-slate-700" aria-live="off">
+                                <div className="prose prose-slate max-w-none" aria-live="off">
                                   <div
                                     dangerouslySetInnerHTML={{
                                       __html: parseMarkdownToHTML(actionPlanContent),
