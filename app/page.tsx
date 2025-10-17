@@ -1925,14 +1925,17 @@ export default function ReferralTool() {
                                     const isSelected = selectedCategories.includes(category.id)
 
                                     return (
-                                      <div
+                                      <button
+                                        type="button"
                                         key={category.id}
-                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md text-left w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                                           isSelected
                                             ? `bg-blue-50 border-blue-300 border-opacity-100 shadow-md ring-2 ring-blue-200`
                                             : `bg-white border-gray-200 border-opacity-50 hover:border-opacity-75 hover:shadow-sm`
                                         }`}
                                         onClick={() => toggleCategory(category.id)}
+                                        aria-pressed={isSelected}
+                                        aria-label={`${isSelected ? 'Deselect' : 'Select'} ${category.label} category`}
                                       >
                                         <div className="flex items-start gap-3">
                                           <div
@@ -1961,6 +1964,7 @@ export default function ReferralTool() {
                                                   className="w-3 h-3 text-white"
                                                   fill="currentColor"
                                                   viewBox="0 0 20 20"
+                                                  aria-hidden="true"
                                                 >
                                                   <path
                                                     fillRule="evenodd"
@@ -1972,7 +1976,7 @@ export default function ReferralTool() {
                                             </div>
                                           )}
                                         </div>
-                                      </div>
+                                      </button>
                                     )
                                   })}
                                 </div>
@@ -2003,14 +2007,17 @@ export default function ReferralTool() {
                                             {category.subCategories.map((subCat) => {
                                               const isSubSelected = selectedSubCategories.includes(subCat.id)
                                               return (
-                                                <div
+                                                <button
+                                                  type="button"
                                                   key={subCat.id}
                                                   onClick={() => toggleSubCategory(subCat.id)}
-                                                  className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                                                  className={`p-3 rounded-lg border cursor-pointer transition-all text-left w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
                                                     isSubSelected
                                                       ? "bg-indigo-50 border-indigo-300 shadow-sm"
                                                       : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
                                                   }`}
+                                                  aria-pressed={isSubSelected}
+                                                  aria-label={`${isSubSelected ? 'Deselect' : 'Select'} ${subCat.label} sub-category`}
                                                 >
                                                   <div className="flex items-start gap-2">
                                                     <div className="flex-1">
@@ -2036,6 +2043,7 @@ export default function ReferralTool() {
                                                             className="w-2.5 h-2.5 text-white"
                                                             fill="currentColor"
                                                             viewBox="0 0 20 20"
+                                                            aria-hidden="true"
                                                           >
                                                             <path
                                                               fillRule="evenodd"
@@ -2047,7 +2055,7 @@ export default function ReferralTool() {
                                                       </div>
                                                     )}
                                                   </div>
-                                                </div>
+                                                </button>
                                               )
                                             })}
                                           </div>
@@ -2060,14 +2068,15 @@ export default function ReferralTool() {
 
                               {/* Location Filters */}
                               <div className="relative">
-                                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                <Label htmlFor="location-input" className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                                   <MapPin className="w-4 h-4 text-blue-600" />
                                   Location Preferences
-                                </h4>
+                                </Label>
                                 <p className="text-sm text-gray-600 mb-3">
                                   <span className="font-medium">Optional:</span> Specify a location to find resources nearby.
                                 </p>
                                 <Input
+                                  id="location-input"
                                   placeholder="Enter location (city, ZIP code, area, etc.)"
                                   value={location}
                                   onChange={(e) => handleLocationChange(e.target.value)}
@@ -2128,10 +2137,11 @@ export default function ReferralTool() {
                         </Card>
 
                         <div className="space-y-3">
-                          <label className="font-medium text-gray-900 text-lg">
+                          <Label htmlFor="client-details-input" className="font-medium text-gray-900 text-lg">
                             Add details about your client&#39;s needs{" "}
-                          </label>
+                          </Label>
                           <Textarea
+                            id="client-details-input"
                             placeholder="Share anything that would help us find the perfect resources for your client - their goals, challenges, timeline, or what success looks like for them..."
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
@@ -2258,10 +2268,10 @@ export default function ReferralTool() {
 
                           {/* Streaming Message */}
                           {isChatStreaming && streamingChatContent && (
-                            <div className="flex justify-start">
+                            <div className="flex justify-start" role="status" aria-live="polite" aria-atomic="false">
                               <div className="max-w-3xl rounded-lg p-4 bg-gray-100 text-gray-900 border border-gray-200">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" aria-hidden="true" />
                                   <span className="text-sm text-indigo-600 font-medium">Responding...</span>
                                 </div>
                                 <div
@@ -2948,11 +2958,11 @@ export default function ReferralTool() {
 
                         {/* Action Plan - streaming or complete */}
                         {(isGeneratingActionPlan || actionPlanContent) && (
-                          <div className="mt-6">
+                          <div className="mt-6" role="status" aria-live="polite" aria-atomic="false">
                             <div className="space-y-4 pb-6 border-b border-gray-200">
                               {isGeneratingActionPlan && (
                                 <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" aria-hidden="true" />
                                   <span className="text-blue-900 font-medium">Generating action plan...</span>
                                 </div>
                               )}
@@ -2993,9 +3003,12 @@ export default function ReferralTool() {
                     {/* Follow-up input */}
                     {showActionPlanSection && conversationHistory.length > 0 && (
                       <div className="mt-6 p-4 border rounded-lg bg-gray-50 animate-fadeIn">
-                        <h4 className="font-medium text-gray-900 mb-3">Ask a follow-up question:</h4>
+                        <Label htmlFor="follow-up-input" className="font-medium text-gray-900 mb-3 block">
+                          Ask a follow-up question:
+                        </Label>
                         <div className="space-y-3">
                           <Textarea
+                            id="follow-up-input"
                             placeholder="Ask for more specific information, clarify details, or request additional resources..."
                             value={followUpPrompt}
                             onChange={(e) => setFollowUpPrompt(e.target.value)}
