@@ -12,6 +12,15 @@ const categoryLabels: Record<string, string> = {
 }
 
 const subCategoryLabels: Record<string, string> = {
+  // Goodwill sub-categories
+  "job-placement": "Job Placement Services",
+  "career-coaching": "Career Coaching",
+  "interview-prep": "Interview Preparation",
+  "resume-building": "Resume & Cover Letter",
+  "excel-center": "Excel Center High School",
+  "workforce-dev": "Workforce Development",
+  "financial-coaching": "Financial Coaching",
+  "support-services": "Support Services",
   // Community sub-categories
   food: "Food & Nutrition",
   housing: "Housing & Shelter",
@@ -28,6 +37,36 @@ const subCategoryLabels: Record<string, string> = {
   "housing-benefits": "Housing Assistance",
   "cash-benefits": "Cash Assistance",
   "family-benefits": "Child & Family Services",
+  // Job Postings sub-categories
+  "entry-level": "Entry-Level Positions",
+  "part-time": "Part-Time Jobs",
+  "full-time": "Full-Time Jobs",
+  seasonal: "Seasonal & Temporary",
+  warehouse: "Warehouse & Logistics",
+  retail: "Retail & Customer Service",
+  "food-service": "Food Service",
+  administrative: "Administrative & Office",
+  "healthcare-jobs": "Healthcare & Medical",
+  "skilled-trades": "Skilled Trades",
+  // GCTA sub-categories
+  "it-certs": "IT & Technology",
+  "healthcare-certs": "Healthcare Certifications",
+  "customer-service": "Customer Service",
+  "logistics-training": "Logistics & Warehouse",
+  manufacturing: "Manufacturing",
+  welding: "Welding",
+  hvac: "HVAC",
+  forklift: "Forklift Certification",
+  cdl: "CDL Training",
+  // CAT sub-categories
+  "computer-skills": "Computer Skills",
+  "microsoft-office": "Microsoft Office",
+  "professional-dev": "Professional Development",
+  leadership: "Leadership Training",
+  communication: "Communication Skills",
+  "time-management": "Time Management",
+  "financial-literacy": "Financial Literacy",
+  "digital-literacy": "Digital Literacy",
 }
 
 export async function POST(request: Request) {
