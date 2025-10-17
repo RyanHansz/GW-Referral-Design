@@ -921,9 +921,25 @@ export default function ReferralTool() {
   }
 
   const toggleCategory = (categoryId: string) => {
+    const isCurrentlySelected = selectedCategories.includes(categoryId)
+
     setSelectedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
+      isCurrentlySelected ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
     )
+
+    // Auto-expand categories with sub-categories when selecting them
+    const category = resourceCategories.find(cat => cat.id === categoryId)
+    if (category?.subCategories && category.subCategories.length > 0) {
+      if (!isCurrentlySelected) {
+        // Expanding - add to expanded list
+        setExpandedCategories((prev) =>
+          prev.includes(categoryId) ? prev : [...prev, categoryId]
+        )
+      } else {
+        // Deselecting - remove from expanded list
+        setExpandedCategories((prev) => prev.filter((id) => id !== categoryId))
+      }
+    }
   }
 
   const toggleCategoryExpanded = (categoryId: string) => {
