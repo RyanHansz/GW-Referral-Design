@@ -2030,7 +2030,7 @@ export default function ReferralTool() {
                                                       </p>
                                                       <p
                                                         className={`text-xs mt-1 ${
-                                                          isSubSelected ? "text-indigo-600" : "text-gray-500"
+                                                          isSubSelected ? "text-indigo-600" : "text-gray-600"
                                                         }`}
                                                       >
                                                         {subCat.description}
@@ -2083,7 +2083,7 @@ export default function ReferralTool() {
                                   className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-background"
                                 />
 
-                                <div className="mt-2 text-xs text-gray-500">
+                                <div className="mt-2 text-xs text-gray-600">
                                   <p>
                                     💡 <strong>Examples:</strong> "Round Rock", "78701", "Austin, TX", "downtown Dallas"
                                   </p>
@@ -2114,7 +2114,7 @@ export default function ReferralTool() {
                                   <option value="Arabic">العربية (Arabic)</option>
                                   <option value="Hindi">हिन्दी (Hindi)</option>
                                 </select>
-                                <div className="mt-2 text-xs text-gray-500">
+                                <div className="mt-2 text-xs text-gray-600">
                                   <p>🌐 Choose the language for generated referrals and action plans</p>
                                 </div>
                               </div>
@@ -2258,7 +2258,7 @@ export default function ReferralTool() {
                                   <p className="whitespace-pre-wrap">{message.content}</p>
                                 )}
                                 <p
-                                  className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"}`}
+                                  className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-600"}`}
                                 >
                                   {new Date(message.timestamp).toLocaleTimeString()}
                                 </p>
@@ -2329,7 +2329,7 @@ export default function ReferralTool() {
                                   className="min-h-[100px] resize-none"
                                   disabled={isChatStreaming}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">Press Enter to send, Shift+Enter for new line</p>
+                                <p className="text-xs text-gray-600 mt-2">Press Enter to send, Shift+Enter for new line</p>
                               </div>
                               <Button
                                 onClick={handleSendChatMessage}
