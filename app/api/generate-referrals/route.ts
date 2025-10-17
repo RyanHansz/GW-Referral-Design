@@ -1,6 +1,74 @@
 import { generateText, streamText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
+// Category and sub-category mappings
+const categoryLabels: Record<string, string> = {
+  goodwill: "Goodwill Resources & Programs",
+  community: "Local Community Resources",
+  government: "Government Benefits",
+  jobs: "Job Postings",
+  gcta: "GCTA Trainings",
+  cat: "CAT Trainings",
+}
+
+const subCategoryLabels: Record<string, string> = {
+  // Goodwill sub-categories
+  "job-placement": "Job Placement Services",
+  "career-coaching": "Career Coaching",
+  "interview-prep": "Interview Preparation",
+  "resume-building": "Resume & Cover Letter",
+  "excel-center": "Excel Center High School",
+  "workforce-dev": "Workforce Development",
+  "financial-coaching": "Financial Coaching",
+  "support-services": "Support Services",
+  // Community sub-categories
+  food: "Food & Nutrition",
+  housing: "Housing & Shelter",
+  healthcare: "Healthcare Services",
+  transportation: "Transportation",
+  childcare: "Child Care & Education",
+  legal: "Legal Services",
+  financial: "Financial Assistance",
+  clothing: "Clothing & Household",
+  employment: "Employment Support",
+  // Government sub-categories
+  "food-benefits": "Food Assistance",
+  "healthcare-benefits": "Healthcare Coverage",
+  "housing-benefits": "Housing Assistance",
+  "cash-benefits": "Cash Assistance",
+  "family-benefits": "Child & Family Services",
+  // Job Postings sub-categories
+  "entry-level": "Entry-Level Positions",
+  "part-time": "Part-Time Jobs",
+  "full-time": "Full-Time Jobs",
+  seasonal: "Seasonal & Temporary",
+  warehouse: "Warehouse & Logistics",
+  retail: "Retail & Customer Service",
+  "food-service": "Food Service",
+  administrative: "Administrative & Office",
+  "healthcare-jobs": "Healthcare & Medical",
+  "skilled-trades": "Skilled Trades",
+  // GCTA sub-categories
+  "it-certs": "IT & Technology",
+  "healthcare-certs": "Healthcare Certifications",
+  "customer-service": "Customer Service",
+  "logistics-training": "Logistics & Warehouse",
+  manufacturing: "Manufacturing",
+  welding: "Welding",
+  hvac: "HVAC",
+  forklift: "Forklift Certification",
+  cdl: "CDL Training",
+  // CAT sub-categories
+  "computer-skills": "Computer Skills",
+  "microsoft-office": "Microsoft Office",
+  "professional-dev": "Professional Development",
+  leadership: "Leadership Training",
+  communication: "Communication Skills",
+  "time-management": "Time Management",
+  "financial-literacy": "Financial Literacy",
+  "digital-literacy": "Digital Literacy",
+}
+
 export async function POST(request: Request) {
   try {
     const {
@@ -26,11 +94,24 @@ export async function POST(request: Request) {
 
     // Build filter context and instructions
     const hasResourceTypeFilters = filters?.resourceTypes && filters.resourceTypes.length > 0
+    const hasCategoryFilters = filters?.categories && filters.categories.length > 0
+    const hasSubCategoryFilters = filters?.subCategories && filters?.subCategories.length > 0
     const hasLocationFilter = filters?.location
 
     let filterContext = ""
-    if (hasResourceTypeFilters || hasLocationFilter) {
+    if (hasCategoryFilters || hasSubCategoryFilters || hasResourceTypeFilters || hasLocationFilter) {
       filterContext += "\n\nFILTER INFORMATION PROVIDED BY USER:"
+
+      if (hasCategoryFilters) {
+        const categoryNames = filters.categories.map((id: string) => categoryLabels[id] || id).join(", ")
+        filterContext += `\n- Main Categories: ${categoryNames}`
+      }
+
+      if (hasSubCategoryFilters) {
+        const subCategoryNames = filters.subCategories.map((id: string) => subCategoryLabels[id] || id).join(", ")
+        filterContext += `\n- Sub-Categories: ${subCategoryNames}`
+      }
+
       if (hasResourceTypeFilters) {
         filterContext += `\n- Resource Types: ${filters.resourceTypes.join(", ")}`
       }
@@ -40,24 +121,45 @@ export async function POST(request: Request) {
       filterContext += "\n\n⚠️ CRITICAL: DO NOT ask the user for this information - it has already been provided! Use it directly in your web searches."
     }
 
-    const strictFilterInstructions = hasResourceTypeFilters
+    // Build filter descriptions for instructions
+    let filterTypeDescription = ""
+    if (hasSubCategoryFilters) {
+      const subCategoryNames = filters.subCategories.map((id: string) => subCategoryLabels[id] || id).join(", ")
+      filterTypeDescription = subCategoryNames
+    } else if (hasCategoryFilters) {
+      const categoryNames = filters.categories.map((id: string) => categoryLabels[id] || id).join(", ")
+      filterTypeDescription = categoryNames
+    } else if (hasResourceTypeFilters) {
+      filterTypeDescription = filters.resourceTypes.join(", ")
+    }
+
+    const strictFilterInstructions = (hasCategoryFilters || hasSubCategoryFilters || hasResourceTypeFilters)
       ? `\n\nCRITICAL FILTER REQUIREMENT - STRICT FILTERING ENABLED:
-The user has filtered for ONLY these resource types: ${filters.resourceTypes.join(", ")}
+The user has filtered for ONLY these resource types: ${filterTypeDescription}
 
 YOU MUST:
 - ONLY return resources that exactly match one of these filtered types
 - DO NOT add other resource types to "fill slots"
-- If there are fewer than 4 matching resources, return fewer resources (minimum 1)
+- If there are fewer than 4 matching resources, return fewer resources
 - If you find more than 4 matching resources, return the best 4
 - NEVER include resources from categories not in the filter list
 - ❌ NEVER hallucinate or invent resources to reach 4 - only return REAL resources found via web search
 
+${hasSubCategoryFilters ? `⚠️ CRITICAL SUB-CATEGORY FILTERING:
+- Sub-category filters are VERY SPECIFIC - they narrow down the main category to a specific type
+- Example: "Housing & Shelter" means ONLY homeless shelters, transitional housing, emergency housing - NOT food banks, NOT job training
+- Example: "Food & Nutrition" means ONLY food banks, food pantries, meal programs - NOT housing, NOT healthcare
+- Example: "Healthcare Services" means ONLY medical clinics, health services - NOT food assistance, NOT housing
+- DO NOT return resources from the main category that don't match the sub-category
+- If sub-category is "Housing & Shelter" → return shelters and housing ONLY, not other community resources
+` : ""}
 Example: If filtered for "GCTA Trainings" ONLY → return ONLY GCTA training programs, nothing else
-Example: If filtered for "Job Postings" ONLY → return ONLY job postings, no trainings or other resources\n`
+Example: If filtered for "Job Postings" ONLY → return ONLY job postings, no trainings or other resources
+Example: If filtered for "Housing & Shelter" sub-category → return ONLY housing/shelter resources, NOT food banks or training programs\n`
       : "\n\nBased on the client description provided, try to find up to 4 relevant resources. If you cannot find 4 quality matches, return fewer (minimum 1). Quality over quantity - never hallucinate resources.\n"
 
     const aiPrompt = isFollowUp
-      ? `You are a social services case manager AI assistant for Goodwill Central Texas. You are helping a client who is already enrolled in Goodwill's Workforce Advancement Program and receives career coaching support. This is a follow-up question based on previous conversation.
+      ? `You are a career case manager AI assistant for Goodwill Central Texas. You are helping a client who is already enrolled in Goodwill's Workforce Advancement Program and receives career coaching support. This is a follow-up question based on previous conversation.
 
 ${contextPrompt}${prompt}
 
@@ -87,7 +189,7 @@ Format the response as JSON with this structure:
 }
 
 IMPORTANT: Return ONLY the JSON object, no markdown formatting or code blocks.`
-      : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance.
+      : `You are a helpful assistant that generates personalized resource referrals for clients seeking assistance with Central Texas Goodwill.
 
 IMPORTANT CONTEXT: The client is already enrolled in Goodwill Central Texas's Workforce Advancement Program and receives career coaching and case management support from a Goodwill career case manager. Do NOT recommend general career coaching, case management, or workforce advancement programs from Goodwill since they already have this support.
 ${filterContext}
@@ -109,7 +211,9 @@ CRITICAL INSTRUCTION - STAY ON TOPIC:
 - If you cannot find 4 resources that directly match the topic, return fewer resources (minimum 1)
 ${strictFilterInstructions}
 
-CRITICAL: Generate resources in STRICT NUMERICAL ORDER (1, 2, 3, 4). Start writing resource #1 first, then #2, then #3, then #4. Do NOT skip ahead to generate other resources first.
+
+CRITICAL INSTRUCTION - USE WEB SEARCH TO FIND INFORMATION:
+- ALWAYS use web search to find the most recent, relevant information about resources. 
 
 CRITICAL STREAMING REQUIREMENT:
 - Generate resources in strict numerical order: 1, 2, 3, 4
@@ -122,9 +226,7 @@ RESOURCE PRIORITIZATION:${
 - STRICT FILTERING IS ACTIVE - Only return resources matching the filtered types
 - Within the filtered types, prioritize SPECIFIC Goodwill programs when they match`
           : `
-- ALWAYS prioritize SPECIFIC Goodwill programs (GCTA Trainings, CAT Trainings, job postings, Digital Navigator) FIRST when they match the client's needs
-- List Goodwill/GCTA resources as resource #1 and #2 whenever applicable
-- Only use Community Resources and Government Benefits to fill remaining slots after considering all relevant specific Goodwill/GCTA options
+- Prioritize SPECIFIC Goodwill programs (GCTA Trainings, CAT Trainings, job postings) FIRST when they match the client's needs
 - Example: If a client needs job training, prioritize GCTA trainings over community college programs`
       }
 - DO NOT recommend general "Goodwill Workforce Advancement" or "Career Coaching" since the client already receives this
@@ -148,7 +250,6 @@ When the client needs fall into these categories, prioritize these types of reso
 
 **Goodwill Resources & Programs:**
 - Goodwill Central Texas specific job postings (retail, donation center positions, etc.)
-- Digital Navigator program (digital literacy training)
 - Goodwill retail stores for affordable goods (if client needs clothing, furniture, household items)
 - Goodwill donation centers (if relevant to client's needs)
 - DO NOT recommend: General career coaching, case management, or workforce advancement (client already has this)

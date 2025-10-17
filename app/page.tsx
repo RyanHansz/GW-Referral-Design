@@ -1109,6 +1109,9 @@ export default function ReferralTool() {
           isFollowUp,
           filters: {
             resourceTypes: selectedResourceTypes,
+            categories: selectedCategories,
+            subCategories: selectedSubCategories,
+            location: location,
             locations: selectedLocations,
             ageGroups: selectedAgeGroups,
             incomeRanges: selectedIncomeRanges,
