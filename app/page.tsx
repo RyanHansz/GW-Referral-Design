@@ -1812,7 +1812,7 @@ export default function ReferralTool() {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex flex-1 relative">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 flex flex-col min-w-0">
           {/* Pilot Banner */}
           <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -3057,7 +3057,7 @@ export default function ReferralTool() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <Dialog
         open={showPrintDialog}
@@ -3129,6 +3129,7 @@ export default function ReferralTool() {
                   <Input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="your.email@example.com"
                     value={emailAddress}
                     onChange={(e) => {
@@ -3137,7 +3138,7 @@ export default function ReferralTool() {
                     }}
                     disabled={isSendingEmail}
                   />
-                  {emailError && <p className="text-sm text-red-600">{emailError}</p>}
+                  {emailError && <p className="text-sm text-red-600" role="alert">{emailError}</p>}
                 </div>
 
                 <Button
