@@ -1341,8 +1341,6 @@ export default function ReferralTool() {
         body: JSON.stringify({
           message: userMessage,
           history: chatMessages.slice(-10), // Send last 10 messages for context
-          selectedCategories,
-          selectedSubCategories,
         }),
       })
 
@@ -1424,8 +1422,6 @@ export default function ReferralTool() {
         body: JSON.stringify({
           message: userMessage,
           history: chatMessages.slice(-10), // Send last 10 messages for context
-          selectedCategories,
-          selectedSubCategories,
         }),
       })
 
