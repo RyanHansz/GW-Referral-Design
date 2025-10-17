@@ -921,29 +921,7 @@ export default function ReferralTool() {
   }
 
   const toggleCategory = (categoryId: string) => {
-    const isCurrentlySelected = selectedCategories.includes(categoryId)
-
     setSelectedCategories((prev) =>
-      isCurrentlySelected ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
-    )
-
-    // Auto-expand categories with sub-categories when selecting them
-    const category = resourceCategories.find(cat => cat.id === categoryId)
-    if (category?.subCategories && category.subCategories.length > 0) {
-      if (!isCurrentlySelected) {
-        // Expanding - add to expanded list
-        setExpandedCategories((prev) =>
-          prev.includes(categoryId) ? prev : [...prev, categoryId]
-        )
-      } else {
-        // Deselecting - remove from expanded list
-        setExpandedCategories((prev) => prev.filter((id) => id !== categoryId))
-      }
-    }
-  }
-
-  const toggleCategoryExpanded = (categoryId: string) => {
-    setExpandedCategories((prev) =>
       prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
     )
   }
@@ -1321,6 +1299,8 @@ export default function ReferralTool() {
         body: JSON.stringify({
           message: userMessage,
           history: chatMessages.slice(-10), // Send last 10 messages for context
+          selectedCategories,
+          selectedSubCategories,
         }),
       })
 
@@ -1402,6 +1382,8 @@ export default function ReferralTool() {
         body: JSON.stringify({
           message: userMessage,
           history: chatMessages.slice(-10), // Send last 10 messages for context
+          selectedCategories,
+          selectedSubCategories,
         }),
       })
 
@@ -1901,79 +1883,83 @@ export default function ReferralTool() {
                                   {resourceCategories.map((category) => {
                                     const Icon = category.icon
                                     const isSelected = selectedCategories.includes(category.id)
-                                    const isExpanded = expandedCategories.includes(category.id)
-                                    const hasSubCategories = category.subCategories && category.subCategories.length > 0
 
                                     return (
-                                      <div key={category.id} className="col-span-1">
-                                        <div
-                                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
-                                            isSelected
-                                              ? `bg-blue-50 border-blue-300 border-opacity-100 shadow-md ring-2 ring-blue-200`
-                                              : `bg-white border-gray-200 border-opacity-50 hover:border-opacity-75 hover:shadow-sm`
-                                          }`}
-                                          onClick={() => toggleCategory(category.id)}
-                                        >
-                                          <div className="flex items-start gap-3">
-                                            <div
-                                              className={`p-2 rounded-lg ${isSelected ? "bg-blue-100" : "bg-gray-50"}`}
-                                            >
-                                              <Icon
-                                                className={`w-6 h-6 ${isSelected ? "text-blue-700" : "text-gray-600"}`}
-                                              />
-                                            </div>
-                                            <div className="flex-1">
-                                              <h4
-                                                className={`font-semibold mb-2 ${isSelected ? "text-blue-900" : "text-gray-800"}`}
-                                              >
-                                                {category.label}
-                                              </h4>
-                                              <p
-                                                className={`text-sm leading-relaxed ${isSelected ? "text-blue-700" : "text-gray-600"}`}
-                                              >
-                                                {category.description}
-                                              </p>
-                                            </div>
-                                            <div className="flex flex-col gap-2 flex-shrink-0">
-                                              {isSelected && (
-                                                <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                                                  <svg
-                                                    className="w-3 h-3 text-white"
-                                                    fill="currentColor"
-                                                    viewBox="0 0 20 20"
-                                                  >
-                                                    <path
-                                                      fillRule="evenodd"
-                                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                      clipRule="evenodd"
-                                                    />
-                                                  </svg>
-                                                </div>
-                                              )}
-                                              {hasSubCategories && (
-                                                <button
-                                                  onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    toggleCategoryExpanded(category.id)
-                                                  }}
-                                                  className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
-                                                    isExpanded ? "bg-blue-100" : "bg-gray-100 hover:bg-gray-200"
-                                                  }`}
-                                                >
-                                                  <ChevronDown
-                                                    className={`w-3 h-3 transition-transform ${
-                                                      isExpanded ? "rotate-180 text-blue-600" : "text-gray-600"
-                                                    }`}
-                                                  />
-                                                </button>
-                                              )}
-                                            </div>
+                                      <div
+                                        key={category.id}
+                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                                          isSelected
+                                            ? `bg-blue-50 border-blue-300 border-opacity-100 shadow-md ring-2 ring-blue-200`
+                                            : `bg-white border-gray-200 border-opacity-50 hover:border-opacity-75 hover:shadow-sm`
+                                        }`}
+                                        onClick={() => toggleCategory(category.id)}
+                                      >
+                                        <div className="flex items-start gap-3">
+                                          <div
+                                            className={`p-2 rounded-lg ${isSelected ? "bg-blue-100" : "bg-gray-50"}`}
+                                          >
+                                            <Icon
+                                              className={`w-6 h-6 ${isSelected ? "text-blue-700" : "text-gray-600"}`}
+                                            />
                                           </div>
+                                          <div className="flex-1">
+                                            <h4
+                                              className={`font-semibold mb-2 ${isSelected ? "text-blue-900" : "text-gray-800"}`}
+                                            >
+                                              {category.label}
+                                            </h4>
+                                            <p
+                                              className={`text-sm leading-relaxed ${isSelected ? "text-blue-700" : "text-gray-600"}`}
+                                            >
+                                              {category.description}
+                                            </p>
+                                          </div>
+                                          {isSelected && (
+                                            <div className="flex-shrink-0">
+                                              <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
+                                                <svg
+                                                  className="w-3 h-3 text-white"
+                                                  fill="currentColor"
+                                                  viewBox="0 0 20 20"
+                                                >
+                                                  <path
+                                                    fillRule="evenodd"
+                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                    clipRule="evenodd"
+                                                  />
+                                                </svg>
+                                              </div>
+                                            </div>
+                                          )}
                                         </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
 
-                                        {/* Sub-categories */}
-                                        {hasSubCategories && isExpanded && (
-                                          <div className="mt-2 ml-4 space-y-2">
+                              {/* Sub-Categories Section */}
+                              {selectedCategories.some(catId => {
+                                const cat = resourceCategories.find(c => c.id === catId)
+                                return cat?.subCategories && cat.subCategories.length > 0
+                              }) && (
+                                <div className="pt-4 border-t border-gray-200">
+                                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                    <Filter className="w-4 h-4 text-blue-600" />
+                                    Refine by Sub-Category
+                                  </h4>
+                                  <p className="text-sm text-gray-600 mb-4">
+                                    Choose specific types within your selected categories.
+                                  </p>
+                                  <div className="space-y-4">
+                                    {selectedCategories.map(catId => {
+                                      const category = resourceCategories.find(c => c.id === catId)
+                                      if (!category?.subCategories || category.subCategories.length === 0) return null
+
+                                      return (
+                                        <div key={catId} className="space-y-2">
+                                          <p className="text-sm font-medium text-gray-700">{category.label}</p>
+                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                                             {category.subCategories.map((subCat) => {
                                               const isSubSelected = selectedSubCategories.includes(subCat.id)
                                               return (
@@ -2025,12 +2011,12 @@ export default function ReferralTool() {
                                               )
                                             })}
                                           </div>
-                                        )}
-                                      </div>
-                                    )
-                                  })}
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
                                 </div>
-                              </div>
+                              )}
 
                               {/* Location Filters */}
                               <div className="relative">

@@ -1,9 +1,38 @@
 import { streamText } from "ai"
 import { openai } from "@ai-sdk/openai"
 
+// Category and sub-category mappings
+const categoryLabels: Record<string, string> = {
+  goodwill: "Goodwill Resources & Programs",
+  community: "Local Community Resources",
+  government: "Government Benefits",
+  jobs: "Job Postings",
+  gcta: "GCTA Trainings",
+  cat: "CAT Trainings",
+}
+
+const subCategoryLabels: Record<string, string> = {
+  // Community sub-categories
+  food: "Food & Nutrition",
+  housing: "Housing & Shelter",
+  healthcare: "Healthcare Services",
+  transportation: "Transportation",
+  childcare: "Child Care & Education",
+  legal: "Legal Services",
+  financial: "Financial Assistance",
+  clothing: "Clothing & Household",
+  employment: "Employment Support",
+  // Government sub-categories
+  "food-benefits": "Food Assistance",
+  "healthcare-benefits": "Healthcare Coverage",
+  "housing-benefits": "Housing Assistance",
+  "cash-benefits": "Cash Assistance",
+  "family-benefits": "Child & Family Services",
+}
+
 export async function POST(request: Request) {
   try {
-    const { message, history = [] } = await request.json()
+    const { message, history = [], selectedCategories = [], selectedSubCategories = [] } = await request.json()
 
     if (!message || typeof message !== "string") {
       return Response.json({ error: "Message is required" }, { status: 400 })
@@ -16,6 +45,28 @@ export async function POST(request: Request) {
             .map((msg: any) => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`)
             .join("\n\n")
         : ""
+
+    // Build filter context from selected categories and sub-categories
+    let filterContext = ""
+    if (selectedCategories.length > 0 || selectedSubCategories.length > 0) {
+      filterContext = "\nUSER'S CURRENT FILTERS:\n"
+
+      if (selectedCategories.length > 0) {
+        const categoryNames = selectedCategories
+          .map((id: string) => categoryLabels[id] || id)
+          .join(", ")
+        filterContext += `- Main Categories: ${categoryNames}\n`
+      }
+
+      if (selectedSubCategories.length > 0) {
+        const subCategoryNames = selectedSubCategories
+          .map((id: string) => subCategoryLabels[id] || id)
+          .join(", ")
+        filterContext += `- Sub-Categories: ${subCategoryNames}\n`
+      }
+
+      filterContext += "\nPlease focus your response on resources and information that match these selected categories.\n"
+    }
 
     const aiPrompt = `You are a helpful assistant for Goodwill Central Texas career case managers, specializing in information about their programs, services, training opportunities, and community resources.
 
@@ -74,7 +125,7 @@ Foundation Communities, Salvation Army, Any Baby Can, Safe Alliance, Manos de Cr
 
 
 
-${conversationContext ? `Previous conversation:\n${conversationContext}\n\n` : ""}Current question: ${message}
+${conversationContext ? `Previous conversation:\n${conversationContext}\n\n` : ""}${filterContext}Current question: ${message}
 
 Provide a helpful response in markdown format with citations. Use proper markdown formatting including:
 - **Bold** for emphasis
