@@ -2087,7 +2087,7 @@ export default function ReferralTool() {
                                     }}
                                   />
                                 ) : (
-                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                  <p className="whitespace-pre-wrap">{message.content}</p>
                                 )}
                                 <p
                                   className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"}`}
