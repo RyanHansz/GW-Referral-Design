@@ -14,6 +14,11 @@ export const metadata: Metadata = {
   title: "Goodwill Central Texas - GenAI Referral Tool",
   description: "AI-powered referral tool for Goodwill Central Texas",
   generator: "v0.app",
+  icons: {
+    icon: "/goodwill-logo.svg",
+    shortcut: "/goodwill-logo.svg",
+    apple: "/goodwill-logo.svg",
+  },
 }
 
 export default function RootLayout({

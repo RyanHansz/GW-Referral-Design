@@ -19,7 +19,6 @@ import {
   Printer,
   CheckCircle,
   MessageCircle,
-  Heart,
   Briefcase,
   GraduationCap,
   Menu,
@@ -46,6 +45,7 @@ import {
   Handshake,
   ChevronUp,
 } from "lucide-react"
+import Image from "next/image"
 
 // Import the new parseMarkdownToHTML function
 import { parseMarkdownToHTML } from "@/lib/markdown"
@@ -144,6 +144,16 @@ const resourceCategories = [
     borderColor: "border-teal-300",
     description: "Career Advancement Training and specialized skill development",
   },
+]
+
+// Suggested chat prompts for users to get started
+const suggestedChatPrompts = [
+  "What job training programs does Goodwill offer?",
+  "How can I get help with resume writing?",
+  "What community resources are available for housing assistance?",
+  "Tell me about career advancement opportunities at Goodwill",
+  "What government benefits might I qualify for?",
+  "How do I access food assistance programs?",
 ]
 
 const translateCategory = (category: string, language: string): string => {
@@ -476,6 +486,11 @@ export default function ReferralTool() {
         <head>
           <title>Goodwill Central Texas - Referral Report</title>
           <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
               line-height: 1.6;
@@ -599,16 +614,39 @@ export default function ReferralTool() {
               padding-top: 15px;
               border-top: 1px solid #e2e8f0;
             }
+            @page {
+              margin: 0.75in 0.5in;
+              size: letter;
+            }
             @media print {
-              body { 
-                margin: 0; 
-                padding: 15px;
+              * {
+                margin: 0;
+                padding: 0;
+              }
+              html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              body {
+                padding: 0 15px !important;
               }
               .header {
                 padding-bottom: 10px;
                 margin-bottom: 15px;
+                page-break-after: avoid;
+                margin-top: 0;
               }
-              .exchange { 
+              .header h1 {
+                margin: 0;
+                padding: 0;
+              }
+              .header p {
+                margin: 3px 0 0 0;
+                padding: 0;
+              }
+              .exchange {
                 page-break-inside: avoid;
                 margin-bottom: 20px;
               }
@@ -1554,8 +1592,14 @@ export default function ReferralTool() {
                     {/* Header */}
                     <div className="mb-6">
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white shadow-lg">
-                          <Heart className="w-6 h-6" />
+                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-2">
+                          <Image
+                            src="/goodwill-logo.svg"
+                            alt="Goodwill Central Texas"
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                         <div>
                           <h2 className="text-2xl font-bold text-gray-900">Find Resources </h2>
@@ -1812,6 +1856,27 @@ export default function ReferralTool() {
                             with citations from our knowledge base.
                           </p>
                         </div>
+
+                        {/* Suggested Prompts - Show when no messages */}
+                        {chatMessages.length === 0 && !isChatStreaming && (
+                          <div className="mb-6">
+                            <h3 className="text-sm font-medium text-gray-700 mb-3">Suggested questions to get started:</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {suggestedChatPrompts.map((prompt, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => setChatInput(prompt)}
+                                  className="text-left p-3 rounded-lg border border-gray-300 bg-white hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-sm text-gray-700 hover:text-indigo-700"
+                                >
+                                  <span className="flex items-start gap-2">
+                                    <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-indigo-500" />
+                                    <span>{prompt}</span>
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Chat Messages */}
                         <div className="space-y-4">
