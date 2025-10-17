@@ -478,6 +478,55 @@ export default function ReferralTool() {
   const [chatInput, setChatInput] = useState("")
   const [isChatStreaming, setIsChatStreaming] = useState(false)
   const [streamingChatContent, setStreamingChatContent] = useState("")
+  const [followUpPrompts, setFollowUpPrompts] = useState<string[]>([])
+
+  // Generate contextual follow-up prompts based on assistant response
+  const generateFollowUpPrompts = (responseContent: string): string[] => {
+    const content = responseContent.toLowerCase()
+    const prompts: string[] = []
+
+    // Topic-based follow-ups
+    if (content.includes("job training") || content.includes("career") || content.includes("training program")) {
+      prompts.push("What are the requirements to enroll in these programs?")
+      prompts.push("How long do these training programs typically take?")
+    }
+
+    if (content.includes("resume") || content.includes("interview") || content.includes("job search")) {
+      prompts.push("Do you offer mock interview practice?")
+      prompts.push("Can someone help me apply for jobs online?")
+    }
+
+    if (content.includes("housing") || content.includes("shelter") || content.includes("rent")) {
+      prompts.push("What emergency housing options are available?")
+      prompts.push("How can I get help with utility bills?")
+    }
+
+    if (content.includes("food") || content.includes("snap") || content.includes("nutrition")) {
+      prompts.push("Where are the nearest food banks?")
+      prompts.push("What documents do I need to apply for SNAP?")
+    }
+
+    if (content.includes("medicaid") || content.includes("health") || content.includes("medical")) {
+      prompts.push("How do I apply for healthcare assistance?")
+      prompts.push("Are there free health clinics nearby?")
+    }
+
+    if (content.includes("transportation") || content.includes("bus pass")) {
+      prompts.push("How can I get help with transportation costs?")
+      prompts.push("Are there free transportation options?")
+    }
+
+    // Always add a couple of general follow-ups
+    if (prompts.length < 3) {
+      prompts.push("Can you tell me more about eligibility requirements?")
+    }
+    if (prompts.length < 3) {
+      prompts.push("What documents will I need to bring?")
+    }
+
+    // Return max 4 prompts
+    return prompts.slice(0, 4)
+  }
 
   const generatePrintHTML = () => {
     return `
@@ -1155,6 +1204,7 @@ export default function ReferralTool() {
     setChatInput("")
     setIsChatStreaming(true)
     setStreamingChatContent("")
+    setFollowUpPrompts([]) // Clear follow-ups when sending new message
 
     try {
       const response = await fetch("/api/chat", {
@@ -1197,6 +1247,8 @@ export default function ReferralTool() {
           timestamp: new Date().toISOString(),
         }
         setChatMessages((prev) => [...prev, assistantMessage])
+        // Generate contextual follow-up prompts
+        setFollowUpPrompts(generateFollowUpPrompts(buffer.trim()))
       }
     } catch (error) {
       console.error("Error sending chat message:", error)
@@ -1207,12 +1259,92 @@ export default function ReferralTool() {
         timestamp: new Date().toISOString(),
       }
       setChatMessages((prev) => [...prev, errorMessage])
+      setFollowUpPrompts([]) // Clear follow-ups on error
     } finally {
       setIsChatStreaming(false)
       setStreamingChatContent("")
     }
   }
 
+  // Helper function to send a specific message (used by suggested prompts)
+  const sendChatMessage = async (message: string) => {
+    if (!message.trim() || isChatStreaming) return
+
+    const userMessage = message.trim()
+    const timestamp = new Date().toISOString()
+
+    // Add user message to chat
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: userMessage,
+        timestamp,
+      },
+    ])
+    setChatInput("")
+    setIsChatStreaming(true)
+    setStreamingChatContent("")
+    setFollowUpPrompts([]) // Clear follow-ups when sending new message
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          history: chatMessages.slice(-10), // Send last 10 messages for context
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to get chat response")
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+
+          // Update streaming content directly with accumulated buffer
+          setStreamingChatContent(buffer)
+        }
+      }
+
+      // Add the final assistant message with the complete buffer
+      if (buffer.trim()) {
+        const assistantMessage = {
+          role: "assistant" as const,
+          content: buffer.trim(),
+          timestamp: new Date().toISOString(),
+        }
+        setChatMessages((prev) => [...prev, assistantMessage])
+        // Generate contextual follow-up prompts
+        setFollowUpPrompts(generateFollowUpPrompts(buffer.trim()))
+      }
+    } catch (error) {
+      console.error("Error sending chat message:", error)
+      const errorMessage = {
+        role: "assistant" as const,
+        content: "I apologize, but I encountered an error processing your request. Please try again.",
+        timestamp: new Date().toISOString(),
+      }
+      setChatMessages((prev) => [...prev, errorMessage])
+      setFollowUpPrompts([]) // Clear follow-ups on error
+    } finally {
+      setIsChatStreaming(false)
+      setStreamingChatContent("")
+    }
+  }
 
   const handleStartNew = () => {
     setShowResults(false)
@@ -1865,8 +1997,9 @@ export default function ReferralTool() {
                               {suggestedChatPrompts.map((prompt, index) => (
                                 <button
                                   key={index}
-                                  onClick={() => setChatInput(prompt)}
-                                  className="text-left p-3 rounded-lg border border-gray-300 bg-white hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-sm text-gray-700 hover:text-indigo-700"
+                                  onClick={() => sendChatMessage(prompt)}
+                                  disabled={isChatStreaming}
+                                  className="text-left p-3 rounded-lg border border-gray-300 bg-white hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-sm text-gray-700 hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   <span className="flex items-start gap-2">
                                     <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-indigo-500" />
@@ -1929,6 +2062,28 @@ export default function ReferralTool() {
                             </div>
                           )}
                         </div>
+
+                        {/* Follow-up Prompts - Show after messages if available */}
+                        {followUpPrompts.length > 0 && chatMessages.length > 0 && !isChatStreaming && (
+                          <div className="mt-4">
+                            <h3 className="text-sm font-medium text-gray-700 mb-3">Related questions you might have:</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {followUpPrompts.map((prompt, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => sendChatMessage(prompt)}
+                                  disabled={isChatStreaming}
+                                  className="text-left p-3 rounded-lg border border-gray-300 bg-white hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-sm text-gray-700 hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <span className="flex items-start gap-2">
+                                    <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-indigo-500" />
+                                    <span>{prompt}</span>
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Chat Input */}
                         <Card className="bg-gray-50 border-gray-200">
