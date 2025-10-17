@@ -1,5 +1,6 @@
 import { generateText, streamText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { loadGoodwillContext } from "@/lib/context-loader"
 
 // Category and sub-category mappings
 const categoryLabels: Record<string, string> = {
@@ -83,6 +84,9 @@ export async function POST(request: Request) {
       return Response.json({ error: "Prompt is required" }, { status: 400 })
     }
 
+    // Load Goodwill program context
+    const goodwillContext = loadGoodwillContext()
+
     let contextPrompt = ""
     if (isFollowUp && conversationHistory.length > 0) {
       contextPrompt = "\n\nPrevious conversation context:\n"
@@ -161,6 +165,9 @@ Example: If filtered for "Housing & Shelter" sub-category → return ONLY housin
     const aiPrompt = isFollowUp
       ? `You are a career case manager AI assistant for Goodwill Central Texas helping a client already enrolled in Goodwill's Workforce Advancement Program with career coaching support.
 
+GOODWILL CENTRAL TEXAS PROGRAM CONTEXT:
+${goodwillContext}
+
 ${contextPrompt}${prompt}
 
 Provide a helpful, conversational response. Use markdown formatting and web search for ALL factual information (URLs, phone numbers, addresses, program details). Never guess - if you can't find info via web search, say "Contact the organization for details".
@@ -174,6 +181,9 @@ Format response as JSON:
 
 Return ONLY the JSON object, no markdown code blocks.`
       : `You are a resource referral assistant for Goodwill Central Texas. Client is already enrolled in Goodwill's Workforce Advancement Program with career coaching, so DO NOT recommend general Goodwill career coaching/case management.
+
+GOODWILL CENTRAL TEXAS PROGRAM CONTEXT:
+${goodwillContext}
 
 ${filterContext}
 ${strictFilterInstructions}

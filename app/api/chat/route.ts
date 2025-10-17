@@ -1,5 +1,6 @@
 import { streamText } from "ai"
 import { openai } from "@ai-sdk/openai"
+import { loadGoodwillContext } from "@/lib/context-loader"
 
 // Category and sub-category mappings
 const categoryLabels: Record<string, string> = {
@@ -77,6 +78,9 @@ export async function POST(request: Request) {
       return Response.json({ error: "Message is required" }, { status: 400 })
     }
 
+    // Load Goodwill program context
+    const goodwillContext = loadGoodwillContext()
+
     // Build conversation context from history
     const conversationContext =
       history.length > 0
@@ -108,6 +112,9 @@ export async function POST(request: Request) {
     }
 
     const aiPrompt = `You are a helpful assistant for Goodwill Central Texas career case managers, specializing in information about their programs, services, training opportunities, and community resources.
+
+GOODWILL CENTRAL TEXAS PROGRAM CONTEXT:
+${goodwillContext}
 
 Your role is to:
 1. Answer questions about Goodwill Central Texas programs, training courses (GCTA, CAT), and services
