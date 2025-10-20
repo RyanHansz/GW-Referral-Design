@@ -1910,8 +1910,8 @@ export default function ReferralTool() {
                 Welcome to the Goodwill Referral Tool
               </h1>
               <p className="text-gray-600 text-sm">
-                To help us improve and track usage, please provide your information. This will be saved locally and only
-                asked once.
+                To help us understand how this tool is being used and make improvements, please provide your name and
+                email. We'll only ask once.
               </p>
             </div>
 
