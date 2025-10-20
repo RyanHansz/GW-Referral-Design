@@ -19,7 +19,6 @@ import {
   Printer,
   CheckCircle,
   MessageCircle,
-  Heart,
   Briefcase,
   GraduationCap,
   Menu,
@@ -45,7 +44,10 @@ import {
   Share2,
   Handshake,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
+import Image from "next/image"
 
 // Import the new parseMarkdownToHTML function
 import { parseMarkdownToHTML } from "@/lib/markdown"
@@ -103,6 +105,16 @@ const resourceCategories = [
     color: "border-blue-300 bg-blue-50",
     borderColor: "border-blue-300",
     description: "Job training, career services, and Goodwill-specific programs",
+    subCategories: [
+      { id: "job-placement", label: "Job Placement Services", description: "Job matching, placement assistance, hiring events" },
+      { id: "career-coaching", label: "Career Coaching", description: "One-on-one career guidance and goal setting" },
+      { id: "interview-prep", label: "Interview Preparation", description: "Mock interviews, interview skills training" },
+      { id: "resume-building", label: "Resume & Cover Letter", description: "Resume writing, editing, and professional documents" },
+      { id: "excel-center", label: "Excel Center High School", description: "Free adult high school diploma program" },
+      { id: "workforce-dev", label: "Workforce Development", description: "Job readiness, soft skills, workplace preparation" },
+      { id: "financial-coaching", label: "Financial Coaching", description: "Budgeting, financial literacy, credit counseling" },
+      { id: "support-services", label: "Support Services", description: "Case management, wraparound services, barrier removal" },
+    ],
   },
   {
     id: "community",
@@ -111,6 +123,17 @@ const resourceCategories = [
     color: "border-green-300 bg-green-50",
     borderColor: "border-green-300",
     description: "Food banks, shelters, community organizations, and local support",
+    subCategories: [
+      { id: "food", label: "Food & Nutrition", description: "Food banks, meal programs, SNAP enrollment" },
+      { id: "housing", label: "Housing & Shelter", description: "Emergency shelter, rental assistance, utilities" },
+      { id: "healthcare", label: "Healthcare Services", description: "Clinics, mental health, dental care" },
+      { id: "transportation", label: "Transportation", description: "Bus passes, rides, gas assistance" },
+      { id: "childcare", label: "Child Care & Education", description: "Daycare, after-school programs" },
+      { id: "legal", label: "Legal Services", description: "Legal aid, immigration assistance" },
+      { id: "financial", label: "Financial Assistance", description: "Cash assistance, bill payment help" },
+      { id: "clothing", label: "Clothing & Household", description: "Clothing closets, furniture, household items" },
+      { id: "employment", label: "Employment Support", description: "Job search help, resume assistance" },
+    ],
   },
   {
     id: "government",
@@ -119,6 +142,13 @@ const resourceCategories = [
     color: "border-purple-300 bg-purple-50",
     borderColor: "border-purple-300",
     description: "SNAP, Medicaid, housing assistance, and federal/state programs",
+    subCategories: [
+      { id: "food-benefits", label: "Food Assistance", description: "SNAP, WIC, food stamps" },
+      { id: "healthcare-benefits", label: "Healthcare Coverage", description: "Medicaid, CHIP, Medicare" },
+      { id: "housing-benefits", label: "Housing Assistance", description: "Section 8, rental assistance, public housing" },
+      { id: "cash-benefits", label: "Cash Assistance", description: "TANF, SSI, disability benefits" },
+      { id: "family-benefits", label: "Child & Family Services", description: "Child care subsidies, family support" },
+    ],
   },
   {
     id: "jobs",
@@ -127,6 +157,18 @@ const resourceCategories = [
     color: "border-orange-300 bg-orange-50",
     borderColor: "border-orange-300",
     description: "Current job openings, employment opportunities, and hiring events",
+    subCategories: [
+      { id: "entry-level", label: "Entry-Level Positions", description: "Jobs requiring little to no experience" },
+      { id: "part-time", label: "Part-Time Jobs", description: "Flexible scheduling, under 30 hours per week" },
+      { id: "full-time", label: "Full-Time Jobs", description: "40+ hours per week, benefits eligible" },
+      { id: "seasonal", label: "Seasonal & Temporary", description: "Short-term, contract, or seasonal positions" },
+      { id: "warehouse", label: "Warehouse & Logistics", description: "Warehouse, shipping, delivery, forklift operators" },
+      { id: "retail", label: "Retail & Customer Service", description: "Sales associates, cashiers, customer service reps" },
+      { id: "food-service", label: "Food Service", description: "Restaurant, kitchen, food prep, catering" },
+      { id: "administrative", label: "Administrative & Office", description: "Clerical, data entry, receptionist, office support" },
+      { id: "healthcare-jobs", label: "Healthcare & Medical", description: "CNA, medical assistant, home health, dental" },
+      { id: "skilled-trades", label: "Skilled Trades", description: "HVAC, welding, electrical, plumbing, construction" },
+    ],
   },
   {
     id: "gcta",
@@ -135,6 +177,17 @@ const resourceCategories = [
     color: "border-blue-300 bg-blue-50",
     borderColor: "border-blue-300",
     description: "Goodwill Career Training Academy programs and certifications",
+    subCategories: [
+      { id: "it-certs", label: "IT & Technology", description: "CompTIA A+, Network+, Security+, Google IT Support" },
+      { id: "healthcare-certs", label: "Healthcare Certifications", description: "CNA, phlebotomy, EKG, medical assistant, patient care" },
+      { id: "customer-service", label: "Customer Service", description: "Call center training, customer relations, service skills" },
+      { id: "logistics-training", label: "Logistics & Warehouse", description: "Supply chain, inventory management, warehouse operations" },
+      { id: "manufacturing", label: "Manufacturing", description: "Production, quality control, machine operation" },
+      { id: "welding", label: "Welding", description: "Basic and advanced welding techniques and certifications" },
+      { id: "hvac", label: "HVAC", description: "Heating, ventilation, and air conditioning certification" },
+      { id: "forklift", label: "Forklift Certification", description: "OSHA-compliant forklift operator training" },
+      { id: "cdl", label: "CDL Training", description: "Commercial driver's license preparation" },
+    ],
   },
   {
     id: "cat",
@@ -143,7 +196,27 @@ const resourceCategories = [
     color: "border-teal-300 bg-teal-50",
     borderColor: "border-teal-300",
     description: "Career Advancement Training and specialized skill development",
+    subCategories: [
+      { id: "computer-skills", label: "Computer Skills", description: "Basic computer literacy, typing, email, internet" },
+      { id: "microsoft-office", label: "Microsoft Office", description: "Word, Excel, PowerPoint, Outlook training" },
+      { id: "professional-dev", label: "Professional Development", description: "Work ethics, professionalism, workplace behavior" },
+      { id: "leadership", label: "Leadership Training", description: "Supervisory skills, team management, leadership development" },
+      { id: "communication", label: "Communication Skills", description: "Verbal, written, interpersonal communication" },
+      { id: "time-management", label: "Time Management", description: "Prioritization, organization, productivity skills" },
+      { id: "financial-literacy", label: "Financial Literacy", description: "Personal finance, budgeting, money management" },
+      { id: "digital-literacy", label: "Digital Literacy", description: "Social media, online tools, digital communication" },
+    ],
   },
+]
+
+// Suggested chat prompts for users to get started
+const suggestedChatPrompts = [
+  "What GCTA training programs are available for clients needing career skills?",
+  "Where can I refer a client for food assistance in the Austin area?",
+  "How do I help a client apply for SNAP benefits?",
+  "What local resources are available for clients experiencing homelessness?",
+  "Tell me about Goodwill's job placement services and career coaching",
+  "What are the CAT training options for clients wanting to advance their careers?",
 ]
 
 const translateCategory = (category: string, language: string): string => {
@@ -396,6 +469,8 @@ export default function ReferralTool() {
   const [processingTime, setProcessingTime] = useState("")
   const [followUpPrompt, setFollowUpPrompt] = useState("")
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([])
+  const [selectedSubCategories, setSelectedSubCategories] = useState<string[]>([])
   const [location, setLocation] = useState("")
   const [locationSuggestions, setLocationSuggestions] = useState<Array<{ display_name: string; formatted: string }>>([])
   const [showLocationSuggestions, setShowLocationSuggestions] = useState(false)
@@ -439,6 +514,9 @@ export default function ReferralTool() {
   const [selectedResources, setSelectedResources] = useState<any[]>([])
   const [actionPlanContent, setActionPlanContent] = useState("")
   const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false)
+  const [actionPlanSummary, setActionPlanSummary] = useState("")
+  const [actionPlanGuides, setActionPlanGuides] = useState<string[]>([])
+  const [currentGuideIndex, setCurrentGuideIndex] = useState(0)
 
   const [outputLanguage, setOutputLanguage] = useState<string>("English")
 
@@ -468,6 +546,109 @@ export default function ReferralTool() {
   const [chatInput, setChatInput] = useState("")
   const [isChatStreaming, setIsChatStreaming] = useState(false)
   const [streamingChatContent, setStreamingChatContent] = useState("")
+  const [followUpPrompts, setFollowUpPrompts] = useState<string[]>([])
+
+  // Generate contextual follow-up prompts based on assistant response
+  const generateFollowUpPrompts = (responseContent: string): string[] => {
+    const content = responseContent.toLowerCase()
+
+    // Score each topic based on keyword frequency to find the most relevant one
+    const topics = [
+      {
+        name: "housing",
+        score: 0,
+        keywords: ["housing", "shelter", "homeless", "rent", "eviction", "apartment"],
+        prompts: [
+          "What emergency shelter options are available in Austin?",
+          "How can clients get help with rent or utility assistance?",
+          "What documents do clients need for housing assistance?",
+          "Are there transitional housing programs available?"
+        ]
+      },
+      {
+        name: "food",
+        score: 0,
+        keywords: ["food", "snap", "nutrition", "meal", "food bank", "hunger", "wic"],
+        prompts: [
+          "Where are the nearest food banks or food pantries?",
+          "What's the process for helping a client apply for SNAP?",
+          "Are there meal programs for children or families?",
+          "What emergency food resources are available today?"
+        ]
+      },
+      {
+        name: "training",
+        score: 0,
+        keywords: ["gcta", "cat training", "training program", "skill development", "certification"],
+        prompts: [
+          "What are the enrollment requirements for GCTA programs?",
+          "How long do these training programs typically take?",
+          "Are there prerequisites for CAT training courses?",
+          "What certifications can clients earn through these programs?"
+        ]
+      },
+      {
+        name: "employment",
+        score: 0,
+        keywords: ["resume", "interview", "job search", "job placement", "career coaching", "employment"],
+        prompts: [
+          "Does Goodwill offer mock interview practice for clients?",
+          "How can I access job placement services for my client?",
+          "What resume assistance is available?",
+          "Are there job fairs or hiring events coming up?"
+        ]
+      },
+      {
+        name: "healthcare",
+        score: 0,
+        keywords: ["medicaid", "health", "medical", "clinic", "insurance", "doctor"],
+        prompts: [
+          "How do I help a client apply for Medicaid or healthcare?",
+          "Where are free or low-cost health clinics in the area?",
+          "What mental health resources are available?",
+          "Are there dental care resources for clients?"
+        ]
+      },
+      {
+        name: "transportation",
+        score: 0,
+        keywords: ["transportation", "bus", "ride", "transit", "car", "gas"],
+        prompts: [
+          "How can clients get help with transportation costs?",
+          "Are there free bus passes or transit vouchers available?",
+          "What transportation resources exist for job interviews?",
+          "Are there programs that help with car repairs?"
+        ]
+      }
+    ]
+
+    // Score each topic based on keyword matches
+    topics.forEach(topic => {
+      topic.keywords.forEach(keyword => {
+        const regex = new RegExp(`\\b${keyword}`, "gi")
+        const matches = content.match(regex)
+        if (matches) {
+          topic.score += matches.length
+        }
+      })
+    })
+
+    // Find the highest scoring topic
+    const topTopic = topics.reduce((max, topic) => topic.score > max.score ? topic : max, topics[0])
+
+    // If we have a clear winner (score > 0), return those prompts
+    if (topTopic.score > 0) {
+      return topTopic.prompts
+    }
+
+    // Fallback general prompts if no topic matches
+    return [
+      "Can you provide more details about eligibility requirements?",
+      "What documents should clients bring?",
+      "Are there any income or residency requirements?",
+      "How long does the application process typically take?"
+    ]
+  }
 
   const generatePrintHTML = () => {
     return `
@@ -476,6 +657,11 @@ export default function ReferralTool() {
         <head>
           <title>Goodwill Central Texas - Referral Report</title>
           <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
             body {
               font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
               line-height: 1.6;
@@ -599,16 +785,39 @@ export default function ReferralTool() {
               padding-top: 15px;
               border-top: 1px solid #e2e8f0;
             }
+            @page {
+              margin: 0.75in 0.5in;
+              size: letter;
+            }
             @media print {
-              body { 
-                margin: 0; 
-                padding: 15px;
+              * {
+                margin: 0;
+                padding: 0;
+              }
+              html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              body {
+                padding: 0 15px !important;
               }
               .header {
                 padding-bottom: 10px;
                 margin-bottom: 15px;
+                page-break-after: avoid;
+                margin-top: 0;
               }
-              .exchange { 
+              .header h1 {
+                margin: 0;
+                padding: 0;
+              }
+              .header p {
+                margin: 3px 0 0 0;
+                padding: 0;
+              }
+              .exchange {
                 page-break-inside: avoid;
                 margin-bottom: 20px;
               }
@@ -761,6 +970,12 @@ export default function ReferralTool() {
     )
   }
 
+  const toggleSubCategory = (subCategoryId: string) => {
+    setSelectedSubCategories((prev) =>
+      prev.includes(subCategoryId) ? prev.filter((id) => id !== subCategoryId) : [...prev, subCategoryId],
+    )
+  }
+
   // Removed old parseLocationInput function as it's replaced by API call
   // const parseLocationInput = (input: string): string[] => {
   //   const suggestions: string[] = []
@@ -899,6 +1114,9 @@ export default function ReferralTool() {
           isFollowUp,
           filters: {
             resourceTypes: selectedResourceTypes,
+            categories: selectedCategories,
+            subCategories: selectedSubCategories,
+            location: location,
             locations: selectedLocations,
             ageGroups: selectedAgeGroups,
             incomeRanges: selectedIncomeRanges,
@@ -1117,6 +1335,7 @@ export default function ReferralTool() {
     setChatInput("")
     setIsChatStreaming(true)
     setStreamingChatContent("")
+    setFollowUpPrompts([]) // Clear follow-ups when sending new message
 
     try {
       const response = await fetch("/api/chat", {
@@ -1159,6 +1378,8 @@ export default function ReferralTool() {
           timestamp: new Date().toISOString(),
         }
         setChatMessages((prev) => [...prev, assistantMessage])
+        // Generate contextual follow-up prompts
+        setFollowUpPrompts(generateFollowUpPrompts(buffer.trim()))
       }
     } catch (error) {
       console.error("Error sending chat message:", error)
@@ -1169,12 +1390,92 @@ export default function ReferralTool() {
         timestamp: new Date().toISOString(),
       }
       setChatMessages((prev) => [...prev, errorMessage])
+      setFollowUpPrompts([]) // Clear follow-ups on error
     } finally {
       setIsChatStreaming(false)
       setStreamingChatContent("")
     }
   }
 
+  // Helper function to send a specific message (used by suggested prompts)
+  const sendChatMessage = async (message: string) => {
+    if (!message.trim() || isChatStreaming) return
+
+    const userMessage = message.trim()
+    const timestamp = new Date().toISOString()
+
+    // Add user message to chat
+    setChatMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: userMessage,
+        timestamp,
+      },
+    ])
+    setChatInput("")
+    setIsChatStreaming(true)
+    setStreamingChatContent("")
+    setFollowUpPrompts([]) // Clear follow-ups when sending new message
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          history: chatMessages.slice(-10), // Send last 10 messages for context
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to get chat response")
+      }
+
+      const reader = response.body?.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ""
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+
+          // Update streaming content directly with accumulated buffer
+          setStreamingChatContent(buffer)
+        }
+      }
+
+      // Add the final assistant message with the complete buffer
+      if (buffer.trim()) {
+        const assistantMessage = {
+          role: "assistant" as const,
+          content: buffer.trim(),
+          timestamp: new Date().toISOString(),
+        }
+        setChatMessages((prev) => [...prev, assistantMessage])
+        // Generate contextual follow-up prompts
+        setFollowUpPrompts(generateFollowUpPrompts(buffer.trim()))
+      }
+    } catch (error) {
+      console.error("Error sending chat message:", error)
+      const errorMessage = {
+        role: "assistant" as const,
+        content: "I apologize, but I encountered an error processing your request. Please try again.",
+        timestamp: new Date().toISOString(),
+      }
+      setChatMessages((prev) => [...prev, errorMessage])
+      setFollowUpPrompts([]) // Clear follow-ups on error
+    } finally {
+      setIsChatStreaming(false)
+      setStreamingChatContent("")
+    }
+  }
 
   const handleStartNew = () => {
     setShowResults(false)
@@ -1471,6 +1772,9 @@ export default function ReferralTool() {
 
     setIsGeneratingActionPlan(true)
     setActionPlanContent("")
+    setActionPlanSummary("")
+    setActionPlanGuides([])
+    setCurrentGuideIndex(0)
 
     try {
       const response = await fetch("/api/generate-action-plan", {
@@ -1488,20 +1792,75 @@ export default function ReferralTool() {
         throw new Error("Failed to generate action plan")
       }
 
-      // Handle streaming response - plain markdown
       const reader = response.body?.getReader()
       if (!reader) throw new Error("No reader available")
 
       const decoder = new TextDecoder()
-      let accumulatedContent = ""
+      let buffer = ""
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+      // For single resources, we get plain markdown streaming
+      // For multiple resources, we get structured JSON chunks
+      const isSingleResource = selectedResources.length === 1
 
-        const chunk = decoder.decode(value, { stream: true })
-        accumulatedContent += chunk
-        setActionPlanContent(accumulatedContent)
+      if (isSingleResource) {
+        // Handle plain markdown streaming
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+          setActionPlanContent(buffer)
+        }
+      } else {
+        // Handle structured JSON streaming
+        let summaryContent = ""
+        const resourceContents: string[] = new Array(selectedResources.length).fill("")
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+
+          // Process complete lines
+          const lines = buffer.split("\n")
+          buffer = lines.pop() || "" // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.trim()) continue
+
+            try {
+              const data = JSON.parse(line)
+
+              if (data.type === "summary") {
+                summaryContent += data.content
+                setActionPlanSummary(summaryContent)
+                // Update legacy content for backward compatibility
+                const fullContent = summaryContent + "\n\n" + resourceContents.filter((r) => r).join("\n\n")
+                setActionPlanContent(fullContent)
+              } else if (data.type === "resource") {
+                resourceContents[data.resourceIndex] = data.content
+                setActionPlanGuides([...resourceContents])
+                // Update legacy content for backward compatibility
+                const fullContent = summaryContent + "\n\n" + resourceContents.filter((r) => r).join("\n\n")
+                setActionPlanContent(fullContent)
+              } else if (data.type === "complete") {
+                // Final assembly
+                setActionPlanSummary(summaryContent)
+                setActionPlanGuides(resourceContents.filter((r) => r))
+                const fullContent = summaryContent + "\n\n" + resourceContents.filter((r) => r).join("\n\n")
+                setActionPlanContent(fullContent)
+              } else if (data.type === "error") {
+                throw new Error(data.error)
+              }
+            } catch (e) {
+              // Skip invalid JSON lines
+              console.warn("Failed to parse line:", line, e)
+            }
+          }
+        }
       }
     } catch (error) {
       console.error("Error generating action plan:", error)
@@ -1515,7 +1874,7 @@ export default function ReferralTool() {
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex flex-1 relative">
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 flex flex-col min-w-0">
           {/* Pilot Banner */}
           <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -1554,8 +1913,14 @@ export default function ReferralTool() {
                     {/* Header */}
                     <div className="mb-6">
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white shadow-lg">
-                          <Heart className="w-6 h-6" />
+                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-2">
+                          <Image
+                            src="/goodwill-logo.svg"
+                            alt="Goodwill Central Texas"
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-contain"
+                          />
                         </div>
                         <div>
                           <h2 className="text-2xl font-bold text-gray-900">Find Resources </h2>
@@ -1610,24 +1975,29 @@ export default function ReferralTool() {
                               {/* Resource Categories */}
                               <div>
                                 <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                  <Filter className="w-4 h-4 text-blue-600" />
                                   What type of resource does your client need?
                                 </h4>
                                 <p className="text-sm text-gray-600 mb-4">
-                                  Choose the categories that best match your client&#39;s needs.
+                                  <span className="font-medium">Optional:</span> Select categories to get more targeted results, or leave unselected for broader recommendations.
                                 </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                   {resourceCategories.map((category) => {
                                     const Icon = category.icon
                                     const isSelected = selectedCategories.includes(category.id)
+
                                     return (
-                                      <div
+                                      <button
+                                        type="button"
                                         key={category.id}
-                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md text-left w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                                           isSelected
                                             ? `bg-blue-50 border-blue-300 border-opacity-100 shadow-md ring-2 ring-blue-200`
                                             : `bg-white border-gray-200 border-opacity-50 hover:border-opacity-75 hover:shadow-sm`
                                         }`}
                                         onClick={() => toggleCategory(category.id)}
+                                        aria-pressed={isSelected}
+                                        aria-label={`${isSelected ? 'Deselect' : 'Select'} ${category.label} category`}
                                       >
                                         <div className="flex items-start gap-3">
                                           <div
@@ -1656,6 +2026,7 @@ export default function ReferralTool() {
                                                   className="w-3 h-3 text-white"
                                                   fill="currentColor"
                                                   viewBox="0 0 20 20"
+                                                  aria-hidden="true"
                                                 >
                                                   <path
                                                     fillRule="evenodd"
@@ -1667,28 +2038,116 @@ export default function ReferralTool() {
                                             </div>
                                           )}
                                         </div>
-                                      </div>
+                                      </button>
                                     )
                                   })}
                                 </div>
                               </div>
 
+                              {/* Sub-Categories Section */}
+                              {selectedCategories.some(catId => {
+                                const cat = resourceCategories.find(c => c.id === catId)
+                                return cat?.subCategories && cat.subCategories.length > 0
+                              }) && (
+                                <div className="pt-4 border-t border-gray-200">
+                                  <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                    <Filter className="w-4 h-4 text-blue-600" />
+                                    Refine by Sub-Category
+                                  </h4>
+                                  <p className="text-sm text-gray-600 mb-4">
+                                    <span className="font-medium">Optional:</span> Select specific types for even more targeted results.
+                                  </p>
+                                  <div className="space-y-4">
+                                    {selectedCategories.map(catId => {
+                                      const category = resourceCategories.find(c => c.id === catId)
+                                      if (!category?.subCategories || category.subCategories.length === 0) return null
+
+                                      return (
+                                        <div key={catId} className="space-y-2">
+                                          <p className="text-sm font-medium text-gray-700">{category.label}</p>
+                                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                            {category.subCategories.map((subCat) => {
+                                              const isSubSelected = selectedSubCategories.includes(subCat.id)
+                                              return (
+                                                <button
+                                                  type="button"
+                                                  key={subCat.id}
+                                                  onClick={() => toggleSubCategory(subCat.id)}
+                                                  className={`p-3 rounded-lg border cursor-pointer transition-all text-left w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                                                    isSubSelected
+                                                      ? "bg-indigo-50 border-indigo-300 shadow-sm"
+                                                      : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                                                  }`}
+                                                  aria-pressed={isSubSelected}
+                                                  aria-label={`${isSubSelected ? 'Deselect' : 'Select'} ${subCat.label} sub-category`}
+                                                >
+                                                  <div className="flex items-start gap-2">
+                                                    <div className="flex-1">
+                                                      <p
+                                                        className={`text-sm font-medium ${
+                                                          isSubSelected ? "text-indigo-900" : "text-gray-800"
+                                                        }`}
+                                                      >
+                                                        {subCat.label}
+                                                      </p>
+                                                      <p
+                                                        className={`text-xs mt-1 ${
+                                                          isSubSelected ? "text-indigo-600" : "text-gray-600"
+                                                        }`}
+                                                      >
+                                                        {subCat.description}
+                                                      </p>
+                                                    </div>
+                                                    {isSubSelected && (
+                                                      <div className="flex-shrink-0">
+                                                        <div className="w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center">
+                                                          <svg
+                                                            className="w-2.5 h-2.5 text-white"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                            aria-hidden="true"
+                                                          >
+                                                            <path
+                                                              fillRule="evenodd"
+                                                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                              clipRule="evenodd"
+                                                            />
+                                                          </svg>
+                                                        </div>
+                                                      </div>
+                                                    )}
+                                                  </div>
+                                                </button>
+                                              )
+                                            })}
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+
                               {/* Location Filters */}
                               <div className="relative">
-                                <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                <Label htmlFor="location-input" className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                                   <MapPin className="w-4 h-4 text-blue-600" />
                                   Location Preferences
-                                </h4>
+                                </Label>
+                                <p className="text-sm text-gray-600 mb-3">
+                                  <span className="font-medium">Optional:</span> Specify a location to find resources nearby.
+                                </p>
                                 <Input
+                                  id="location-input"
                                   placeholder="Enter location (city, ZIP code, area, etc.)"
                                   value={location}
                                   onChange={(e) => handleLocationChange(e.target.value)}
                                   className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-background"
                                 />
 
-                                <div className="mt-2 text-xs text-gray-500">
+                                <div className="mt-2 text-xs text-gray-600">
                                   <p>
-                                    💡 <strong>Examples:</strong> "Round Rock", "78701", "Austin, TX", "downtown Dallas"
+                                    💡 <strong>Examples:</strong> "Round Rock", "78701", "Austin, TX", "San Marcos"
                                   </p>
                                 </div>
                               </div>
@@ -1706,18 +2165,19 @@ export default function ReferralTool() {
                                 >
                                   <option value="English">English</option>
                                   <option value="Spanish">Español (Spanish)</option>
-                                  <option value="French">Français (French)</option>
-                                  <option value="German">Deutsch (German)</option>
-                                  <option value="Italian">Italiano (Italian)</option>
-                                  <option value="Portuguese">Português (Portuguese)</option>
-                                  <option value="Russian">Русский (Russian)</option>
+                                  <option value="Vietnamese">Tiếng Việt (Vietnamese)</option>
                                   <option value="Chinese">中文 (Chinese)</option>
-                                  <option value="Japanese">日本語 (Japanese)</option>
                                   <option value="Korean">한국어 (Korean)</option>
                                   <option value="Arabic">العربية (Arabic)</option>
                                   <option value="Hindi">हिन्दी (Hindi)</option>
+                                  <option value="French">Français (French)</option>
+                                  <option value="German">Deutsch (German)</option>
+                                  <option value="Portuguese">Português (Portuguese)</option>
+                                  <option value="Russian">Русский (Russian)</option>
+                                  <option value="Japanese">日本語 (Japanese)</option>
+                                  <option value="Italian">Italiano (Italian)</option>
                                 </select>
-                                <div className="mt-2 text-xs text-gray-500">
+                                <div className="mt-2 text-xs text-gray-600">
                                   <p>🌐 Choose the language for generated referrals and action plans</p>
                                 </div>
                               </div>
@@ -1740,10 +2200,11 @@ export default function ReferralTool() {
                         </Card>
 
                         <div className="space-y-3">
-                          <label className="font-medium text-gray-900 text-lg">
+                          <Label htmlFor="client-details-input" className="font-medium text-gray-900 text-lg">
                             Add details about your client&#39;s needs{" "}
-                          </label>
+                          </Label>
                           <Textarea
+                            id="client-details-input"
                             placeholder="Share anything that would help us find the perfect resources for your client - their goals, challenges, timeline, or what success looks like for them..."
                             value={userInput}
                             onChange={(e) => setUserInput(e.target.value)}
@@ -1813,8 +2274,30 @@ export default function ReferralTool() {
                           </p>
                         </div>
 
+                        {/* Suggested Prompts - Show when no messages */}
+                        {chatMessages.length === 0 && !isChatStreaming && (
+                          <div className="mb-6">
+                            <h3 className="text-sm font-medium text-gray-700 mb-3">Suggested questions to get started:</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {suggestedChatPrompts.map((prompt, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => sendChatMessage(prompt)}
+                                  disabled={isChatStreaming}
+                                  className="text-left p-3 rounded-lg border border-gray-300 bg-white hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-sm text-gray-700 hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <span className="flex items-start gap-2">
+                                    <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-indigo-500" />
+                                    <span>{prompt}</span>
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
                         {/* Chat Messages */}
-                        <div className="space-y-4">
+                        <div className="space-y-4" role="log" aria-live="polite" aria-atomic="false">
                           {chatMessages.map((message, index) => (
                             <div
                               key={index}
@@ -1835,10 +2318,10 @@ export default function ReferralTool() {
                                     }}
                                   />
                                 ) : (
-                                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                  <p className="whitespace-pre-wrap">{message.content}</p>
                                 )}
                                 <p
-                                  className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-500"}`}
+                                  className={`text-xs mt-2 ${message.role === "user" ? "text-blue-100" : "text-gray-600"}`}
                                 >
                                   {new Date(message.timestamp).toLocaleTimeString()}
                                 </p>
@@ -1848,10 +2331,14 @@ export default function ReferralTool() {
 
                           {/* Streaming Message */}
                           {isChatStreaming && streamingChatContent && (
-                            <div className="flex justify-start">
+                            <div className="flex justify-start" aria-live="off">
+                              {/* Screen reader only status announcement */}
+                              <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                                Generating response, please wait...
+                              </span>
                               <div className="max-w-3xl rounded-lg p-4 bg-gray-100 text-gray-900 border border-gray-200">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+                                  <Loader2 className="w-4 h-4 animate-spin text-indigo-600" aria-hidden="true" />
                                   <span className="text-sm text-indigo-600 font-medium">Responding...</span>
                                 </div>
                                 <div
@@ -1864,6 +2351,28 @@ export default function ReferralTool() {
                             </div>
                           )}
                         </div>
+
+                        {/* Follow-up Prompts - Show after messages if available */}
+                        {followUpPrompts.length > 0 && chatMessages.length > 0 && !isChatStreaming && (
+                          <div className="mt-4">
+                            <h3 className="text-sm font-medium text-gray-700 mb-3">Related questions you might have:</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {followUpPrompts.map((prompt, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => sendChatMessage(prompt)}
+                                  disabled={isChatStreaming}
+                                  className="text-left p-3 rounded-lg border border-gray-300 bg-white hover:bg-indigo-50 hover:border-indigo-300 transition-colors text-sm text-gray-700 hover:text-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <span className="flex items-start gap-2">
+                                    <Sparkles className="w-4 h-4 mt-0.5 flex-shrink-0 text-indigo-500" />
+                                    <span>{prompt}</span>
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         {/* Chat Input */}
                         <Card className="bg-gray-50 border-gray-200">
@@ -1887,7 +2396,7 @@ export default function ReferralTool() {
                                   className="min-h-[100px] resize-none"
                                   disabled={isChatStreaming}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">Press Enter to send, Shift+Enter for new line</p>
+                                <p className="text-xs text-gray-600 mt-2">Press Enter to send, Shift+Enter for new line</p>
                               </div>
                               <Button
                                 onClick={handleSendChatMessage}
@@ -1957,6 +2466,7 @@ export default function ReferralTool() {
                             {conversationHistory.length === 0 &&
                               (outputLanguage !== "English" ||
                                 selectedCategories.length > 0 ||
+                                selectedSubCategories.length > 0 ||
                                 selectedResourceTypes.length > 0 ||
                                 location ||
                                 selectedLocations.length > 0 ||
@@ -1977,6 +2487,21 @@ export default function ReferralTool() {
                                       <span className="font-medium">Categories:</span>{" "}
                                       {selectedCategories
                                         .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedSubCategories.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Sub-Categories:</span>{" "}
+                                      {selectedSubCategories
+                                        .map((id) => {
+                                          for (const cat of resourceCategories) {
+                                            const subCat = cat.subCategories.find((s) => s.id === id)
+                                            if (subCat) return subCat.label
+                                          }
+                                          return null
+                                        })
                                         .filter(Boolean)
                                         .join(", ")}
                                     </div>
@@ -2226,6 +2751,7 @@ export default function ReferralTool() {
                           {index === 0 &&
                             (outputLanguage !== "English" ||
                               selectedCategories.length > 0 ||
+                              selectedSubCategories.length > 0 ||
                               selectedResourceTypes.length > 0 ||
                               location ||
                               selectedLocations.length > 0 ||
@@ -2246,6 +2772,21 @@ export default function ReferralTool() {
                                       <span className="font-medium">Categories:</span>{" "}
                                       {selectedCategories
                                         .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedSubCategories.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Sub-Categories:</span>{" "}
+                                      {selectedSubCategories
+                                        .map((id) => {
+                                          for (const cat of resourceCategories) {
+                                            const subCat = cat.subCategories.find((s) => s.id === id)
+                                            if (subCat) return subCat.label
+                                          }
+                                          return null
+                                        })
                                         .filter(Boolean)
                                         .join(", ")}
                                     </div>
@@ -2515,23 +3056,119 @@ export default function ReferralTool() {
                         )}
 
                         {/* Action Plan - streaming or complete */}
-                        {(isGeneratingActionPlan || actionPlanContent) && (
-                          <div className="mt-6">
-                            <div className="space-y-4 pb-6 border-b border-gray-200">
+                        {(isGeneratingActionPlan || actionPlanContent || actionPlanSummary || actionPlanGuides.length > 0) && (
+                          <div className="mt-6 p-4 bg-blue-50 border border-blue-500 rounded-lg max-w-4xl">
+                            <h3 className="text-lg font-semibold text-blue-900 mb-4">Action Plan</h3>
+                            <div className="space-y-4">
                               {isGeneratingActionPlan && (
-                                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                                <div className="flex items-center gap-3 p-4 bg-white rounded-lg border border-blue-200">
+                                  {/* Screen reader only status announcement */}
+                                  <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                                    Generating action plan, please wait...
+                                  </span>
+                                  <Loader2 className="w-5 h-5 animate-spin text-blue-600" aria-hidden="true" />
                                   <span className="text-blue-900 font-medium">Generating action plan...</span>
                                 </div>
                               )}
 
-                              {actionPlanContent && (
-                                <div className="prose max-w-none text-slate-700">
+                              {/* Single resource or legacy view */}
+                              {actionPlanContent && selectedResources.length === 1 && (
+                                <div className="prose prose-slate max-w-none" role="region" aria-live={isGeneratingActionPlan ? "off" : "polite"} aria-atomic="true">
                                   <div
                                     dangerouslySetInnerHTML={{
                                       __html: parseMarkdownToHTML(actionPlanContent),
                                     }}
                                   />
+                                </div>
+                              )}
+
+                              {/* Multiple resources with carousel */}
+                              {selectedResources.length > 1 && (actionPlanSummary || actionPlanGuides.length > 0) && (
+                                <div className="space-y-4">
+                                  {/* Quick Summary */}
+                                  {actionPlanSummary && (
+                                    <div className="prose prose-slate max-w-none p-4 bg-white rounded-lg border border-blue-200">
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: parseMarkdownToHTML(actionPlanSummary),
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Individual Resource Guides Carousel */}
+                                  {actionPlanGuides.length > 0 && (
+                                    <div className="space-y-3">
+                                      <div className="flex items-center justify-between">
+                                        <h4 className="text-md font-semibold text-blue-900">
+                                          Individual Resource Guides
+                                        </h4>
+                                        <div className="text-sm text-blue-700">
+                                          {currentGuideIndex + 1} of {actionPlanGuides.filter(g => g).length}
+                                        </div>
+                                      </div>
+
+                                      {/* Carousel Container */}
+                                      <div className="relative">
+                                        {/* Current Guide */}
+                                        <div className="prose prose-slate max-w-none p-4 bg-white rounded-lg border border-blue-200">
+                                          {actionPlanGuides[currentGuideIndex] ? (
+                                            <div
+                                              dangerouslySetInnerHTML={{
+                                                __html: parseMarkdownToHTML(actionPlanGuides[currentGuideIndex]),
+                                              }}
+                                            />
+                                          ) : (
+                                            <div className="flex items-center gap-3 py-8 justify-center text-blue-600">
+                                              <Loader2 className="w-5 h-5 animate-spin" />
+                                              <span>Loading resource guide...</span>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {/* Navigation Arrows */}
+                                        <div className="flex items-center justify-between mt-4">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentGuideIndex(Math.max(0, currentGuideIndex - 1))}
+                                            disabled={currentGuideIndex === 0}
+                                            className="flex items-center gap-2"
+                                          >
+                                            <ChevronLeft className="w-4 h-4" />
+                                            Previous
+                                          </Button>
+
+                                          {/* Dots indicator */}
+                                          <div className="flex items-center gap-2">
+                                            {actionPlanGuides.map((_, index) => (
+                                              <button
+                                                key={index}
+                                                onClick={() => setCurrentGuideIndex(index)}
+                                                className={`w-2 h-2 rounded-full transition-all ${
+                                                  index === currentGuideIndex
+                                                    ? "bg-blue-600 w-6"
+                                                    : "bg-blue-300 hover:bg-blue-400"
+                                                }`}
+                                                aria-label={`Go to guide ${index + 1}`}
+                                              />
+                                            ))}
+                                          </div>
+
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentGuideIndex(Math.min(actionPlanGuides.length - 1, currentGuideIndex + 1))}
+                                            disabled={currentGuideIndex === actionPlanGuides.length - 1}
+                                            className="flex items-center gap-2"
+                                          >
+                                            Next
+                                            <ChevronRight className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -2542,9 +3179,13 @@ export default function ReferralTool() {
 
                     {/* Show streaming follow-up content */}
                     {streamingFollowUpContent && (
-                      <div className="space-y-4 pb-6 border-b border-gray-200">
+                      <div className="space-y-4 pb-6 border-b border-gray-200" aria-live="off">
                         <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+                          {/* Screen reader only status announcement */}
+                          <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                            Generating follow-up response, please wait...
+                          </span>
+                          <Loader2 className="w-5 h-5 animate-spin text-blue-600" aria-hidden="true" />
                           <span className="text-blue-900 font-medium">Generating response...</span>
                         </div>
 
@@ -2561,9 +3202,12 @@ export default function ReferralTool() {
                     {/* Follow-up input */}
                     {showActionPlanSection && conversationHistory.length > 0 && (
                       <div className="mt-6 p-4 border rounded-lg bg-gray-50 animate-fadeIn">
-                        <h4 className="font-medium text-gray-900 mb-3">Ask a follow-up question:</h4>
+                        <Label htmlFor="follow-up-input" className="font-medium text-gray-900 mb-3 block">
+                          Ask a follow-up question:
+                        </Label>
                         <div className="space-y-3">
                           <Textarea
+                            id="follow-up-input"
                             placeholder="Ask for more specific information, clarify details, or request additional resources..."
                             value={followUpPrompt}
                             onChange={(e) => setFollowUpPrompt(e.target.value)}
@@ -2611,7 +3255,7 @@ export default function ReferralTool() {
               </div>
             </div>
           </div>
-        </div>
+      </main>
       </div>
 
       <Dialog
@@ -2684,6 +3328,7 @@ export default function ReferralTool() {
                   <Input
                     id="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="your.email@example.com"
                     value={emailAddress}
                     onChange={(e) => {
@@ -2692,7 +3337,7 @@ export default function ReferralTool() {
                     }}
                     disabled={isSendingEmail}
                   />
-                  {emailError && <p className="text-sm text-red-600">{emailError}</p>}
+                  {emailError && <p className="text-sm text-red-600" role="alert">{emailError}</p>}
                 </div>
 
                 <Button
