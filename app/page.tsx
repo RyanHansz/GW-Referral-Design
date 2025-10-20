@@ -548,8 +548,7 @@ export default function ReferralTool() {
   const [streamingChatContent, setStreamingChatContent] = useState("")
   const [followUpPrompts, setFollowUpPrompts] = useState<string[]>([])
 
-  // User info modal state
-  const [showUserModal, setShowUserModal] = useState(false)
+  // User info state
   const [userName, setUserName] = useState("")
   const [userEmail, setUserEmail] = useState("")
   const [userNameInput, setUserNameInput] = useState("")
@@ -563,8 +562,6 @@ export default function ReferralTool() {
     if (storedUserName && storedUserEmail) {
       setUserName(storedUserName)
       setUserEmail(storedUserEmail)
-    } else {
-      setShowUserModal(true)
     }
   }, [])
 
@@ -574,7 +571,6 @@ export default function ReferralTool() {
       localStorage.setItem("userEmail", userEmailInput.trim())
       setUserName(userNameInput.trim())
       setUserEmail(userEmailInput.trim())
-      setShowUserModal(false)
     }
   }
 
@@ -1900,77 +1896,92 @@ export default function ReferralTool() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* User Info Modal */}
-      <Dialog open={showUserModal} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <UserPlus className="h-6 w-6 text-blue-600" />
-              Welcome to the Goodwill Referral Tool
-            </DialogTitle>
-            <DialogDescription className="text-base pt-2">
-              To help us improve and track usage, please provide your information. This will be saved locally and only asked once.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="userName" className="text-sm font-medium">
-                Your Name *
-              </Label>
-              <Input
-                id="userName"
-                name="userName"
-                type="text"
-                placeholder="Enter your full name"
-                value={userNameInput}
-                onChange={(e) => setUserNameInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
-                    handleUserInfoSubmit()
-                  }
-                }}
-                autoComplete="off"
-                data-form-type="other"
-                className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
-                autoFocus
-              />
+  // If no user info, show the welcome page
+  if (!userName || !userEmail) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-2xl">
+          <CardContent className="pt-8 pb-8 px-8">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
+                <UserPlus className="h-8 w-8 text-blue-600" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Welcome to the Goodwill Referral Tool
+              </h1>
+              <p className="text-gray-600 text-sm">
+                To help us improve and track usage, please provide your information. This will be saved locally and only
+                asked once.
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="userEmail" className="text-sm font-medium">
-                Your Email *
-              </Label>
-              <Input
-                id="userEmail"
-                name="userEmail"
-                type="email"
-                placeholder="Enter your email address"
-                value={userEmailInput}
-                onChange={(e) => setUserEmailInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
-                    handleUserInfoSubmit()
-                  }
-                }}
-                autoComplete="off"
-                data-form-type="other"
-                className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
-              />
-            </div>
-            <div className="flex justify-end pt-2">
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="userName" className="text-sm font-medium text-gray-700">
+                  Your Name *
+                </Label>
+                <Input
+                  id="userName"
+                  name="userName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={userNameInput}
+                  onChange={(e) => setUserNameInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
+                      handleUserInfoSubmit()
+                    }
+                  }}
+                  autoComplete="off"
+                  data-form-type="other"
+                  className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
+                  autoFocus
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="userEmail" className="text-sm font-medium text-gray-700">
+                  Your Email *
+                </Label>
+                <Input
+                  id="userEmail"
+                  name="userEmail"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={userEmailInput}
+                  onChange={(e) => setUserEmailInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
+                      handleUserInfoSubmit()
+                    }
+                  }}
+                  autoComplete="off"
+                  data-form-type="other"
+                  className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
+                />
+              </div>
+
               <Button
                 onClick={handleUserInfoSubmit}
                 disabled={!userNameInput.trim() || !userEmailInput.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold"
               >
                 Get Started
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
+            <p className="text-xs text-gray-500 text-center mt-6">
+              Your information is stored locally in your browser and is not sent to any server.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Main application (only shown after user info is provided)
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex flex-1 relative">
         {/* Main Content */}
         <main className="flex-1 flex flex-col min-w-0">
