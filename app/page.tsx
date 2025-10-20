@@ -1903,8 +1903,8 @@ export default function ReferralTool() {
         <Card className="w-full max-w-md shadow-2xl">
           <CardContent className="pt-8 pb-8 px-8">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-                <UserPlus className="h-8 w-8 text-blue-600" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white mb-4">
+                <Image src="/goodwill-logo.svg" alt="Goodwill Logo" width={48} height={48} />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 Welcome to the Goodwill Referral Tool
