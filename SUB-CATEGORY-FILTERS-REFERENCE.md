@@ -9,7 +9,8 @@
 ## Overview
 
 Sub-category filters allow users to narrow down resources within a main category. For example, under "GCTA Trainings", users can filter by "IT & Technology", "Healthcare Certifications", etc.
-<img width="800" height="644" alt="Screenshot 2025-10-20 at 11 16 24 AM" src="https://github.com/user-attachments/assets/69efa547-8365-43b0-8ee3-433e5e8875e8" />
+
+<img width="715" height="615" alt="Screenshot 2025-10-20 at 11 17 10 AM" src="https://github.com/user-attachments/assets/0136b035-3e2f-4720-9485-324a91b28570" />
 
 
 ---
