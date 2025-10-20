@@ -13,6 +13,8 @@
 ## Overview
 
 **AI GENERATED, DOUBLE CHECK THINGS**
+<img width="897" height="768" alt="Screenshot 2025-10-20 at 11 39 03 AM" src="https://github.com/user-attachments/assets/94cf715e-f7a6-4a1a-bc87-51296239fcb6" />
+
 
 Chat Mode provides an interactive Q&A interface for Goodwill Central Texas case managers to ask questions about programs, services, training opportunities, and community resources. The system uses GPT-5 with web search capabilities and a comprehensive knowledge base to provide accurate, cited responses in real-time.
 
