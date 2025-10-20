@@ -742,6 +742,347 @@ const handleUserInfoSubmit = () => {
 
 ---
 
+## Iframe Embedding Considerations
+
+### **⚠️ Important: This Tool Will Be Embedded in an iframe**
+
+The Goodwill Referral Tool is designed to be embedded in iframes across different platforms. This creates specific challenges for the user info modal that need to be addressed.
+
+---
+
+### **Issue #1: Parent Page Can Still Scroll** ⚠️ **HIGH PRIORITY**
+
+**Problem:**
+- Modal disables scrolling within the iframe
+- Parent page can still scroll freely
+- Users can scroll the iframe (with modal) out of view
+- Modal is still "open" and blocking, but not visible
+
+**Impact:** Confusing UX - user might think app is frozen
+
+**Current Behavior:**
+```
+[Parent Page - Can Scroll ✓]
+  ↓
+  [Iframe with Modal - Cannot Scroll ✗]
+```
+
+**Solution Option A - PostMessage API (Recommended):**
+
+Update the modal logic to communicate with parent:
+
+```typescript
+// Add to useEffect in app/page.tsx
+useEffect(() => {
+  if (showUserModal) {
+    // Request parent to disable scroll
+    window.parent.postMessage({ type: 'disableScroll' }, '*')
+  } else {
+    // Request parent to enable scroll
+    window.parent.postMessage({ type: 'enableScroll' }, '*')
+  }
+
+  return () => {
+    // Cleanup: re-enable scroll on unmount
+    window.parent.postMessage({ type: 'enableScroll' }, '*')
+  }
+}, [showUserModal])
+```
+
+**Parent page must listen:**
+
+```html
+<script>
+  window.addEventListener('message', (event) => {
+    // Verify origin for security
+    if (event.origin !== 'https://tools.goodwillcentraltexas.org') return
+
+    if (event.data.type === 'disableScroll') {
+      document.body.style.overflow = 'hidden'
+    } else if (event.data.type === 'enableScroll') {
+      document.body.style.overflow = ''
+    }
+  })
+</script>
+```
+
+**Solution Option B - Accept Current Behavior (Simpler):**
+
+Document this as expected behavior and ensure iframe is prominently placed so scrolling it out of view is unlikely.
+
+---
+
+### **Issue #2: localStorage Cross-Origin Isolation** ⚠️ **HIGH PRIORITY**
+
+**Problem:**
+- localStorage is scoped to origin (protocol + domain + port)
+- If iframe is embedded on different domains, each has separate localStorage
+- User will see modal multiple times across different embedding locations
+
+**Example Scenarios:**
+
+| Iframe URL | Embedded On | localStorage Shared? | Modal Frequency |
+|-----------|-------------|---------------------|-----------------|
+| `https://tools.goodwill.org` | `https://tools.goodwill.org` | ✅ Yes | Once |
+| `https://tools.goodwill.org` | `https://www.goodwill.org` | ❌ No | Every embedding |
+| `https://tools.goodwill.org` | `https://intranet.org` | ❌ No | Every embedding |
+| `https://tools.goodwill.org` | `https://partner-site.com` | ❌ No | Every embedding |
+
+**Impact:** Users may need to provide info multiple times if tool is embedded across different sites
+
+**Solution Option A - URL Parameters (Recommended):**
+
+Parent page passes user info via URL:
+
+```html
+<!-- Parent page embeds with user info -->
+<iframe src="https://tools.goodwill.org?userName=Sarah%20Johnson&userEmail=sjohnson@goodwill.org"></iframe>
+```
+
+Update detection logic:
+
+```typescript
+useEffect(() => {
+  // Priority 1: Check URL parameters
+  const params = new URLSearchParams(window.location.search)
+  const urlName = params.get('userName')
+  const urlEmail = params.get('userEmail')
+
+  if (urlName && urlEmail) {
+    const decodedName = decodeURIComponent(urlName)
+    const decodedEmail = decodeURIComponent(urlEmail)
+
+    setUserName(decodedName)
+    setUserEmail(decodedEmail)
+    localStorage.setItem('userName', decodedName)
+    localStorage.setItem('userEmail', decodedEmail)
+    return // Don't show modal
+  }
+
+  // Priority 2: Check localStorage (same-origin embeddings)
+  const storedUserName = localStorage.getItem("userName")
+  const storedUserEmail = localStorage.getItem("userEmail")
+
+  if (storedUserName && storedUserEmail) {
+    setUserName(storedUserName)
+    setUserEmail(storedUserEmail)
+  } else {
+    setShowUserModal(true)
+  }
+}, [])
+```
+
+**Security Note:** Don't trust URL parameters blindly - validate email format, sanitize inputs.
+
+**Solution Option B - PostMessage API:**
+
+Parent page sends user info via postMessage:
+
+```javascript
+// Parent page
+const iframe = document.getElementById('goodwillTool')
+iframe.addEventListener('load', () => {
+  iframe.contentWindow.postMessage({
+    type: 'setUserInfo',
+    userName: 'Sarah Johnson',
+    userEmail: 'sjohnson@goodwill.org'
+  }, 'https://tools.goodwillcentraltexas.org')
+})
+```
+
+Update detection logic:
+
+```typescript
+useEffect(() => {
+  let userInfoReceived = false
+
+  // Listen for parent sending user info
+  const handleMessage = (event) => {
+    // Verify origin for security
+    if (event.origin !== 'https://parent-site.com') return
+
+    if (event.data.type === 'setUserInfo') {
+      userInfoReceived = true
+      setUserName(event.data.userName)
+      setUserEmail(event.data.userEmail)
+      localStorage.setItem('userName', event.data.userName)
+      localStorage.setItem('userEmail', event.data.userEmail)
+    }
+  }
+
+  window.addEventListener('message', handleMessage)
+
+  // Fallback: Show modal if no message received within 500ms
+  const timeout = setTimeout(() => {
+    if (!userInfoReceived) {
+      const storedUserName = localStorage.getItem("userName")
+      const storedUserEmail = localStorage.getItem("userEmail")
+
+      if (!storedUserName || !storedUserEmail) {
+        setShowUserModal(true)
+      }
+    }
+  }, 500)
+
+  return () => {
+    window.removeEventListener('message', handleMessage)
+    clearTimeout(timeout)
+  }
+}, [])
+```
+
+**Solution Option C - Accept Multiple Prompts (Simplest):**
+
+Document that users will see modal once per embedding location. Acceptable if tool is only embedded in 1-2 places.
+
+---
+
+### **Issue #3: Modal Height vs Iframe Height** ⚠️ **MEDIUM PRIORITY**
+
+**Problem:**
+- Modal is ~450-500px tall
+- If iframe has fixed height < 500px, modal may be cut off
+- Scrolling within modal works, but not ideal
+
+**Solution:**
+
+Add to DialogContent:
+
+```typescript
+<DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+```
+
+**Document iframe requirements:**
+
+```markdown
+### Minimum Iframe Dimensions
+
+- **Width:** 400px minimum, 768px recommended
+- **Height:** 600px minimum, 800px recommended
+- **Scrolling:** Enable with `scrolling="yes"` or CSS `overflow: auto`
+
+### Example Embedding Code
+
+<iframe
+  src="https://tools.goodwillcentraltexas.org"
+  width="100%"
+  height="800"
+  style="border: none; min-height: 600px;"
+  scrolling="yes"
+></iframe>
+```
+
+---
+
+### **Issue #4: Focus Trap Boundary** ✅ **NO ISSUE**
+
+**Good News:** Focus trapping works correctly in iframes. Tabbing stays within the modal and cannot escape to parent page.
+
+---
+
+### **Issue #5: Modal Backdrop Coverage** ✅ **NO ISSUE**
+
+**Good News:** Modal backdrop only covers the iframe viewport, not the entire parent page. This is expected and correct behavior.
+
+---
+
+### **Issue #6: Portal Rendering** ✅ **NO ISSUE**
+
+**Good News:** shadcn/ui Dialog uses Radix UI Portal which renders at the end of `document.body`. In an iframe, this is the iframe's body, which is correct.
+
+---
+
+### **Testing in Iframe Context**
+
+A test page has been created at `iframe-test.html` in the project root.
+
+**To test:**
+
+```bash
+# Ensure dev server is running
+npm run dev
+
+# Open iframe-test.html in browser
+open iframe-test.html
+# or
+firefox iframe-test.html
+```
+
+**Test checklist:**
+
+1. ✅ Modal appears on first iframe load
+2. ✅ Try scrolling parent page while modal is open
+3. ✅ Submit modal, reload iframe → modal should not appear
+4. ✅ Clear localStorage, reload → modal appears again
+5. ✅ Test different iframe heights (400px, 600px, 800px)
+6. ✅ Verify modal is fully visible at 600px+ height
+7. ✅ Test in multiple browsers
+
+---
+
+### **Recommended Iframe Embedding Guidelines**
+
+**For Same-Origin Embeddings:**
+
+```html
+<iframe
+  src="https://tools.goodwillcentraltexas.org"
+  width="100%"
+  height="900"
+  style="border: none; min-height: 600px; border-radius: 8px;"
+  title="Goodwill Referral Tool"
+  allow="clipboard-write"
+></iframe>
+
+<script>
+  // Listen for scroll control requests
+  window.addEventListener('message', (event) => {
+    if (event.origin !== 'https://tools.goodwillcentraltexas.org') return
+
+    if (event.data.type === 'disableScroll') {
+      document.body.style.overflow = 'hidden'
+    } else if (event.data.type === 'enableScroll') {
+      document.body.style.overflow = ''
+    }
+  })
+</script>
+```
+
+**For Cross-Origin Embeddings:**
+
+```html
+<iframe
+  src="https://tools.goodwillcentraltexas.org?userName=Sarah%20Johnson&userEmail=sjohnson@goodwill.org"
+  width="100%"
+  height="900"
+  style="border: none; min-height: 600px; border-radius: 8px;"
+  title="Goodwill Referral Tool"
+  allow="clipboard-write"
+  sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+></iframe>
+```
+
+**Security Considerations:**
+
+- Always validate `event.origin` in postMessage listeners
+- Sanitize and validate URL parameters
+- Use HTTPS for iframe src
+- Consider CSP (Content Security Policy) headers
+- Use `sandbox` attribute with minimal required permissions
+
+---
+
+### **Decision Matrix**
+
+| Approach | Pros | Cons | Recommended? |
+|----------|------|------|--------------|
+| **URL Parameters** | Simple, works cross-origin, no parent JS needed | Visible in URL, requires parent to know user info | ✅ Yes |
+| **PostMessage API** | Secure, flexible, works cross-origin | Requires parent JS, more complex | ✅ Yes |
+| **Accept Multiple Prompts** | No changes needed, simplest | Annoying for users | ⚠️ Only if 1-2 embeddings |
+| **Parent Scroll Control** | Better UX, prevents confusion | Requires parent cooperation | ✅ Yes |
+
+---
+
 ## Known Limitations
 
 1. **No Email Validation:** Only checks non-empty, doesn't verify format
