@@ -12,6 +12,8 @@
 ## Overview
 
 **AI GENERATED, DOUBLE CHECK THINGS**
+<img width="1045" height="470" alt="Screenshot 2025-10-20 at 11 33 51 AM" src="https://github.com/user-attachments/assets/af0f9168-eb6c-4019-b6ee-52c28b154e67" />
+
 
 The application supports multilingual output, allowing case managers to generate resource recommendations and action plans in different languages. The system uses bilingual titles and translates field labels to make resources accessible to clients who speak languages other than English.
 
