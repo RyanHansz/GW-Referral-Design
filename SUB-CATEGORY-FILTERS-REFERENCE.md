@@ -152,9 +152,10 @@ if (selectedSubCategories.length > 0) {
 
 ### **4. UI/UX Guidelines**
 - Show sub-categories when parent category is expanded
-- Use checkboxes for multi-select
+- Use shadcn/ui components (Checkbox, Button, Card, etc.) for consistency
 - Display selected sub-categories in "Active Filters" section
 - Provide clear visual hierarchy (indent, smaller text)
+- Style with Tailwind CSS utility classes
 
 ---
 
@@ -212,7 +213,7 @@ git grep "selectedSubCategories" 4051d21
 
 - **Vercel AI SDK:** Used for streaming LLM responses
 - **Next.js 14:** App router and server actions
-- **Tailwind CSS:** Styling and responsive design
+- **shadcn/ui:** Component library built on Radix UI primitives with Tailwind CSS
 - **Lucide React:** Icon library
 
 ---
