@@ -1921,6 +1921,8 @@ export default function ReferralTool() {
               </Label>
               <Input
                 id="userName"
+                name="userName"
+                type="text"
                 placeholder="Enter your full name"
                 value={userNameInput}
                 onChange={(e) => setUserNameInput(e.target.value)}
@@ -1929,7 +1931,9 @@ export default function ReferralTool() {
                     handleUserInfoSubmit()
                   }
                 }}
-                className="w-full"
+                autoComplete="off"
+                data-form-type="other"
+                className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
                 autoFocus
               />
             </div>
@@ -1939,6 +1943,7 @@ export default function ReferralTool() {
               </Label>
               <Input
                 id="userEmail"
+                name="userEmail"
                 type="email"
                 placeholder="Enter your email address"
                 value={userEmailInput}
@@ -1948,7 +1953,9 @@ export default function ReferralTool() {
                     handleUserInfoSubmit()
                   }
                 }}
-                className="w-full"
+                autoComplete="off"
+                data-form-type="other"
+                className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
               />
             </div>
             <div className="flex justify-end pt-2">
