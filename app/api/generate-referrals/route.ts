@@ -274,12 +274,12 @@ Client description: ${prompt}`
     // Use streaming for follow-up questions
     if (isFollowUp) {
       const result = streamText({
-        model: openai("gpt-5-mini"),
+        model: openai("gpt-5"),
         prompt: aiPrompt,
         maxTokens: 2000,
         tools: {
           web_search: openai.tools.webSearch({
-            searchContextSize: "medium",
+            searchContextSize: "low",
           }),
         },
         providerOptions: {
@@ -304,7 +304,7 @@ Client description: ${prompt}`
         await writer.write(encoder.encode(JSON.stringify({ type: "status", message: "Searching for resources..." }) + "\n"))
 
         const result = streamText({
-          model: openai("gpt-5-mini"),
+          model: openai("gpt-5"),
           prompt: aiPrompt,
           maxTokens: 3000,
           tools: {

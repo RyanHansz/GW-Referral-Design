@@ -16,44 +16,9 @@ export async function POST(request: Request) {
       )
       .join("\n")
 
-    const aiPrompt = resources.length > 1
-      ? `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
-
-Generate a CONCISE action plan in ${outputLanguage} for accessing these ${resources.length} selected resources. Use simple language (8th grade reading level max).
-
-Selected Resources:
-${resourceList}
-
-STRUCTURE:
-## Quick Summary
-Provide a brief overview (3-4 sentences) covering:
-- Common steps to take first (e.g., "Gather your documents before applying")
-- Documents you'll need for most resources (ID, proof of address, income, etc.)
-- Suggested order/priority (e.g., "Start with #1 while waiting for #2 to process")
-
-Then for each resource:
-### [Short Resource Name]
-**How to apply:**
-- 2-3 simple steps with actual links/locations
-
-**Documents needed:**
-- 3-4 specific items
-
-**Timeline:**
-- 1 phrase with timeframe (e.g., "2-4 weeks")
-
-**Key tip:**
-- 1 actionable tip from web search
-
-🚨 CORE RULES:
-1. **Use Web Search**: Find REAL application links, forms, phone numbers - NEVER guess URLs
-2. **Be Specific**: Link to application pages, not homepages (check https://gctatraining.org/class-schedule/ for GCTA courses)
-3. **Plain Language**: Write at 8th grade level - short words, clear sentences, no jargon
-4. **Keep It Brief**: Each section takes 5-10 seconds to read
-5. **Simple Formatting**: Only use **bold**, bullet points (-), and headers (###)
-
-Return ONLY the markdown content directly, no JSON.`
-      : `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
+    // Single resource: use original simple approach
+    if (resources.length === 1) {
+      const aiPrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
 
 Generate a CONCISE action plan in ${outputLanguage} for accessing this resource. Use simple language (8th grade reading level max).
 
@@ -83,23 +48,186 @@ STRUCTURE:
 
 Return ONLY the markdown content directly, no JSON.`
 
-    const result = streamText({
-      model: openai("gpt-5-mini"),
-      prompt: aiPrompt,
-      maxTokens: 2500,
-      tools: {
-        web_search: openai.tools.webSearch({
-          searchContextSize: "medium",
-        }),
-      },
-      providerOptions: {
-        openai: {
-          reasoningEffort: "low",
+      const result = streamText({
+        model: openai("gpt-5"),
+        prompt: aiPrompt,
+        maxTokens: 2500,
+        tools: {
+          web_search: openai.tools.webSearch({
+            searchContextSize: "low",
+          }),
         },
+        providerOptions: {
+          openai: {
+            reasoningEffort: "low",
+          },
+        },
+      })
+
+      return result.toTextStreamResponse()
+    }
+
+    // Multiple resources: use parallel generation with structured streaming
+    const stream = new TransformStream()
+    const writer = stream.writable.getWriter()
+    const encoder = new TextEncoder()
+
+    // Start async generation
+    ;(async () => {
+      try {
+        // Launch ALL generations in parallel (summary + all resources at the same time)
+        const allPromises: Promise<void>[] = []
+
+        // Summary generation - streams as it generates
+        const summaryPrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
+
+Generate ONLY a Quick Summary in ${outputLanguage} for accessing these ${resources.length} selected resources. Use simple language (8th grade reading level max).
+
+Selected Resources:
+${resourceList}
+
+STRUCTURE:
+## Quick Summary
+Provide a brief overview (3-4 sentences) covering:
+- Common steps to take first (e.g., "Gather your documents before applying")
+- Documents you'll need for most resources (ID, proof of address, income, etc.)
+- Suggested order/priority (e.g., "Start with #1 while waiting for #2 to process")
+
+🚨 CORE RULES:
+1. **Use Web Search**: Find information about these resources to give accurate advice
+2. **Plain Language**: Write at 8th grade level - short words, clear sentences, no jargon
+3. **Keep It Brief**: 3-4 sentences total
+4. **Simple Formatting**: Only use **bold** and bullet points (-)
+
+Return ONLY the "## Quick Summary" section markdown, nothing else.`
+
+        const summaryPromise = (async () => {
+          const summaryResult = streamText({
+            model: openai("gpt-5"),
+            prompt: summaryPrompt,
+            maxTokens: 500,
+            tools: {
+              web_search: openai.tools.webSearch({
+                searchContextSize: "low",
+              }),
+            },
+            providerOptions: {
+              openai: {
+                reasoningEffort: "low",
+              },
+            },
+          })
+
+          // Stream summary chunks as they arrive
+          for await (const chunk of summaryResult.textStream) {
+            await writer.write(
+              encoder.encode(
+                JSON.stringify({
+                  type: "summary",
+                  content: chunk,
+                }) + "\n",
+              ),
+            )
+          }
+        })()
+
+        allPromises.push(summaryPromise)
+
+        // Resource generations - all launch immediately
+        const resourcePromises = resources.map(async (resource: any, index: number) => {
+          const resourcePrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
+
+Generate a CONCISE guide in ${outputLanguage} for accessing this specific resource. Use simple language (8th grade reading level max).
+
+Resource to cover:
+${resource.title} - ${resource.service} (${resource.providerType})
+
+STRUCTURE:
+### ${resource.title}
+**How to apply:**
+- 2-3 simple steps with actual links/locations
+
+**Documents needed:**
+- 3-4 specific items
+
+**Timeline:**
+- 1 phrase with timeframe (e.g., "2-4 weeks")
+
+**Key tip:**
+- 1 actionable tip from web search
+
+🚨 CORE RULES:
+1. **Use Web Search**: Find REAL application links, forms, phone numbers - NEVER guess URLs
+2. **Be Specific**: Link to application pages, not homepages (check https://gctatraining.org/class-schedule/ for GCTA courses)
+3. **Plain Language**: Write at 8th grade level - short words, clear sentences, no jargon
+4. **Keep It Brief**: Each section takes 5-10 seconds to read
+5. **Simple Formatting**: Only use **bold**, bullet points (-), and headers (###)
+
+Return ONLY the markdown content for this one resource (starting with ###), no JSON.`
+
+          const resourceResult = streamText({
+            model: openai("gpt-5"),
+            prompt: resourcePrompt,
+            maxTokens: 800,
+            tools: {
+              web_search: openai.tools.webSearch({
+                searchContextSize: "low",
+              }),
+            },
+            providerOptions: {
+              openai: {
+                reasoningEffort: "low",
+              },
+            },
+          })
+
+          // Accumulate full resource content
+          let resourceContent = ""
+          for await (const chunk of resourceResult.textStream) {
+            resourceContent += chunk
+          }
+
+          // Send complete resource when done
+          await writer.write(
+            encoder.encode(
+              JSON.stringify({
+                type: "resource",
+                resourceIndex: index,
+                content: resourceContent,
+              }) + "\n",
+            ),
+          )
+        })
+
+        allPromises.push(...resourcePromises)
+
+        // Wait for ALL generations to complete
+        await Promise.all(allPromises)
+
+        // Send completion
+        await writer.write(encoder.encode(JSON.stringify({ type: "complete" }) + "\n"))
+        await writer.close()
+      } catch (error) {
+        console.error("Streaming error:", error)
+        await writer.write(
+          encoder.encode(
+            JSON.stringify({
+              type: "error",
+              error: "Failed to generate action plan",
+            }) + "\n",
+          ),
+        )
+        await writer.close()
+      }
+    })()
+
+    return new Response(stream.readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
       },
     })
-
-    return result.toTextStreamResponse()
   } catch (error) {
     console.error("Error generating action plan:", error)
     return Response.json(

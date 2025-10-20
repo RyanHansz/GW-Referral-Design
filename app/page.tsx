@@ -44,6 +44,8 @@ import {
   Share2,
   Handshake,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -512,6 +514,9 @@ export default function ReferralTool() {
   const [selectedResources, setSelectedResources] = useState<any[]>([])
   const [actionPlanContent, setActionPlanContent] = useState("")
   const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false)
+  const [actionPlanSummary, setActionPlanSummary] = useState("")
+  const [actionPlanGuides, setActionPlanGuides] = useState<string[]>([])
+  const [currentGuideIndex, setCurrentGuideIndex] = useState(0)
 
   const [outputLanguage, setOutputLanguage] = useState<string>("English")
 
@@ -1767,6 +1772,9 @@ export default function ReferralTool() {
 
     setIsGeneratingActionPlan(true)
     setActionPlanContent("")
+    setActionPlanSummary("")
+    setActionPlanGuides([])
+    setCurrentGuideIndex(0)
 
     try {
       const response = await fetch("/api/generate-action-plan", {
@@ -1784,20 +1792,75 @@ export default function ReferralTool() {
         throw new Error("Failed to generate action plan")
       }
 
-      // Handle streaming response - plain markdown
       const reader = response.body?.getReader()
       if (!reader) throw new Error("No reader available")
 
       const decoder = new TextDecoder()
-      let accumulatedContent = ""
+      let buffer = ""
 
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+      // For single resources, we get plain markdown streaming
+      // For multiple resources, we get structured JSON chunks
+      const isSingleResource = selectedResources.length === 1
 
-        const chunk = decoder.decode(value, { stream: true })
-        accumulatedContent += chunk
-        setActionPlanContent(accumulatedContent)
+      if (isSingleResource) {
+        // Handle plain markdown streaming
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+          setActionPlanContent(buffer)
+        }
+      } else {
+        // Handle structured JSON streaming
+        let summaryContent = ""
+        const resourceContents: string[] = new Array(selectedResources.length).fill("")
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value, { stream: true })
+          buffer += chunk
+
+          // Process complete lines
+          const lines = buffer.split("\n")
+          buffer = lines.pop() || "" // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (!line.trim()) continue
+
+            try {
+              const data = JSON.parse(line)
+
+              if (data.type === "summary") {
+                summaryContent += data.content
+                setActionPlanSummary(summaryContent)
+                // Update legacy content for backward compatibility
+                const fullContent = summaryContent + "\n\n" + resourceContents.filter((r) => r).join("\n\n")
+                setActionPlanContent(fullContent)
+              } else if (data.type === "resource") {
+                resourceContents[data.resourceIndex] = data.content
+                setActionPlanGuides([...resourceContents])
+                // Update legacy content for backward compatibility
+                const fullContent = summaryContent + "\n\n" + resourceContents.filter((r) => r).join("\n\n")
+                setActionPlanContent(fullContent)
+              } else if (data.type === "complete") {
+                // Final assembly
+                setActionPlanSummary(summaryContent)
+                setActionPlanGuides(resourceContents.filter((r) => r))
+                const fullContent = summaryContent + "\n\n" + resourceContents.filter((r) => r).join("\n\n")
+                setActionPlanContent(fullContent)
+              } else if (data.type === "error") {
+                throw new Error(data.error)
+              }
+            } catch (e) {
+              // Skip invalid JSON lines
+              console.warn("Failed to parse line:", line, e)
+            }
+          }
+        }
       }
     } catch (error) {
       console.error("Error generating action plan:", error)
@@ -2102,16 +2165,17 @@ export default function ReferralTool() {
                                 >
                                   <option value="English">English</option>
                                   <option value="Spanish">Español (Spanish)</option>
-                                  <option value="French">Français (French)</option>
-                                  <option value="German">Deutsch (German)</option>
-                                  <option value="Italian">Italiano (Italian)</option>
-                                  <option value="Portuguese">Português (Portuguese)</option>
-                                  <option value="Russian">Русский (Russian)</option>
+                                  <option value="Vietnamese">Tiếng Việt (Vietnamese)</option>
                                   <option value="Chinese">中文 (Chinese)</option>
-                                  <option value="Japanese">日本語 (Japanese)</option>
                                   <option value="Korean">한국어 (Korean)</option>
                                   <option value="Arabic">العربية (Arabic)</option>
                                   <option value="Hindi">हिन्दी (Hindi)</option>
+                                  <option value="French">Français (French)</option>
+                                  <option value="German">Deutsch (German)</option>
+                                  <option value="Portuguese">Português (Portuguese)</option>
+                                  <option value="Russian">Русский (Russian)</option>
+                                  <option value="Japanese">日本語 (Japanese)</option>
+                                  <option value="Italian">Italiano (Italian)</option>
                                 </select>
                                 <div className="mt-2 text-xs text-gray-600">
                                   <p>🌐 Choose the language for generated referrals and action plans</p>
@@ -2402,6 +2466,7 @@ export default function ReferralTool() {
                             {conversationHistory.length === 0 &&
                               (outputLanguage !== "English" ||
                                 selectedCategories.length > 0 ||
+                                selectedSubCategories.length > 0 ||
                                 selectedResourceTypes.length > 0 ||
                                 location ||
                                 selectedLocations.length > 0 ||
@@ -2422,6 +2487,21 @@ export default function ReferralTool() {
                                       <span className="font-medium">Categories:</span>{" "}
                                       {selectedCategories
                                         .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedSubCategories.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Sub-Categories:</span>{" "}
+                                      {selectedSubCategories
+                                        .map((id) => {
+                                          for (const cat of resourceCategories) {
+                                            const subCat = cat.subCategories.find((s) => s.id === id)
+                                            if (subCat) return subCat.label
+                                          }
+                                          return null
+                                        })
                                         .filter(Boolean)
                                         .join(", ")}
                                     </div>
@@ -2671,6 +2751,7 @@ export default function ReferralTool() {
                           {index === 0 &&
                             (outputLanguage !== "English" ||
                               selectedCategories.length > 0 ||
+                              selectedSubCategories.length > 0 ||
                               selectedResourceTypes.length > 0 ||
                               location ||
                               selectedLocations.length > 0 ||
@@ -2691,6 +2772,21 @@ export default function ReferralTool() {
                                       <span className="font-medium">Categories:</span>{" "}
                                       {selectedCategories
                                         .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </div>
+                                  )}
+                                  {selectedSubCategories.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Sub-Categories:</span>{" "}
+                                      {selectedSubCategories
+                                        .map((id) => {
+                                          for (const cat of resourceCategories) {
+                                            const subCat = cat.subCategories.find((s) => s.id === id)
+                                            if (subCat) return subCat.label
+                                          }
+                                          return null
+                                        })
                                         .filter(Boolean)
                                         .join(", ")}
                                     </div>
@@ -2960,7 +3056,7 @@ export default function ReferralTool() {
                         )}
 
                         {/* Action Plan - streaming or complete */}
-                        {(isGeneratingActionPlan || actionPlanContent) && (
+                        {(isGeneratingActionPlan || actionPlanContent || actionPlanSummary || actionPlanGuides.length > 0) && (
                           <div className="mt-6 p-4 bg-blue-50 border border-blue-500 rounded-lg max-w-4xl">
                             <h3 className="text-lg font-semibold text-blue-900 mb-4">Action Plan</h3>
                             <div className="space-y-4">
@@ -2975,8 +3071,9 @@ export default function ReferralTool() {
                                 </div>
                               )}
 
-                              {actionPlanContent && !isGeneratingActionPlan && (
-                                <div className="prose prose-slate max-w-none" role="region" aria-live="polite" aria-atomic="true">
+                              {/* Single resource or legacy view */}
+                              {actionPlanContent && selectedResources.length === 1 && (
+                                <div className="prose prose-slate max-w-none" role="region" aria-live={isGeneratingActionPlan ? "off" : "polite"} aria-atomic="true">
                                   <div
                                     dangerouslySetInnerHTML={{
                                       __html: parseMarkdownToHTML(actionPlanContent),
@@ -2985,13 +3082,93 @@ export default function ReferralTool() {
                                 </div>
                               )}
 
-                              {actionPlanContent && isGeneratingActionPlan && (
-                                <div className="prose prose-slate max-w-none" aria-live="off">
-                                  <div
-                                    dangerouslySetInnerHTML={{
-                                      __html: parseMarkdownToHTML(actionPlanContent),
-                                    }}
-                                  />
+                              {/* Multiple resources with carousel */}
+                              {selectedResources.length > 1 && (actionPlanSummary || actionPlanGuides.length > 0) && (
+                                <div className="space-y-4">
+                                  {/* Quick Summary */}
+                                  {actionPlanSummary && (
+                                    <div className="prose prose-slate max-w-none p-4 bg-white rounded-lg border border-blue-200">
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: parseMarkdownToHTML(actionPlanSummary),
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Individual Resource Guides Carousel */}
+                                  {actionPlanGuides.length > 0 && (
+                                    <div className="space-y-3">
+                                      <div className="flex items-center justify-between">
+                                        <h4 className="text-md font-semibold text-blue-900">
+                                          Individual Resource Guides
+                                        </h4>
+                                        <div className="text-sm text-blue-700">
+                                          {currentGuideIndex + 1} of {actionPlanGuides.filter(g => g).length}
+                                        </div>
+                                      </div>
+
+                                      {/* Carousel Container */}
+                                      <div className="relative">
+                                        {/* Current Guide */}
+                                        <div className="prose prose-slate max-w-none p-4 bg-white rounded-lg border border-blue-200">
+                                          {actionPlanGuides[currentGuideIndex] ? (
+                                            <div
+                                              dangerouslySetInnerHTML={{
+                                                __html: parseMarkdownToHTML(actionPlanGuides[currentGuideIndex]),
+                                              }}
+                                            />
+                                          ) : (
+                                            <div className="flex items-center gap-3 py-8 justify-center text-blue-600">
+                                              <Loader2 className="w-5 h-5 animate-spin" />
+                                              <span>Loading resource guide...</span>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {/* Navigation Arrows */}
+                                        <div className="flex items-center justify-between mt-4">
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentGuideIndex(Math.max(0, currentGuideIndex - 1))}
+                                            disabled={currentGuideIndex === 0}
+                                            className="flex items-center gap-2"
+                                          >
+                                            <ChevronLeft className="w-4 h-4" />
+                                            Previous
+                                          </Button>
+
+                                          {/* Dots indicator */}
+                                          <div className="flex items-center gap-2">
+                                            {actionPlanGuides.map((_, index) => (
+                                              <button
+                                                key={index}
+                                                onClick={() => setCurrentGuideIndex(index)}
+                                                className={`w-2 h-2 rounded-full transition-all ${
+                                                  index === currentGuideIndex
+                                                    ? "bg-blue-600 w-6"
+                                                    : "bg-blue-300 hover:bg-blue-400"
+                                                }`}
+                                                aria-label={`Go to guide ${index + 1}`}
+                                              />
+                                            ))}
+                                          </div>
+
+                                          <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setCurrentGuideIndex(Math.min(actionPlanGuides.length - 1, currentGuideIndex + 1))}
+                                            disabled={currentGuideIndex === actionPlanGuides.length - 1}
+                                            className="flex items-center gap-2"
+                                          >
+                                            Next
+                                            <ChevronRight className="w-4 h-4" />
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
