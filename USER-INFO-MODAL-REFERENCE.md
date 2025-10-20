@@ -1,10 +1,12 @@
-# User Info Modal Reference
+# User Info Welcome Page Reference
 
 **Repository:** [GW-Referral-Design](https://github.com/RyanHansz/GW-Referral-Design)
 **Branch:** `ask-for-user-name`
 **Related Commits:**
 - `8b94460` - feat: add user info modal on first visit
 - `25593e3` - fix: prevent password autofill and use consistent blue focus color
+- `ff63cd3` - docs: add comprehensive iframe embedding considerations and test page
+- `23724ee` - refactor: convert user info modal to dedicated welcome page
 
 ---
 
@@ -12,9 +14,11 @@
 
 **AI GENERATED, DOUBLE CHECK THINGS**
 
-<!-- Add screenshot here showing the modal -->
+<!-- Add screenshot here showing the welcome page -->
 
-The user info modal collects the case manager's name and email on their first visit to the Goodwill Referral Tool. This information is stored locally to track usage and identify users for support purposes. The modal only appears once per browser/device and cannot be dismissed until information is provided.
+The user info welcome page collects the case manager's name and email on their first visit to the Goodwill Referral Tool. This information is stored locally to track usage and identify users for support purposes. The welcome page is shown instead of the main app until user information is provided.
+
+**Key Change:** Previously implemented as a blocking modal, now implemented as a dedicated full-page welcome screen. This eliminates all modal-in-iframe issues and provides a cleaner, more professional user experience.
 
 ---
 
@@ -30,12 +34,14 @@ The user info modal collects the case manager's name and email on their first vi
 
 ### Key Requirements
 
-- **First-visit only**: Modal appears once per browser/device
+- **First-visit only**: Welcome page shown once per browser/device
 - **Required fields**: Both name and email must be provided
-- **Cannot be dismissed**: Modal blocks access until submitted
+- **Cannot access app**: Main application hidden until user info submitted
 - **Local storage**: Information saved in browser, not sent to server
 - **No password autofill**: Prevents browser password managers from interfering
 - **Consistent styling**: Uses app's blue theme for focus states
+- **Professional design**: Gradient background with centered card layout
+- **Iframe-friendly**: No modal issues - clean full-page experience
 
 ---
 
@@ -59,11 +65,10 @@ import { useState, useRef, useCallback, useMemo, useEffect } from "react"
 
 #### **2. State Management**
 
-**Location:** Lines 551-556
+**Location:** Lines 551-555
 
 ```typescript
-// User info modal state
-const [showUserModal, setShowUserModal] = useState(false)
+// User info state
 const [userName, setUserName] = useState("")
 const [userEmail, setUserEmail] = useState("")
 const [userNameInput, setUserNameInput] = useState("")
@@ -71,21 +76,26 @@ const [userEmailInput, setUserEmailInput] = useState("")
 ```
 
 **State Variables:**
-- `showUserModal`: Controls modal visibility (boolean)
 - `userName`: Stored user name from localStorage (string)
 - `userEmail`: Stored user email from localStorage (string)
 - `userNameInput`: Controlled input for name field (string)
 - `userEmailInput`: Controlled input for email field (string)
 
 **Why Two Sets of Variables?**
-- `userName`/`userEmail`: Persistent values loaded from localStorage
+- `userName`/`userEmail`: Persistent values loaded from localStorage - controls which page is shown
 - `userNameInput`/`userEmailInput`: Form inputs that get validated before saving
+
+**Key Difference from Modal Approach:**
+- No `showUserModal` state needed
+- Conditional rendering based directly on `userName` and `userEmail`
+- If empty → show welcome page
+- If populated → show main app
 
 ---
 
 #### **3. First-Visit Detection Logic**
 
-**Location:** Lines 558-569
+**Location:** Lines 557-566
 
 ```typescript
 // Check if user has provided info on first load
@@ -96,23 +106,26 @@ useEffect(() => {
   if (storedUserName && storedUserEmail) {
     setUserName(storedUserName)
     setUserEmail(storedUserEmail)
-  } else {
-    setShowUserModal(true)
   }
 }, [])
 ```
 
 **Logic Flow:**
 1. On component mount, check localStorage for `userName` and `userEmail`
-2. If both exist, load them into state and don't show modal
-3. If either is missing, show the modal (`setShowUserModal(true)`)
+2. If both exist, load them into state → main app will render
+3. If either is missing, state remains empty → welcome page will render
 4. Empty dependency array `[]` ensures this runs only once on mount
+
+**Key Difference from Modal Approach:**
+- No need to explicitly show/hide anything
+- Component automatically renders appropriate view based on state
+- Cleaner, more declarative code
 
 ---
 
 #### **4. Form Submission Handler**
 
-**Location:** Lines 571-579
+**Location:** Lines 568-575
 
 ```typescript
 const handleUserInfoSubmit = () => {
@@ -121,25 +134,31 @@ const handleUserInfoSubmit = () => {
     localStorage.setItem("userEmail", userEmailInput.trim())
     setUserName(userNameInput.trim())
     setUserEmail(userEmailInput.trim())
-    setShowUserModal(false)
   }
 }
 ```
 
 **Validation:**
 - Checks both fields are non-empty after trimming whitespace
-- Only saves and closes modal if both fields are valid
+- Only saves if both fields are valid
 
 **Actions:**
 1. Save trimmed values to localStorage
 2. Update state with saved values
-3. Close the modal
+3. Component automatically re-renders showing main app (no manual closing needed)
+
+**Key Difference from Modal Approach:**
+- No `setShowUserModal(false)` needed
+- State update triggers automatic transition to main app
+- React's conditional rendering handles the view switch
 
 ---
 
-#### **5. Modal UI Component**
+#### **5. Conditional Rendering & Welcome Page UI**
 
-**Location:** Lines 1905-1965
+**Location:** Lines 1904-1987
+
+The component uses an early return pattern for conditional rendering:
 
 ```typescript
 {/* User Info Modal */}
