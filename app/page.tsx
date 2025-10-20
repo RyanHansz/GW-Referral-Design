@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useCallback, useMemo } from "react"
+import { useState, useRef, useCallback, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -547,6 +547,36 @@ export default function ReferralTool() {
   const [isChatStreaming, setIsChatStreaming] = useState(false)
   const [streamingChatContent, setStreamingChatContent] = useState("")
   const [followUpPrompts, setFollowUpPrompts] = useState<string[]>([])
+
+  // User info modal state
+  const [showUserModal, setShowUserModal] = useState(false)
+  const [userName, setUserName] = useState("")
+  const [userEmail, setUserEmail] = useState("")
+  const [userNameInput, setUserNameInput] = useState("")
+  const [userEmailInput, setUserEmailInput] = useState("")
+
+  // Check if user has provided info on first load
+  useEffect(() => {
+    const storedUserName = localStorage.getItem("userName")
+    const storedUserEmail = localStorage.getItem("userEmail")
+
+    if (storedUserName && storedUserEmail) {
+      setUserName(storedUserName)
+      setUserEmail(storedUserEmail)
+    } else {
+      setShowUserModal(true)
+    }
+  }, [])
+
+  const handleUserInfoSubmit = () => {
+    if (userNameInput.trim() && userEmailInput.trim()) {
+      localStorage.setItem("userName", userNameInput.trim())
+      localStorage.setItem("userEmail", userEmailInput.trim())
+      setUserName(userNameInput.trim())
+      setUserEmail(userEmailInput.trim())
+      setShowUserModal(false)
+    }
+  }
 
   // Generate contextual follow-up prompts based on assistant response
   const generateFollowUpPrompts = (responseContent: string): string[] => {
@@ -1872,6 +1902,68 @@ export default function ReferralTool() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* User Info Modal */}
+      <Dialog open={showUserModal} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <UserPlus className="h-6 w-6 text-blue-600" />
+              Welcome to the Goodwill Referral Tool
+            </DialogTitle>
+            <DialogDescription className="text-base pt-2">
+              To help us improve and track usage, please provide your information. This will be saved locally and only asked once.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="userName" className="text-sm font-medium">
+                Your Name *
+              </Label>
+              <Input
+                id="userName"
+                placeholder="Enter your full name"
+                value={userNameInput}
+                onChange={(e) => setUserNameInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
+                    handleUserInfoSubmit()
+                  }
+                }}
+                className="w-full"
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="userEmail" className="text-sm font-medium">
+                Your Email *
+              </Label>
+              <Input
+                id="userEmail"
+                type="email"
+                placeholder="Enter your email address"
+                value={userEmailInput}
+                onChange={(e) => setUserEmailInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
+                    handleUserInfoSubmit()
+                  }
+                }}
+                className="w-full"
+              />
+            </div>
+            <div className="flex justify-end pt-2">
+              <Button
+                onClick={handleUserInfoSubmit}
+                disabled={!userNameInput.trim() || !userEmailInput.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+              >
+                Get Started
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex flex-1 relative">
         {/* Main Content */}
         <main className="flex-1 flex flex-col min-w-0">
