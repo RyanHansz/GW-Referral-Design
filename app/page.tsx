@@ -1941,13 +1941,13 @@ export default function ReferralTool() {
 
               <div className="space-y-2">
                 <Label htmlFor="userEmail" className="text-sm font-medium text-gray-700">
-                  Your Email *
+                  Your Goodwill Email *
                 </Label>
                 <Input
                   id="userEmail"
                   name="userEmail"
                   type="email"
-                  placeholder="Enter your email address"
+                  placeholder="Enter your Goodwill email address"
                   value={userEmailInput}
                   onChange={(e) => setUserEmailInput(e.target.value)}
                   onKeyDown={(e) => {
@@ -1969,10 +1969,6 @@ export default function ReferralTool() {
                 Get Started
               </Button>
             </div>
-
-            <p className="text-xs text-gray-500 text-center mt-6">
-              Your information is stored locally in your browser and is not sent to any server.
-            </p>
           </CardContent>
         </Card>
       </div>
