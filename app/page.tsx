@@ -1899,7 +1899,7 @@ export default function ReferralTool() {
   // If no user info, show the welcome page
   if (!userName || !userEmail) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-2xl">
           <CardContent className="pt-8 pb-8 px-8">
             <div className="text-center mb-8">
