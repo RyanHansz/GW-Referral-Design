@@ -19,16 +19,37 @@ This document explains how the action plan generation and streaming system works
 
 ---
 
+## Screenshots
+
+### Action Plan with Multiple Resources
+
+![Action Plan Streaming Example](public/docs/action-plan-streaming-example.png)
+
+*Example showing action plan generation for 4 selected resources (3 GCTA healthcare training courses and Texas RioGrande Legal Aid). The system generates a Quick Summary followed by individual guides for each resource, all streaming sequentially in a single container.*
+
+**Key Features Visible:**
+- Resource selection checkboxes with service type labels
+- "Generate Action Plan" button showing selected count
+- Quick Summary section with document requirements and suggested order
+- Individual resource guides with structured sections (How to apply, Documents needed, Timeline, Key tip)
+- Real application links from web search (e.g., https://gctatraining.org/phlebotomy/)
+- Clean, readable formatting without inline citations
+- All content visible at once (no pagination or navigation needed)
+
+---
+
 ## Table of Contents
 
-1. [Architecture Overview](#architecture-overview)
-2. [API Route Implementation](#api-route-implementation)
-3. [Frontend Streaming Handler](#frontend-streaming-handler)
-4. [LLM Configuration](#llm-configuration)
-5. [Prompt Structure](#prompt-structure)
-6. [Streaming Flow](#streaming-flow)
-7. [Code Reference](#code-reference)
-8. [Recent Changes](#recent-changes)
+1. [Screenshots](#screenshots)
+2. [Architecture Overview](#architecture-overview)
+3. [API Route Implementation](#api-route-implementation)
+4. [Frontend Streaming Handler](#frontend-streaming-handler)
+5. [LLM Configuration](#llm-configuration)
+6. [Prompt Structure](#prompt-structure)
+7. [Streaming Flow](#streaming-flow)
+8. [Code Reference](#code-reference)
+9. [Recent Changes](#recent-changes)
+10. [Future Improvements](#future-improvements)
 
 ---
 
@@ -733,34 +754,212 @@ if (!resources || resources.length === 0) {
 
 ---
 
-## Future Enhancements
+## Future Improvements
 
-### Potential Improvements
+### 1. Parallelized Resource Guide Generation
 
-1. **Caching**
-   - Store generated plans per resource
-   - Invalidate on schedule changes
-   - Reduce API calls by 60-80%
+**Current Limitation:**
+The system currently generates all resource guides **sequentially** in a single LLM call. While this is simple and works well, it could be optimized for speed when handling multiple resources.
 
-2. **Offline Mode**
-   - Pregenerate common resource plans
-   - Store in static files
-   - Fallback if API unavailable
+**Proposed Architecture:**
 
-3. **Personalization**
-   - Include client details in prompt
-   - Customize based on barriers
-   - Reference case notes
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    USER SELECTS 4 RESOURCES                  │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  SEPARATE INTO COMPONENTS                     │
+│  - QuickSummary component (1 LLM call)                      │
+│  - ResourceGuide component × 4 (4 parallel LLM calls)       │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│               PARALLEL LLM CALLS WITH PROMISE.ALL            │
+│  Call 1: Generate Quick Summary                              │
+│  Call 2: Generate Resource Guide #1   ┐                     │
+│  Call 3: Generate Resource Guide #2   ├─ Parallel           │
+│  Call 4: Generate Resource Guide #3   │                     │
+│  Call 5: Generate Resource Guide #4   ┘                     │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  STREAM ALL SIMULTANEOUSLY                    │
+│  - Each component has its own streaming state                │
+│  - UI shows all 4 guides streaming at once                   │
+│  - Faster perceived performance                              │
+└─────────────────────────────────────────────────────────────┘
+```
 
-4. **Quality Metrics**
-   - Track URL validity rate
-   - Measure case manager satisfaction
-   - A/B test prompt variations
+**Implementation Strategy:**
 
-5. **Multi-Step Plans**
-   - Break complex processes into phases
-   - Add timeline visualizations
-   - Include milestone tracking
+1. **Component Breakdown**
+   - Create `<QuickSummaryStream />` component
+   - Create `<ResourceGuideStream resource={resource} />` component
+   - Each component manages its own streaming state
+   - Parent component orchestrates parallel calls
+
+2. **API Changes**
+   ```typescript
+   // New endpoint: /api/generate-summary
+   POST { resources: Resource[] } → Stream summary
+
+   // New endpoint: /api/generate-resource-guide
+   POST { resource: Resource } → Stream single guide
+   ```
+
+3. **Frontend Changes**
+   ```typescript
+   const [summaryContent, setSummaryContent] = useState("")
+   const [guideContents, setGuideContents] = useState<Record<string, string>>({})
+
+   // Launch all calls in parallel
+   const generateActionPlan = async () => {
+     const summaryPromise = streamSummary(resources)
+     const guidePromises = resources.map(r => streamGuide(r))
+
+     await Promise.all([summaryPromise, ...guidePromises])
+   }
+   ```
+
+**Benefits:**
+- ⚡ **Faster generation**: 4 guides in ~5-8 seconds vs. ~15-20 seconds sequential
+- 📊 **Better UX**: All sections appear simultaneously
+- 🎯 **Focused prompts**: Each guide gets dedicated context
+- 🔄 **Independent retry**: Can retry single guide without regenerating all
+
+**Tradeoffs:**
+- 🔧 **More complexity**: Multiple streaming handlers, state management
+- 💰 **Higher cost**: 5 LLM calls instead of 1 (5x tokens)
+- 🎨 **UI complexity**: Need to handle multiple simultaneous streams
+- 🐛 **Error handling**: Must handle partial failures gracefully
+
+**When to Implement:**
+- When users frequently select 3+ resources
+- When generation speed becomes a bottleneck
+- After measuring average generation times
+- When budget allows for increased API costs
+
+**Estimated Impact:**
+- **Speed improvement**: 40-60% faster for 3+ resources
+- **Cost increase**: 200-300% more API calls
+- **Complexity increase**: +150 lines of code
+- **User satisfaction**: Likely improved for power users
+
+---
+
+### 2. Caching & Optimization
+
+**Resource Guide Caching:**
+- Store generated plans per resource combination
+- Cache key: `${resourceId}-${outputLanguage}-${date}`
+- Invalidate daily or on schedule changes
+- Expected reduction: 60-80% of API calls
+
+**Implementation:**
+```typescript
+// Check cache first
+const cacheKey = `${resource.id}-${outputLanguage}-${today}`
+const cached = await redis.get(cacheKey)
+if (cached) return cached
+
+// Generate and cache
+const guide = await generateGuide(resource)
+await redis.setex(cacheKey, 86400, guide) // 24 hour TTL
+```
+
+---
+
+### 3. Offline Mode
+
+**Pregenerated Plans:**
+- Generate plans for top 20 most-requested resources
+- Store as static markdown files
+- Update weekly via cron job
+- Serve instantly without LLM call
+
+**Fallback Strategy:**
+```typescript
+try {
+  return await generateLivePlan(resources)
+} catch (error) {
+  return loadPregenerated(resources)
+}
+```
+
+---
+
+### 4. Personalization
+
+**Context-Aware Generation:**
+- Include client's case notes in prompt
+- Reference known barriers (transportation, childcare)
+- Suggest resources based on location
+- Customize timeline based on urgency
+
+**Enhanced Prompt:**
+```
+Client Context:
+- Location: East Austin
+- Transportation: Limited (bus only)
+- Barriers: Childcare needed
+- Timeline: Seeking work within 2 months
+
+Generate action plan considering these factors...
+```
+
+---
+
+### 5. Quality Metrics & Validation
+
+**Track Success Metrics:**
+- URL validity rate (% of working links)
+- Case manager feedback ratings
+- Client follow-through rates
+- Time saved vs. manual plan writing
+
+**Automated Validation:**
+- Verify URLs return 200 status
+- Check phone numbers format
+- Validate timeline reasonableness
+- Flag hallucinated content
+
+**A/B Testing:**
+- Test prompt variations
+- Compare sequential vs. parallel generation
+- Measure user satisfaction scores
+- Optimize based on data
+
+---
+
+### 6. Multi-Step Plans with Timeline
+
+**Phase-Based Planning:**
+```markdown
+## Phase 1: Preparation (Week 1)
+- Gather documents
+- Create resume
+- Apply to GCTA
+
+## Phase 2: Training (Weeks 2-8)
+- Attend Phlebotomy course
+- Study for certification
+- Complete clinical hours
+
+## Phase 3: Job Search (Weeks 9-12)
+- Get certified
+- Apply to hospitals
+- Interview prep
+```
+
+**Timeline Visualization:**
+- Gantt chart for multi-resource plans
+- Milestone tracking
+- Deadline reminders
+- Progress checkboxes
 
 ---
 
