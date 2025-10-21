@@ -17,6 +17,24 @@ A full-screen welcome page that collects the case manager's name and email on th
 
 ---
 
+## Screenshots
+
+### Welcome Page - Name Field Focused
+
+![Welcome Page Screenshot](public/docs/welcome-page-screenshot.png)
+
+*The welcome page as it appears on first visit. The name field is focused (blue border) and ready for input. The email field and Get Started button are visible below.*
+
+**Key Visual Elements:**
+- Goodwill logo centered at top
+- Dark gray background (gray-800)
+- White card with shadow
+- Blue focus ring on name input
+- White background on both input fields
+- Blue Get Started button at bottom
+
+---
+
 ## Design Specs
 
 ### Visual Layout
