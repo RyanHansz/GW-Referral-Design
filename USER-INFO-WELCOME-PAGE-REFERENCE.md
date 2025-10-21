@@ -228,6 +228,118 @@ return <MainApp />
 
 ---
 
+## Code Reference
+
+### Main Implementation
+
+**File:** `app/page.tsx`
+
+#### State Variables
+```typescript
+// Lines 552-557
+const [userName, setUserName] = useState("")
+const [userEmail, setUserEmail] = useState("")
+const [userNameInput, setUserNameInput] = useState("")
+const [userEmailInput, setUserEmailInput] = useState("")
+const [userEmailError, setUserEmailError] = useState("")
+const [userEmailTouched, setUserEmailTouched] = useState(false)
+```
+
+#### localStorage Loading
+```typescript
+// Lines 560-568
+useEffect(() => {
+  const storedUserName = localStorage.getItem("userName")
+  const storedUserEmail = localStorage.getItem("userEmail")
+
+  if (storedUserName && storedUserEmail) {
+    setUserName(storedUserName)
+    setUserEmail(storedUserEmail)
+  }
+}, [])
+```
+
+#### Email Validation
+```typescript
+// Lines 571-586
+const isValidEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+const validateUserEmail = (email: string) => {
+  if (!email.trim()) {
+    setUserEmailError("Email is required")
+    return false
+  }
+  if (!isValidEmail(email)) {
+    setUserEmailError("Please enter a valid email address")
+    return false
+  }
+  setUserEmailError("")
+  return true
+}
+```
+
+#### Form Submit Handler
+```typescript
+// Lines 604-611
+const handleUserInfoSubmit = () => {
+  if (userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
+    localStorage.setItem("userName", userNameInput.trim())
+    localStorage.setItem("userEmail", userEmailInput.trim())
+    setUserName(userNameInput.trim())
+    setUserEmail(userEmailInput.trim())
+  }
+}
+```
+
+#### Conditional Rendering
+```typescript
+// Lines 1936-2019
+if (!userName || !userEmail) {
+  return (
+    // Welcome page JSX
+  )
+}
+// Main app renders if user info exists
+```
+
+#### Welcome Page JSX Structure
+- **Lines 1938-1951:** Logo and heading section
+- **Lines 1953-1975:** Name input field with autoFocus
+- **Lines 1978-2006:** Email input field with validation error display
+- **Lines 2008-2015:** Get Started button with disabled state
+
+### UI Components
+
+The welcome page uses shadcn/ui components:
+
+- **Card, CardContent:** `components/ui/card.tsx`
+- **Input:** `components/ui/input.tsx`
+- **Label:** `components/ui/label.tsx`
+- **Button:** `components/ui/button.tsx`
+
+### Assets
+
+- **Logo:** `public/goodwill-logo.svg`
+- **Screenshot:** `public/docs/welcome-page-screenshot.png`
+
+### Key Features by Line Number
+
+| Feature | Line(s) | Description |
+|---------|---------|-------------|
+| State initialization | 552-557 | All useState declarations for user info |
+| localStorage check | 560-568 | Load saved user info on mount |
+| Email regex validation | 571-573 | Simple email format check |
+| Error message logic | 576-586 | Set appropriate error messages |
+| Form submission | 604-611 | Save to localStorage and update state |
+| Conditional page render | 1936 | Show welcome page if no user info |
+| Auto-focus name field | 1974 | Immediate cursor placement |
+| Email error display | 2003-2005 | Conditional error message rendering |
+| Button disabled logic | 2010 | Prevents submit with invalid data |
+
+---
+
 ## Accessibility (WCAG 2.1 AA)
 
 ✅ **Keyboard Navigation**
