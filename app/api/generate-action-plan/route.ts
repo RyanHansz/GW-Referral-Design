@@ -51,6 +51,7 @@ Provide a brief overview (3-4 sentences) covering:
 3. **Plain Language**: Write at 8th grade level - short words, clear sentences, no jargon
 4. **Keep It Brief**: Each section takes 5-10 seconds to read
 5. **Simple Formatting**: Only use **bold**, bullet points (-), and headers (###)
+6. **NO INLINE CITATIONS**: Do not include parenthetical citations like (website.com) in the text - embed links naturally into the text instead
 
 Return ONLY the markdown content directly, no JSON. Generate the ${resources.length > 1 ? 'Quick Summary followed by each' : ''} resource section${resources.length > 1 ? 's' : ''} in order.`
 
