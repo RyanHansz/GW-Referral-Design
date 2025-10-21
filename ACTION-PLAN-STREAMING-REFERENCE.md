@@ -48,8 +48,11 @@ This document explains how the action plan generation and streaming system works
 6. [Prompt Structure](#prompt-structure)
 7. [Streaming Flow](#streaming-flow)
 8. [Code Reference](#code-reference)
-9. [Recent Changes](#recent-changes)
-10. [Future Improvements](#future-improvements)
+9. [Best Practices](#best-practices)
+10. [Troubleshooting](#troubleshooting)
+11. [Performance Considerations](#performance-considerations)
+12. [Security](#security)
+13. [Future Improvements](#future-improvements)
 
 ---
 
@@ -103,26 +106,19 @@ This document explains how the action plan generation and streaming system works
 
 ### Why This Architecture?
 
-**Before (Parallel Generation):**
-- Generated summary + all resource guides simultaneously
-- Complex JSON streaming protocol
-- Carousel UI with navigation buttons
-- Required state management for multiple guides
-- ~300+ lines of complex code
-
-**After (Sequential Streaming):**
+**Design Principles:**
 - Single prompt generates all content in order
-- Plain markdown streaming
-- Single container shows all content
+- Plain markdown streaming for simplicity
+- Single container shows all content at once
 - Simple accumulation in one state variable
-- ~50 lines of clean code
+- Minimal code complexity (~50 lines)
 
 **Benefits:**
-- Simpler codebase and easier to maintain
-- Better UX - see everything at once
-- Faster perceived performance
-- No navigation needed
-- Easier to scan all resources together
+- Simple codebase that's easy to maintain
+- Better UX - see everything at once without navigation
+- Progressive rendering for faster perceived performance
+- Easy to scan all resources together
+- Straightforward error handling
 
 ---
 
@@ -240,15 +236,13 @@ const generateActionPlan = async () => {
 
 ### State Management
 
-**Single state variable:**
+**Required state variables:**
 ```typescript
 const [actionPlanContent, setActionPlanContent] = useState("")
+const [isGeneratingActionPlan, setIsGeneratingActionPlan] = useState(false)
 ```
 
-**Removed state (from parallel version):**
-- ~~`actionPlanSummary`~~ - No longer needed
-- ~~`actionPlanGuides`~~ - No longer needed
-- ~~`currentGuideIndex`~~ - No longer needed
+The system uses a single string to accumulate all streaming content, making state management simple and predictable.
 
 ### UI Rendering
 
@@ -525,55 +519,6 @@ User sees content appear progressively:
 
 ---
 
-## Recent Changes
-
-### October 21, 2025 - Simplified Architecture
-
-**Branch:** `simple-actionplan-websearch`
-
-**Removed:**
-- Parallel generation logic
-- JSON streaming protocol
-- Carousel UI with navigation
-- Multiple state variables
-- Complex streaming handler
-
-**Added:**
-- Single comprehensive prompt
-- Sequential generation
-- Plain markdown streaming
-- Simple state management
-- Single container rendering
-
-**Impact:**
-- Reduced code by ~300 lines
-- Simplified state from 3 variables to 1
-- Improved UX (no navigation needed)
-- Faster perceived performance
-- Easier to maintain
-
-### October 21, 2025 - No Inline Citations
-
-**Change:** Added rule #6 to prompt
-```
-6. **NO INLINE CITATIONS**: Do not include parenthetical citations like
-   (website.com) in the text - embed links naturally into the text instead
-```
-
-**Reason:** Inline citations were overwhelming to read and cluttered the output.
-
-**Result:** Cleaner, more readable action plans with naturally embedded links.
-
-### Model Change History
-
-| Date | Model | Reason |
-|------|-------|--------|
-| Oct 21, 2025 | `gpt-5-mini` | Switch from gpt-5 for cost optimization |
-| Oct 15, 2025 | `gpt-5` | Upgrade from gpt-4o for better quality |
-| Sep 2025 | `gpt-4o` | Initial implementation |
-
----
-
 ## Best Practices
 
 ### When Editing the Prompt
@@ -604,8 +549,8 @@ User sees content appear progressively:
 ✅ Clear state before new generation
 
 **DON'T:**
-❌ Add back carousel/navigation UI
-❌ Parse content as JSON
+❌ Add navigation/pagination UI (defeats purpose of single view)
+❌ Parse content as JSON (content is plain markdown)
 ❌ Skip error handling
 ❌ Remove security sanitization
 ❌ Block UI during streaming
@@ -693,14 +638,15 @@ User sees content appear progressively:
 ### Speed Optimization
 
 **Current Settings:**
-- Low reasoning effort: 40% faster
-- Low search context: 30% faster response
-- Sequential generation: More predictable timing
+- Low reasoning effort: Prioritizes speed while maintaining quality
+- Low search context: Faster search results with sufficient data
+- Streaming generation: More predictable timing and progressive rendering
 
 **Potential Improvements:**
 - Cache common resource guides
 - Preload frequently accessed resources
 - Use gpt-4o-mini for even faster generation
+- Implement request debouncing for rapid selections
 
 ### Network Considerations
 
@@ -929,7 +875,7 @@ Generate action plan considering these factors...
 
 **A/B Testing:**
 - Test prompt variations
-- Compare sequential vs. parallel generation
+- Compare different generation strategies
 - Measure user satisfaction scores
 - Optimize based on data
 
