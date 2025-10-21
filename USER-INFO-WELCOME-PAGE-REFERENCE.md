@@ -29,11 +29,12 @@ The user info welcome page is a full-screen landing page that collects the case 
 ### Key Requirements
 
 - **First-visit only**: Welcome page shown once per browser/device
-- **Required fields**: Both name and email must be provided
+- **Required fields**: Both name and valid email must be provided
+- **Email validation**: Validates email format before allowing submission
 - **Cannot access app**: Main application hidden until user info submitted
 - **Local storage**: Information saved in browser, not sent to server
 - **No password autofill**: Prevents browser password managers from interfering
-- **Professional design**: Gradient background with centered card layout
+- **Professional design**: Dark gray background with centered white card layout
 - **Iframe-friendly**: Full-page approach avoids all modal-related issues
 
 ---
@@ -103,13 +104,32 @@ useEffect(() => {
 
 ---
 
-#### **4. Form Submission Handler**
+#### **4. Email Validation Helper**
 
-**Location:** Lines 568-575
+**Location:** Lines 568-571
+
+```typescript
+// Simple email validation
+const isValidEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+```
+
+**Email Format Validation:**
+- Uses regex to validate basic email structure
+- Checks for: text + @ + domain + . + extension
+- Example valid: `user@goodwill.org`, `sarah.johnson@goodwillcentraltexas.org`
+- Example invalid: `user`, `user@`, `user@domain`, `@domain.com`
+
+---
+
+#### **5. Form Submission Handler**
+
+**Location:** Lines 573-580
 
 ```typescript
 const handleUserInfoSubmit = () => {
-  if (userNameInput.trim() && userEmailInput.trim()) {
+  if (userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
     localStorage.setItem("userName", userNameInput.trim())
     localStorage.setItem("userEmail", userEmailInput.trim())
     setUserName(userNameInput.trim())
@@ -120,7 +140,8 @@ const handleUserInfoSubmit = () => {
 
 **Validation:**
 - Checks both fields are non-empty after trimming whitespace
-- Only saves if both fields are valid
+- Validates email format using `isValidEmail()` helper
+- Only saves if both fields are valid AND email format is correct
 
 **Actions:**
 1. Save trimmed values to localStorage
@@ -129,9 +150,9 @@ const handleUserInfoSubmit = () => {
 
 ---
 
-#### **5. Conditional Rendering**
+#### **6. Conditional Rendering**
 
-**Location:** Lines 1904-1984
+**Location:** Lines 1900-1980
 
 The component uses an early return pattern:
 
@@ -139,7 +160,7 @@ The component uses an early return pattern:
 // If no user info, show the welcome page
 if (!userName || !userEmail) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-800 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardContent className="pt-8 pb-8 px-8">
           {/* Welcome page content */}
@@ -165,12 +186,11 @@ return (
 
 ```
 ┌─────────────────────────────────────┐
-│  Gradient Background (blue-indigo)  │
+│  Dark Gray Background (gray-800)    │
 │  ┌───────────────────────────────┐  │
 │  │     Centered White Card        │  │
 │  │  ┌─────────────────────────┐  │  │
-│  │  │   Blue Circle Icon      │  │  │
-│  │  │   (UserPlus)            │  │  │
+│  │  │   Goodwill Logo (72px)  │  │  │
 │  │  └─────────────────────────┘  │  │
 │  │                                │  │
 │  │  Welcome to the Goodwill...    │  │
@@ -178,19 +198,17 @@ return (
 │  │                                │  │
 │  │  Name Field *                  │  │
 │  │  ┌─────────────────────────┐  │  │
-│  │  │                         │  │  │
+│  │  │   (white background)    │  │  │
 │  │  └─────────────────────────┘  │  │
 │  │                                │  │
-│  │  Email Field *                 │  │
+│  │  Goodwill Email Field *        │  │
 │  │  ┌─────────────────────────┐  │  │
-│  │  │                         │  │  │
+│  │  │   (white background)    │  │  │
 │  │  └─────────────────────────┘  │  │
 │  │                                │  │
 │  │  ┌─────────────────────────┐  │  │
 │  │  │    Get Started Button   │  │  │
 │  │  └─────────────────────────┘  │  │
-│  │                                │  │
-│  │  Privacy notice (small text)   │  │
 │  └───────────────────────────────┘  │
 └─────────────────────────────────────┘
 ```
@@ -199,10 +217,10 @@ return (
 
 **Background:**
 ```typescript
-className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex items-center justify-center p-4"
+className="min-h-screen bg-gray-800 flex items-center justify-center p-4"
 ```
 - Full viewport height
-- Diagonal gradient (bottom-right direction)
+- Flat dark gray background (gray-800)
 - Flexbox centering
 - Padding for mobile responsiveness
 
@@ -213,23 +231,40 @@ className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-8
 ```
 - Max width 28rem (448px)
 - Large shadow for depth
-- Generous padding
+- Generous padding (32px vertical, 32px horizontal)
 
-**Icon Circle:**
+**Logo:**
 ```typescript
-<div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-  <UserPlus className="h-8 w-8 text-blue-600" />
-</div>
+<Image src="/goodwill-logo.svg" alt="Goodwill Logo" width={72} height={72} className="mx-auto" />
 ```
-- 64px circle
-- Light blue background
-- Blue-600 icon
+- 72px × 72px Goodwill logo
+- Centered with `mx-auto`
+- No circular background
+- 16px margin bottom
+
+**Heading & Description:**
+```typescript
+<h1 className="text-2xl font-bold text-gray-900 mb-2">
+  Welcome to the Goodwill Referral Tool
+</h1>
+<p className="text-gray-600 text-base">
+  To help us understand how this tool is being used and make improvements, please provide your name and email.
+</p>
+```
+- Large, bold heading (24px)
+- Description at base size (16px)
+- Gray color scheme for readability
 
 **Form Fields:**
+```typescript
+<Input className="w-full bg-white focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600" />
+```
+- White backgrounds (`bg-white`) for visibility against card
 - 20px spacing between fields (`space-y-5`)
 - Blue-600 focus rings
 - Auto-focus on name field
 - Enter key support
+- Email format validation
 
 **Submit Button:**
 ```typescript
@@ -283,14 +318,14 @@ className="focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible
 
 ```typescript
 onKeyDown={(e) => {
-  if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
+  if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
     handleUserInfoSubmit()
   }
 }}
 ```
 
 - Press Enter in either field to submit
-- Only works when both fields are valid
+- Only works when both fields are valid AND email format is correct
 - Faster for keyboard users
 
 ---
@@ -309,17 +344,36 @@ User can immediately start typing without clicking
 
 ---
 
-### **5. Validation & Button State**
+### **5. Email Format Validation**
+
+```typescript
+const isValidEmail = (email: string) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+```
+
+**Validation Rules:**
+- Must contain @ symbol
+- Must have text before @
+- Must have domain after @
+- Must have extension (e.g., .org, .com)
+- Examples: ✅ `user@goodwill.org` ✅ `sarah.j@goodwillcentraltexas.org`
+- Examples: ❌ `user` ❌ `user@domain` ❌ `@goodwill.org`
+
+---
+
+### **6. Button State Management**
 
 ```typescript
 <Button
-  disabled={!userNameInput.trim() || !userEmailInput.trim()}
+  disabled={!userNameInput.trim() || !userEmailInput.trim() || !isValidEmail(userEmailInput)}
 >
   Get Started
 </Button>
 ```
 
 - Button disabled until both fields have content
+- Button disabled until email format is valid
 - Visual feedback via disabled state
 - Trimming prevents spaces-only input
 
@@ -463,14 +517,16 @@ If tool is only embedded in 1-2 places, users seeing welcome page multiple times
 
 1. ✅ **First Visit**
    - Clear localStorage
-   - Load app → See welcome page with gradient
+   - Load app → See welcome page with dark gray background
    - Main app not visible
+   - Input fields have white backgrounds
 
 2. ✅ **Form Validation**
    - Try submitting with empty name → Button disabled
    - Try submitting with empty email → Button disabled
    - Try submitting with spaces only → Button disabled
-   - Fill both fields → Button enabled
+   - Try submitting with invalid email format → Button disabled
+   - Fill both fields with valid email → Button enabled
 
 3. ✅ **Submission**
    - Fill both fields
@@ -481,13 +537,20 @@ If tool is only embedded in 1-2 places, users seeing welcome page multiple times
 4. ✅ **Enter Key**
    - Clear localStorage, reload
    - Fill name, press Enter → Nothing (email empty)
-   - Fill email, press Enter → Submit and transition
+   - Fill name and invalid email, press Enter → Nothing (email invalid)
+   - Fill name and valid email, press Enter → Submit and transition
 
-5. ✅ **Auto-Focus**
+5. ✅ **Email Validation**
+   - Try `user` → Button disabled
+   - Try `user@domain` → Button disabled
+   - Try `@goodwill.org` → Button disabled
+   - Try `user@goodwill.org` → Button enabled
+
+6. ✅ **Auto-Focus**
    - Clear localStorage, reload
    - Cursor automatically in name field
 
-6. ✅ **No Password Autofill**
+7. ✅ **No Password Autofill**
    - Clear localStorage, reload
    - No password manager popup
    - No autofill suggestions
@@ -532,12 +595,12 @@ If tool is only embedded in 1-2 places, users seeing welcome page multiple times
 ### **User Communication**
 
 Welcome page states:
-> "Your information is stored locally in your browser and is not sent to any server."
+> "To help us understand how this tool is being used and make improvements, please provide your name and email."
 
 **Transparency:**
-- Purpose explained upfront
-- Local storage clearly stated
-- One-time collection mentioned
+- Purpose explained upfront (usage tracking and improvements)
+- Local storage (stored in browser, not automatically sent to server)
+- Simple, clear language
 
 ---
 
@@ -618,15 +681,17 @@ Ensure all three classes present:
 
 - **React Hooks:** useState, useEffect
 - **shadcn/ui Components:** Card, CardContent, Input, Label, Button
-- **Lucide Icons:** UserPlus
-- **Tailwind CSS:** Gradient backgrounds, focus states, responsive design
+- **Next.js Image Component:** Optimized image loading for Goodwill logo
+- **Tailwind CSS:** Flat backgrounds, focus states, responsive design
 - **Browser API:** localStorage
+- **Form Validation:** Regex-based email validation
 
 ---
 
 ## Future Enhancements
 
-- [ ] Add email format validation with error message
+- [x] ~~Add email format validation~~ (Implemented)
+- [ ] Add inline error message for invalid email format
 - [ ] Create settings panel to update user info
 - [ ] Send user info to server for analytics (with consent)
 - [ ] Support URL parameters for cross-origin embeds

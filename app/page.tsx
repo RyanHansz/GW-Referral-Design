@@ -553,6 +553,8 @@ export default function ReferralTool() {
   const [userEmail, setUserEmail] = useState("")
   const [userNameInput, setUserNameInput] = useState("")
   const [userEmailInput, setUserEmailInput] = useState("")
+  const [userEmailError, setUserEmailError] = useState("")
+  const [userEmailTouched, setUserEmailTouched] = useState(false)
 
   // Check if user has provided info on first load
   useEffect(() => {
@@ -565,8 +567,42 @@ export default function ReferralTool() {
     }
   }, [])
 
+  // Simple email validation
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
+
+  // Validate user email and set error message
+  const validateUserEmail = (email: string) => {
+    if (!email.trim()) {
+      setUserEmailError("Email is required")
+      return false
+    }
+    if (!isValidEmail(email)) {
+      setUserEmailError("Please enter a valid email address")
+      return false
+    }
+    setUserEmailError("")
+    return true
+  }
+
+  // Handle user email blur to show validation errors
+  const handleUserEmailBlur = () => {
+    setUserEmailTouched(true)
+    validateUserEmail(userEmailInput)
+  }
+
+  // Handle user email change and clear error if valid
+  const handleUserEmailChange = (email: string) => {
+    setUserEmailInput(email)
+    // If email was touched and user is now typing, validate in real-time
+    if (userEmailTouched) {
+      validateUserEmail(email)
+    }
+  }
+
   const handleUserInfoSubmit = () => {
-    if (userNameInput.trim() && userEmailInput.trim()) {
+    if (userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
       localStorage.setItem("userName", userNameInput.trim())
       localStorage.setItem("userEmail", userEmailInput.trim())
       setUserName(userNameInput.trim())
@@ -1928,13 +1964,13 @@ export default function ReferralTool() {
                   value={userNameInput}
                   onChange={(e) => setUserNameInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
+                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
                       handleUserInfoSubmit()
                     }
                   }}
                   autoComplete="off"
                   data-form-type="other"
-                  className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
+                  className="w-full bg-white focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
                   autoFocus
                 />
               </div>
@@ -1949,21 +1985,29 @@ export default function ReferralTool() {
                   type="email"
                   placeholder="Enter your Goodwill email address"
                   value={userEmailInput}
-                  onChange={(e) => setUserEmailInput(e.target.value)}
+                  onChange={(e) => handleUserEmailChange(e.target.value)}
+                  onBlur={handleUserEmailBlur}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim()) {
+                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
                       handleUserInfoSubmit()
                     }
                   }}
                   autoComplete="off"
                   data-form-type="other"
-                  className="w-full focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
+                  className={`w-full bg-white focus-visible:ring-offset-0 ${
+                    userEmailTouched && userEmailError
+                      ? "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500"
+                      : "focus-visible:ring-blue-600 focus-visible:border-blue-600"
+                  }`}
                 />
+                {userEmailTouched && userEmailError && (
+                  <p className="text-sm text-red-600 mt-1">{userEmailError}</p>
+                )}
               </div>
 
               <Button
                 onClick={handleUserInfoSubmit}
-                disabled={!userNameInput.trim() || !userEmailInput.trim()}
+                disabled={!userNameInput.trim() || !userEmailInput.trim() || !isValidEmail(userEmailInput)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold"
               >
                 Get Started
