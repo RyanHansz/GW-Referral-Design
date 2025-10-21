@@ -274,12 +274,13 @@ The system uses a single string to accumulate all streaming content, making stat
 ---
 
 ## LLM Configuration
+**Note** We should expect to revisit this LLM setup and prompt structure after testing internally and with GW staff
 
 ### Model Settings
 
 | Setting | Value | Purpose |
 |---------|-------|---------|
-| **Model** | `gpt-5-mini` | o1-mini reasoning model |
+| **Model** | `gpt-5-mini` | reasoning model |
 | **Max Tokens** | 2500 (single)<br>800×N+500 (multiple) | Ensures complete generation |
 | **Web Search** | Enabled | Finds real links & contact info |
 | **Search Context** | `low` | Optimized for speed |
@@ -287,7 +288,7 @@ The system uses a single string to accumulate all streaming content, making stat
 
 ### Why These Settings?
 
-**o1-mini (gpt-5-mini):**
+**gpt-5-mini:**
 - Good at following structured instructions
 - Has web search capability
 - Balances quality and cost
@@ -302,6 +303,7 @@ The system uses a single string to accumulate all streaming content, making stat
 - Reduces token usage
 - Faster search results
 - Sufficient for finding contact info
+
 
 ---
 
@@ -641,24 +643,6 @@ User sees content appear progressively:
 - Low reasoning effort: Prioritizes speed while maintaining quality
 - Low search context: Faster search results with sufficient data
 - Streaming generation: More predictable timing and progressive rendering
-
-**Potential Improvements:**
-- Cache common resource guides
-- Preload frequently accessed resources
-- Use gpt-4o-mini for even faster generation
-- Implement request debouncing for rapid selections
-
-### Network Considerations
-
-**Streaming Benefits:**
-- Progressive rendering
-- Faster perceived performance
-- No timeout issues
-
-**Bandwidth:**
-- ~3-5 KB per resource guide
-- Compressed text-only response
-- Minimal impact on network
 
 ---
 
