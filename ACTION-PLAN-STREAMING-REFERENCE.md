@@ -41,10 +41,8 @@ This document explains how the action plan generation and streaming system works
 7. [Streaming Flow](#streaming-flow)
 8. [Code Reference](#code-reference)
 9. [Best Practices](#best-practices)
-10. [Troubleshooting](#troubleshooting)
-11. [Performance Considerations](#performance-considerations)
-12. [Security](#security)
-13. [Future Improvements](#future-improvements)
+10. [Security](#security)
+11. [Related Documentation](#related-documentation)
 
 ---
 
