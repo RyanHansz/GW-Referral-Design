@@ -56,7 +56,7 @@ Provide a brief overview (3-4 sentences) covering:
 Return ONLY the markdown content directly, no JSON. Generate the ${resources.length > 1 ? 'Quick Summary followed by each' : ''} resource section${resources.length > 1 ? 's' : ''} in order.`
 
     const result = streamText({
-      model: openai("gpt-5"),
+      model: openai("gpt-5-mini"),
       prompt: aiPrompt,
       maxTokens: resources.length === 1 ? 2500 : 800 * resources.length + 500,
       tools: {
