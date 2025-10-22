@@ -208,10 +208,15 @@ RESOURCE TYPES & EXAMPLES:
 **Government**: SNAP, Medicaid, housing assistance, TANF, WIC, Social Security
 **Job Postings**: ONLY real jobs from Indeed, LinkedIn, WorkInTexas, Glassdoor - NEVER invent jobs
 **GCTA/CAT**: Check https://gctatraining.org/class-schedule/ for current offerings with dates
+  - CRITICAL: Use actual GCTA campus address (search for "GCTA campus Austin address" to find specific location)
+  - Example address format: "Address: 1015 Norwood Park Blvd, Austin, TX 78758"
 
 EXAMPLES:
 ❌ BAD: "GCTA Class Schedule" linking to schedule page
 ✓ GOOD: "GCTA - CompTIA A+ (Jan 15, 2026)" with course details
+
+❌ BAD: "Address: Austin, TX" (too generic)
+✓ GOOD: "Address: 1015 Norwood Park Blvd, Austin, TX 78758" (specific campus location)
 
 ❌ BAD: "Food Bank Services" with homepage
 ✓ GOOD: "Mobile Food Pantry - Dove Springs" with location/hours
@@ -223,10 +228,11 @@ FORMATTING (keep BRIEF & SCANNABLE):
   - Example: "Goodwill Resources & Programs / Recursos y Programas de Goodwill"` : " (e.g., \"GCTA - Medical Assistant Cert\")"}
 - **Service**: 1-2 words (e.g., "Healthcare Training")
 - **whyItFits**: 15-20 words max
-- **eligibility**: 3-5 items, comma-separated (include class dates for training)
-- **services**: 3-4 items, comma-separated (include duration/schedule for training)
+- **eligibility**: 3-5 items, comma-separated (basic requirements ONLY - DO NOT include dates/schedules)
+- **classDate**: (GCTA/CAT ONLY) "Starts MM/DD/YYYY-MM/DD/YYYY (schedule)" - e.g., "Starts 1/12/2026-2/20/2026 (Mon-Fri 7am-3pm)"
+- **services**: 3-4 items, comma-separated (include duration/what's learned)
 - **support**: 2-3 items max
-- **contact**: Phone | Address | Hours
+- **contact**: Phone: [#] | Address: [full street address with ZIP] (DO NOT use generic "Austin, TX" - search for actual campus address)
 - **category**: Exact name from list (Goodwill Resources & Programs, Local Community Resources, Government Benefits, Job Postings, GCTA Trainings, CAT Trainings)
 - **providerType**: Goodwill Provided | Community Resource | Government Benefit
 
@@ -248,10 +254,11 @@ REQUIRED JSON STRUCTURE:
       "category": "Exact category name",
       "providerType": "Type from list",
       "whyItFits": "One sentence (15-20 words)",
-      "eligibility": "18+, Travis County, HS diploma (3-5 items)",
+      "eligibility": "18+, Travis County, HS diploma (3-5 items, NO dates)",
+      "classDate": "Starts 1/12/2026-2/20/2026 (Mon-Fri 7am-3pm)" // ONLY for GCTA/CAT
       "services": "Training, certification, coaching (3-4 items)",
       "support": "Grants, placement (2-3 items)",
-      "contact": "Phone: [#] | Address: [city] | Hours: [brief]",
+      "contact": "Phone: [#] | Address: [city]", // NO "Hours: Varies by class"
       "source": "EXACT URL from web search",
       "badge": "domain/path from search"
     }
@@ -265,6 +272,10 @@ REQUIRED JSON STRUCTURE:
 
 CRITICAL NOTES:
 - DO NOT include "Eligibility:", "Services:", emoji icons in values - UI adds these
+- For GCTA/CAT: Put class dates in "classDate" field, NOT in "eligibility"
+- For GCTA/CAT: DO NOT include "Hours: Varies by class; call for details" in contact
+- For GCTA/CAT: Use FULL campus address (search "GCTA campus Austin address"), NOT generic "Austin, TX"
+- For ALL resources: Web search to find complete street address with ZIP code
 - Generate resources in order (1, 2, 3, 4) - complete each before next
 - Generate in ${outputLanguage}
 - Return ONLY JSON, no markdown code blocks
@@ -274,7 +285,7 @@ Client description: ${prompt}`
     // Use streaming for follow-up questions
     if (isFollowUp) {
       const result = streamText({
-        model: openai("gpt-5"),
+        model: openai("gpt-5-mini"),
         prompt: aiPrompt,
         maxTokens: 2000,
         tools: {
@@ -304,7 +315,7 @@ Client description: ${prompt}`
         await writer.write(encoder.encode(JSON.stringify({ type: "status", message: "Searching for resources..." }) + "\n"))
 
         const result = streamText({
-          model: openai("gpt-5"),
+          model: openai("gpt-5-mini"),
           prompt: aiPrompt,
           maxTokens: 3000,
           tools: {
