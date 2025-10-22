@@ -116,24 +116,30 @@ Compare prod version with current repo to identify features/improvements to port
 - Shows status messages during generation
 - Reference: `app/api/generate-referrals/route.ts` streaming implementation
 
-### TICKET-010: Add PDF Export Functionality
-**Priority:** Low
+### TICKET-010: Add Pilot/Beta Banner
+**Priority:** High
 **Status:** To Do
-**Description:** Add ability to export referrals as PDF
-- Feature: Print-friendly formatted PDF with:
-  - Client description
-  - All resource details
-  - Action plans (if generated)
-  - Goodwill branding
-- Reference: `app/page.tsx` handlePrint function
+**Description:** Add prominent banner at top of page indicating pilot status
+- Current Prod: No banner visible
+- Target: Amber/yellow banner with:
+  - 🚧 construction emoji icon
+  - "Pilot Version - Work in Progress" heading
+  - Description: "This tool is being tested with Goodwill staff. Please share feedback if you spot issues or have suggestions!"
+  - "Share Feedback" button that opens email to feedback@goodwillcentraltexas.org
+- Visual: Amber background (#FEF3C7), amber border, amber text
+- Reference: `app/page.tsx` lines 1885-1911
 
-### TICKET-011: Add Email Referrals Feature
-**Priority:** Low
+### TICKET-011: Add Header with Goodwill Branding
+**Priority:** High
 **Status:** To Do
-**Description:** Add ability to email referrals directly from app
-- Current Prod: Button exists but unclear if functional
-- Target: Email composed with resource details, ready to send
-- Reference: Check if implemented in prod, may need new endpoint
+**Description:** Add header section with logo and tool title
+- Current Prod: Missing header content
+- Target: Header showing:
+  - Goodwill logo (white rounded square with shadow)
+  - "Find Resources" heading (h2, bold)
+  - "GenAI Referral Tool" subtitle (blue text)
+  - "PILOT" badge (amber badge with border)
+- Reference: `app/page.tsx` lines 1920-1942
 
 ## LLM Prompt Improvements
 
@@ -279,11 +285,13 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## Summary by Priority
 
-**High Priority (10 tickets):**
+**High Priority (12 tickets):**
 - TICKET-001: Structured Resource Cards
 - TICKET-004: Language Selection
 - TICKET-006: Action Plan Generation
 - TICKET-008: Follow-Up Questions
+- TICKET-010: Add Pilot/Beta Banner
+- TICKET-011: Add Header with Goodwill Branding
 - TICKET-012: GCTA Class Dates Field
 - TICKET-014: Government .gov Sources
 - TICKET-017: Web Search Integration
@@ -303,9 +311,7 @@ Compare prod version with current repo to identify features/improvements to port
 - TICKET-020: Trusted Sources List
 - TICKET-022: Test Multi-Language
 
-**Low Priority (5 tickets):**
-- TICKET-010: PDF Export
-- TICKET-011: Email Referrals
+**Low Priority (3 tickets):**
 - TICKET-015: Prevent Generic Hours
 - TICKET-021: Reference Documentation
 
