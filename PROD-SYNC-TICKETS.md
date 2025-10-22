@@ -106,7 +106,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Includes trusted source list for accurate information
 - Reference: `app/api/chat/route.ts`, `CHAT-MODE-REFERENCE.md`
 
-### TICKET-009: Add Follow-Up Questions
+### TICKET-009: Add Follow-Up Questions for Resources
 **Priority:** High
 **Status:** To Do
 **Description:** Add suggested follow-up questions after resource results
@@ -117,7 +117,20 @@ Compare prod version with current repo to identify features/improvements to port
   - Maintain conversation context
 - Reference: `app/page.tsx` suggestedFollowUps state
 
-### TICKET-010: Add Streaming Resource Display
+### TICKET-010: Add Follow-Up Questions for Action Plans
+**Priority:** Medium
+**Status:** To Do
+**Description:** Add follow-up question interface for action plans
+- Current: Action plans are one-way, no ability to ask clarifying questions
+- Target: Interactive follow-up interface showing:
+  - "Ask a follow-up question:" heading
+  - Text area with placeholder: "Ask for more specific information, clarify details, or request additional resources..."
+  - "Ask Follow-Up" button with message icon
+  - Context-aware responses based on action plan content
+- Allows case managers to clarify steps, get more details, or adapt plans
+- Reference: Screenshot of follow-up interface
+
+### TICKET-011: Add Streaming Resource Display
 **Priority:** Medium
 **Status:** To Do
 **Description:** Show resources progressively as they're generated
@@ -127,7 +140,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Shows status messages during generation
 - Reference: `app/api/generate-referrals/route.ts` streaming implementation
 
-### TICKET-011: Add Pilot/Beta Banner
+### TICKET-012: Add Pilot/Beta Banner
 **Priority:** High
 **Status:** To Do
 **Description:** Add prominent banner at top of page indicating pilot status
@@ -140,7 +153,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Visual: Amber background (#FEF3C7), amber border, amber text
 - Reference: `app/page.tsx` lines 1885-1911
 
-### TICKET-012: Add Header with Goodwill Branding
+### TICKET-013: Add Header with Goodwill Branding
 **Priority:** High
 **Status:** To Do
 **Description:** Add header section with logo and tool title
@@ -154,7 +167,7 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## LLM Prompt Improvements
 
-### TICKET-013: Add GCTA Class Dates Field
+### TICKET-014: Add GCTA Class Dates Field
 **Priority:** High
 **Status:** To Do
 **Description:** Separate class start/end dates from eligibility for GCTA/CAT courses
@@ -165,7 +178,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Makes scheduling information more visible
 - Reference: PR #4 (`gcta-resource-updates` branch)
 
-### TICKET-014: Require Full Campus Addresses for GCTA/CAT
+### TICKET-015: Require Full Campus Addresses for GCTA/CAT
 **Priority:** Medium
 **Status:** To Do
 **Description:** Update LLM prompt to require specific campus addresses
@@ -175,7 +188,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Prompt includes explicit search instructions
 - Reference: PR #4, `app/api/generate-referrals/route.ts` lines 211-212
 
-### TICKET-015: Require Authoritative .gov Sources for Government Benefits
+### TICKET-016: Require Authoritative .gov Sources for Government Benefits
 **Priority:** High
 **Status:** To Do
 **Description:** Ensure government benefit listings link to official .gov websites only
@@ -188,7 +201,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Include specific benefit amounts
 - Reference: `gov-services-improve-listings` branch (not yet merged)
 
-### TICKET-016: Prevent Generic Hours Text for GCTA
+### TICKET-017: Prevent Generic Hours Text for GCTA
 **Priority:** Low
 **Status:** To Do
 **Description:** Remove unhelpful "Hours: Varies by class; call for details" from contact info
@@ -197,7 +210,7 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## Backend Improvements
 
-### TICKET-017: Switch to GPT-5-mini for Resource Generation
+### TICKET-018: Switch to GPT-5-mini for Resource Generation
 **Priority:** Medium
 **Status:** To Do
 **Description:** Update model from gpt-5 to gpt-5-mini for cost/speed optimization
@@ -209,7 +222,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Still use gpt-5 for action plans (if quality needed)
 - Reference: PR #4, `LLM-PROMPTS-REFERENCE.md`
 
-### TICKET-018: Add Web Search Integration
+### TICKET-019: Add Web Search Integration
 **Priority:** High
 **Status:** To Do
 **Description:** Enable web search for LLM to verify URLs and find current information
@@ -218,7 +231,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Used for all endpoints (referrals, follow-ups, action plans, chat)
 - Reference: All route files use `openai.tools.webSearch()`
 
-### TICKET-019: Implement Progressive Streaming for Multiple Resources
+### TICKET-020: Implement Progressive Streaming for Multiple Resources
 **Priority:** Medium
 **Status:** To Do
 **Description:** Stream resources individually as they're generated (not all at once)
@@ -229,7 +242,7 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## Content/Data Improvements
 
-### TICKET-020: Add Goodwill Program Context File
+### TICKET-021: Add Goodwill Program Context File
 **Priority:** High
 **Status:** To Do
 **Description:** Load Goodwill program details from external file instead of inline
@@ -239,7 +252,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Injected into all LLM prompts
 - Reference: `lib/context-loader.ts`
 
-### TICKET-021: Add Trusted Sources List to Chat Mode
+### TICKET-022: Add Trusted Sources List to Chat Mode
 **Priority:** Medium
 **Status:** To Do
 **Description:** Provide chat LLM with curated list of trusted organizations/websites
@@ -249,7 +262,7 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## Testing & Quality
 
-### TICKET-022: Test Multi-Language Output
+### TICKET-023: Test Multi-Language Output
 **Priority:** Medium
 **Status:** To Do
 **Description:** Verify all 7 languages generate properly formatted resources
@@ -259,7 +272,7 @@ Compare prod version with current repo to identify features/improvements to port
   - Proper character encoding
 - Reference: `LANGUAGE-SELECTION-REFERENCE.md`
 
-### TICKET-023: Test Government Benefits Generation
+### TICKET-024: Test Government Benefits Generation
 **Priority:** High
 **Status:** To Do
 **Description:** Verify government benefit resources use .gov sources only
@@ -268,7 +281,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Verify specific benefit amounts included
 - No third-party sites like benefits.gov
 
-### TICKET-024: Test GCTA/CAT Resource Format
+### TICKET-025: Test GCTA/CAT Resource Format
 **Priority:** High
 **Status:** To Do
 **Description:** Verify GCTA/CAT resources show proper structure
@@ -284,32 +297,33 @@ Compare prod version with current repo to identify features/improvements to port
 **High Priority (11 tickets):**
 - TICKET-001: Structured Resource Cards
 - TICKET-004: Language Selection
-- TICKET-009: Follow-Up Questions
-- TICKET-011: Pilot/Beta Banner
-- TICKET-012: Header with Goodwill Branding
-- TICKET-013: GCTA Class Dates Field
-- TICKET-015: Government .gov Sources
-- TICKET-018: Web Search Integration
-- TICKET-020: Goodwill Context File
-- TICKET-023: Test Government Benefits
-- TICKET-024: Test GCTA/CAT Format
+- TICKET-009: Follow-Up Questions for Resources
+- TICKET-012: Pilot/Beta Banner
+- TICKET-013: Header with Goodwill Branding
+- TICKET-014: GCTA Class Dates Field
+- TICKET-016: Government .gov Sources
+- TICKET-019: Web Search Integration
+- TICKET-021: Goodwill Context File
+- TICKET-024: Test Government Benefits
+- TICKET-025: Test GCTA/CAT Format
 
-**Medium Priority (11 tickets):**
+**Medium Priority (12 tickets):**
 - TICKET-002: Category Badges
 - TICKET-003: Multiple View Tabs
 - TICKET-005: Sub-Category Filters
 - TICKET-006: Show Active Filters
 - TICKET-007: Improve Action Plan Design
 - TICKET-008: Chat Mode
-- TICKET-010: Streaming Display
-- TICKET-014: Full Campus Addresses
-- TICKET-017: Switch to GPT-5-mini
-- TICKET-019: Progressive Streaming
-- TICKET-021: Trusted Sources List
-- TICKET-022: Test Multi-Language
+- TICKET-010: Follow-Up Questions for Action Plans
+- TICKET-011: Streaming Display
+- TICKET-015: Full Campus Addresses
+- TICKET-018: Switch to GPT-5-mini
+- TICKET-020: Progressive Streaming
+- TICKET-022: Trusted Sources List
+- TICKET-023: Test Multi-Language
 
 **Low Priority (1 ticket):**
-- TICKET-016: Prevent Generic Hours
+- TICKET-017: Prevent Generic Hours
 
 ---
 
