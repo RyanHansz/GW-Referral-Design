@@ -85,6 +85,7 @@ interface Resource {
   // eligibility?: string // Duplicate field, removed
   services?: string
   support?: string
+  classDate?: string // For GCTA/CAT training start dates and schedules
 }
 
 interface ReferralResponse {
@@ -329,6 +330,7 @@ const translateLabels = (category: string, language: string) => {
     services: "🔧 Services:",
     support: "🤲 Support:",
     contact: "📞 Contact:",
+    classDate: "📅 Class Dates:",
   }
 
   const labelTranslations: Record<string, Record<string, any>> = {
@@ -338,12 +340,14 @@ const translateLabels = (category: string, language: string) => {
         services: "📚 Lo Que Aprenderás:",
         support: "💰 Apoyo Financiero:",
         contact: "📞 Información de Inscripción:",
+        classDate: "📅 Fechas de Clase:",
       },
       "CAT Trainings": {
         eligibility: "📋 Quién Puede Inscribirse:",
         services: "📚 Lo Que Aprenderás:",
         support: "💰 Apoyo Financiero:",
         contact: "📞 Información de Inscripción:",
+        classDate: "📅 Fechas de Clase:",
       },
       "Job Postings": {
         eligibility: "✅ Requisitos:",
@@ -376,12 +380,14 @@ const translateLabels = (category: string, language: string) => {
         services: "📚 Ce Que Vous Apprendrez:",
         support: "💰 Soutien Financier:",
         contact: "📞 Informations d'Inscription:",
+        classDate: "📅 Dates de Cours:",
       },
       "CAT Trainings": {
         eligibility: "📋 Qui Peut S'Inscrire:",
         services: "📚 Ce Que Vous Apprendrez:",
         support: "💰 Soutien Financier:",
         contact: "📞 Informations d'Inscription:",
+        classDate: "📅 Dates de Cours:",
       },
       "Job Postings": {
         eligibility: "✅ Exigences:",
@@ -425,6 +431,7 @@ const translateLabels = (category: string, language: string) => {
         services: "📚 What You'll Learn:",
         support: "💰 Financial Support:",
         contact: "📞 Enrollment Info:",
+        classDate: "📅 Class Dates:",
       }
     case "Job Postings":
       return {
@@ -2688,6 +2695,11 @@ export default function ReferralTool() {
                                               {resource.eligibility}
                                             </p>
                                           )}
+                                          {resource.classDate && (
+                                            <p className="text-black mt-1 text-sm leading-relaxed">
+                                              <span className="font-semibold">{labels.classDate}</span> {resource.classDate}
+                                            </p>
+                                          )}
                                           {resource.services && (
                                             <p className="text-black mt-1 text-sm leading-relaxed">
                                               <span className="font-semibold">{labels.services}</span> {resource.services}
@@ -2698,11 +2710,15 @@ export default function ReferralTool() {
                                               <span className="font-semibold">{labels.support}</span> {resource.support}
                                             </p>
                                           )}
-                                          {resource.contact && (
-                                            <p className="text-black mt-3 text-sm">
-                                              <span className="font-semibold">{labels.contact}</span> {resource.contact}
-                                            </p>
-                                          )}
+                                          {resource.contact && (() => {
+                                            // Filter out unhelpful generic hours text
+                                            const filteredContact = resource.contact.replace(/\s*\|\s*Hours:\s*Varies\s+by\s+class;?\s*call\s+for\s+details\.?/gi, '');
+                                            return filteredContact.trim() && (
+                                              <p className="text-black mt-3 text-sm">
+                                                <span className="font-semibold">{labels.contact}</span> {filteredContact}
+                                              </p>
+                                            );
+                                          })()}
                                         </>
                                       )
                                     })()}
@@ -2929,6 +2945,11 @@ export default function ReferralTool() {
                                                 {resource.eligibility}
                                               </p>
                                             )}
+                                            {resource.classDate && (
+                                              <p className="text-black mt-1 text-sm leading-relaxed">
+                                                <span className="font-semibold">{labels.classDate}</span> {resource.classDate}
+                                              </p>
+                                            )}
                                             {resource.services && (
                                               <p className="text-black mt-1 text-sm leading-relaxed">
                                                 <span className="font-semibold">{labels.services}</span> {resource.services}
@@ -2958,11 +2979,15 @@ export default function ReferralTool() {
                                                 ))}
                                             </div>
 
-                                            {resource.contact && (
-                                              <p className="text-black mt-3 text-sm">
-                                                <span className="font-semibold">{labels.contact}</span> {resource.contact}
-                                              </p>
-                                            )}
+                                            {resource.contact && (() => {
+                                              // Filter out unhelpful generic hours text
+                                              const filteredContact = resource.contact.replace(/\s*\|\s*Hours:\s*Varies\s+by\s+class;?\s*call\s+for\s+details\.?/gi, '');
+                                              return filteredContact.trim() && (
+                                                <p className="text-black mt-3 text-sm">
+                                                  <span className="font-semibold">{labels.contact}</span> {filteredContact}
+                                                </p>
+                                              );
+                                            })()}
                                           </>
                                         )
                                       })()}

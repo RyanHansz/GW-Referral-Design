@@ -223,10 +223,11 @@ FORMATTING (keep BRIEF & SCANNABLE):
   - Example: "Goodwill Resources & Programs / Recursos y Programas de Goodwill"` : " (e.g., \"GCTA - Medical Assistant Cert\")"}
 - **Service**: 1-2 words (e.g., "Healthcare Training")
 - **whyItFits**: 15-20 words max
-- **eligibility**: 3-5 items, comma-separated (include class dates for training)
-- **services**: 3-4 items, comma-separated (include duration/schedule for training)
+- **eligibility**: 3-5 items, comma-separated (basic requirements ONLY - DO NOT include dates/schedules)
+- **classDate**: (GCTA/CAT ONLY) "Starts MM/DD/YYYY-MM/DD/YYYY (schedule)" - e.g., "Starts 1/12/2026-2/20/2026 (Mon-Fri 7am-3pm)"
+- **services**: 3-4 items, comma-separated (include duration/what's learned)
 - **support**: 2-3 items max
-- **contact**: Phone | Address | Hours
+- **contact**: Phone | Address (DO NOT include generic "Hours: Varies by class" text)
 - **category**: Exact name from list (Goodwill Resources & Programs, Local Community Resources, Government Benefits, Job Postings, GCTA Trainings, CAT Trainings)
 - **providerType**: Goodwill Provided | Community Resource | Government Benefit
 
@@ -248,10 +249,11 @@ REQUIRED JSON STRUCTURE:
       "category": "Exact category name",
       "providerType": "Type from list",
       "whyItFits": "One sentence (15-20 words)",
-      "eligibility": "18+, Travis County, HS diploma (3-5 items)",
+      "eligibility": "18+, Travis County, HS diploma (3-5 items, NO dates)",
+      "classDate": "Starts 1/12/2026-2/20/2026 (Mon-Fri 7am-3pm)" // ONLY for GCTA/CAT
       "services": "Training, certification, coaching (3-4 items)",
       "support": "Grants, placement (2-3 items)",
-      "contact": "Phone: [#] | Address: [city] | Hours: [brief]",
+      "contact": "Phone: [#] | Address: [city]", // NO "Hours: Varies by class"
       "source": "EXACT URL from web search",
       "badge": "domain/path from search"
     }
@@ -265,6 +267,8 @@ REQUIRED JSON STRUCTURE:
 
 CRITICAL NOTES:
 - DO NOT include "Eligibility:", "Services:", emoji icons in values - UI adds these
+- For GCTA/CAT: Put class dates in "classDate" field, NOT in "eligibility"
+- For GCTA/CAT: DO NOT include "Hours: Varies by class; call for details" in contact
 - Generate resources in order (1, 2, 3, 4) - complete each before next
 - Generate in ${outputLanguage}
 - Return ONLY JSON, no markdown code blocks
