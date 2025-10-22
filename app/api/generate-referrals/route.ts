@@ -208,10 +208,15 @@ RESOURCE TYPES & EXAMPLES:
 **Government**: SNAP, Medicaid, housing assistance, TANF, WIC, Social Security
 **Job Postings**: ONLY real jobs from Indeed, LinkedIn, WorkInTexas, Glassdoor - NEVER invent jobs
 **GCTA/CAT**: Check https://gctatraining.org/class-schedule/ for current offerings with dates
+  - CRITICAL: Use actual GCTA campus address (search for "GCTA campus Austin address" to find specific location)
+  - Example address format: "Address: 1015 Norwood Park Blvd, Austin, TX 78758"
 
 EXAMPLES:
 ❌ BAD: "GCTA Class Schedule" linking to schedule page
 ✓ GOOD: "GCTA - CompTIA A+ (Jan 15, 2026)" with course details
+
+❌ BAD: "Address: Austin, TX" (too generic)
+✓ GOOD: "Address: 1015 Norwood Park Blvd, Austin, TX 78758" (specific campus location)
 
 ❌ BAD: "Food Bank Services" with homepage
 ✓ GOOD: "Mobile Food Pantry - Dove Springs" with location/hours
@@ -227,7 +232,7 @@ FORMATTING (keep BRIEF & SCANNABLE):
 - **classDate**: (GCTA/CAT ONLY) "Starts MM/DD/YYYY-MM/DD/YYYY (schedule)" - e.g., "Starts 1/12/2026-2/20/2026 (Mon-Fri 7am-3pm)"
 - **services**: 3-4 items, comma-separated (include duration/what's learned)
 - **support**: 2-3 items max
-- **contact**: Phone | Address (DO NOT include generic "Hours: Varies by class" text)
+- **contact**: Phone: [#] | Address: [full street address with ZIP] (DO NOT use generic "Austin, TX" - search for actual campus address)
 - **category**: Exact name from list (Goodwill Resources & Programs, Local Community Resources, Government Benefits, Job Postings, GCTA Trainings, CAT Trainings)
 - **providerType**: Goodwill Provided | Community Resource | Government Benefit
 
@@ -269,6 +274,8 @@ CRITICAL NOTES:
 - DO NOT include "Eligibility:", "Services:", emoji icons in values - UI adds these
 - For GCTA/CAT: Put class dates in "classDate" field, NOT in "eligibility"
 - For GCTA/CAT: DO NOT include "Hours: Varies by class; call for details" in contact
+- For GCTA/CAT: Use FULL campus address (search "GCTA campus Austin address"), NOT generic "Austin, TX"
+- For ALL resources: Web search to find complete street address with ZIP code
 - Generate resources in order (1, 2, 3, 4) - complete each before next
 - Generate in ${outputLanguage}
 - Return ONLY JSON, no markdown code blocks
