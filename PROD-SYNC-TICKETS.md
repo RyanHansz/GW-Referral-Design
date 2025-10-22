@@ -178,6 +178,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Helps staff personalize recommendations before generating action plans
 
 ### TICKET-013: Better Loading State for Resource Generation
+<img width="1112" height="690" alt="Screenshot 2025-10-22 at 4 26 04 PM" src="https://github.com/user-attachments/assets/5c659ee6-c9b8-4fd0-a9da-ef6e09c4b390" />
 **Priority:** Medium
 **Status:** To Do
 **Description:** Improve loading experience when generating resources
