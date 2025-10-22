@@ -382,7 +382,7 @@ Respond directly with the markdown content - do not wrap it in JSON or any other
 ```
 
 **API Configuration:**
-- Model: `gpt-5`
+- Model: `gpt-5-mini`
 - Max Tokens: `2000`
 - Search Context: `low`
 - Reasoning Effort: `low`
@@ -396,7 +396,8 @@ Respond directly with the markdown content - do not wrap it in JSON or any other
 
 ```javascript
 // Model Selection
-model: openai("gpt-5")
+model: openai("gpt-5")          // Resource generation & action plans
+model: openai("gpt-5-mini")     // Chat mode (faster, cost-effective)
 
 // Reasoning & Performance
 providerOptions: {
@@ -415,14 +416,14 @@ tools: {
 
 ### **Prompt-Specific Settings**
 
-| Prompt | Max Tokens | Search Context | Purpose |
-|--------|-----------|----------------|---------|
-| Resource Finder | 3000 | low | Generate 1-4 resources with full details |
-| Follow-up | 2000 | low | Answer clarification questions |
-| Action Plan (Single) | 2500 | low | Detailed guide for 1 resource |
-| Quick Summary | 500 | low | Brief overview of multiple resources |
-| Individual Guide | 800 | low | Concise guide for 1 resource (parallel) |
-| Chat | 2000 | low | Conversational Q&A responses |
+| Prompt | Model | Max Tokens | Search Context | Purpose |
+|--------|-------|-----------|----------------|---------|
+| Resource Finder | gpt-5 | 3000 | low | Generate 1-4 resources with full details |
+| Follow-up | gpt-5 | 2000 | low | Answer clarification questions |
+| Action Plan (Single) | gpt-5 | 2500 | low | Detailed guide for 1 resource |
+| Quick Summary | gpt-5 | 500 | low | Brief overview of multiple resources |
+| Individual Guide | gpt-5 | 800 | low | Concise guide for 1 resource (parallel) |
+| Chat | gpt-5-mini | 2000 | low | Conversational Q&A responses |
 
 ---
 
@@ -449,7 +450,8 @@ These variables are injected into prompts at runtime:
 ## Prompt Iteration History
 
 ### **Key Changes**
-- **Oct 2025:** Switched from `gpt-5-mini` to `gpt-5` for better quality
+- **Oct 2025:** Switched chat mode to `gpt-5-mini` for faster responses (resource generation still uses `gpt-5`)
+- **Oct 2025:** Switched resource generation from `gpt-5-mini` to `gpt-5` for better quality
 - **Oct 2025:** Added bilingual title format for non-English output
 - **Oct 2025:** Reduced search context from `medium` to `low` for speed
 - **Oct 2025:** Set reasoning effort to `low` across all prompts
@@ -458,7 +460,8 @@ These variables are injected into prompts at runtime:
 - **Sep 2025:** Enhanced chat prompt with trusted sources
 
 ### **A/B Testing Notes**
-- `gpt-5` vs `gpt-5-mini`: 5 showed 30% better URL accuracy
+- `gpt-5` vs `gpt-5-mini` (resources): GPT-5 showed 30% better URL accuracy
+- `gpt-5-mini` (chat): Faster responses, adequate quality for conversational Q&A
 - `low` vs `medium` search context: Low reduced latency by 40%, minimal quality impact
 - Bilingual titles: Improved case manager clarity by 50%
 
@@ -509,5 +512,5 @@ These variables are injected into prompts at runtime:
 
 For questions about prompt engineering or LLM configuration, contact the development team.
 
-**Last Updated:** 2025-10-20
+**Last Updated:** 2025-10-22
 **Author:** Claude Code + Ryan Hansz
