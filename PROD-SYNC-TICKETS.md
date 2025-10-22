@@ -1,10 +1,12 @@
-# Production Sync Tickets
+# Improvement Backlog
 
 Compare prod version with current repo to identify features/improvements to port to production.
 
 ## UI/UX Enhancements
 
-### TICKET-001: Add Structured Resource Cards
+### TICKET-001: Add Structure to Resource Cards
+<img width="1175" height="714" alt="Screenshot 2025-10-22 at 4 10 50 PM" src="https://github.com/user-attachments/assets/7d1f49d0-61f3-4fd1-b779-e1dc0de191c9" />
+
 **Priority:** High
 **Status:** To Do
 **Description:** Replace simple list view with detailed resource cards showing structured fields
@@ -16,7 +18,9 @@ Compare prod version with current repo to identify features/improvements to port
   - Contact info (📞 icon)
 - Reference: `app/page.tsx` lines 2687-2724
 
-### TICKET-002: Add Resource Category Badges
+### TICKET-002: Add More Resource Category Badges
+<img width="183" height="50" alt="Screenshot 2025-10-22 at 4 11 06 PM" src="https://github.com/user-attachments/assets/ef2a65e2-fd97-4a45-826d-12030814f6d5" />
+
 **Priority:** Medium
 **Status:** To Do
 **Description:** Add visual category badges to resource cards
@@ -30,18 +34,9 @@ Compare prod version with current repo to identify features/improvements to port
   - Goodwill Resources & Programs (heart icon, pink)
 - Reference: `app/page.tsx` lines 2674-2683
 
-### TICKET-003: Add Multiple View Tabs
-**Priority:** Medium
-**Status:** To Do
-**Description:** Add tabbed interface for different result views
-- Current Prod: Single list view
-- Target: Multiple tabs:
-  - Text Summary (brief overview)
-  - Detailed Cards (current default)
-  - Chat Mode (conversational interface)
-- Reference: `app/page.tsx` activeTab state
 
-### TICKET-004: Add Language Selection Dropdown
+### TICKET-004: Add Language Selection 
+<img width="1005" height="374" alt="Screenshot 2025-10-22 at 4 11 37 PM" src="https://github.com/user-attachments/assets/00f3dff2-5c91-4f25-ad8d-d294fb629ef3" />
 **Priority:** High
 **Status:** To Do
 **Description:** Add language selector for multi-language support
@@ -58,6 +53,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Reference: `app/page.tsx` lines 2170-2183, `LANGUAGE-SELECTION-REFERENCE.md`
 
 ### TICKET-005: Add Sub-Category Filters
+<img width="1208" height="649" alt="Screenshot 2025-10-22 at 4 12 20 PM" src="https://github.com/user-attachments/assets/2fa435b0-bb6c-4533-b0db-311143bb3eb5" />
 **Priority:** Medium
 **Status:** To Do
 **Description:** Expand category filters to include sub-categories
@@ -69,6 +65,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Reference: `app/api/generate-referrals/route.ts` lines 15-71, `SUB-CATEGORY-FILTERS-REFERENCE.md`
 
 ### TICKET-006: Show Active Filters in Referral Prompt
+<img width="801" height="168" alt="Screenshot 2025-10-22 at 4 12 42 PM" src="https://github.com/user-attachments/assets/0a872368-9a11-4bf5-80a4-b86f134a885f" />
 **Priority:** Medium
 **Status:** To Do
 **Description:** Display active filters above search results for better context
@@ -84,6 +81,8 @@ Compare prod version with current repo to identify features/improvements to port
 ## Feature Additions
 
 ### TICKET-007: Improve Action Plan Design
+<img width="1407" height="916" alt="Screenshot 2025-10-22 at 4 13 29 PM" src="https://github.com/user-attachments/assets/f69ee8f8-d376-4399-90c5-b68e6a4d0145" />
+
 **Priority:** Medium
 **Status:** To Do
 **Description:** Enhance action plan UI with separate components for better organization
@@ -97,6 +96,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Reference: `app/api/generate-action-plan/route.ts`
 
 ### TICKET-008: Add Chat Mode
+<img width="1728" height="799" alt="Screenshot 2025-10-22 at 4 13 46 PM" src="https://github.com/user-attachments/assets/fa696a11-2cf3-459f-af0c-ae767c593359" />
 **Priority:** Medium
 **Status:** To Do
 **Description:** Add conversational AI chat interface for Q&A about programs
@@ -107,6 +107,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Reference: `app/api/chat/route.ts`, `CHAT-MODE-REFERENCE.md`
 
 ### TICKET-009: Add Follow-Up Questions for Resources
+<img width="899" height="471" alt="Screenshot 2025-10-22 at 4 17 45 PM" src="https://github.com/user-attachments/assets/0c8d9172-c124-43ca-a1a1-54361d3d55af" />
 **Priority:** High
 **Status:** To Do
 **Description:** Add suggested follow-up questions after resource results
@@ -116,19 +117,6 @@ Compare prod version with current repo to identify features/improvements to port
   - Allow users to ask custom follow-up questions
   - Maintain conversation context
 - Reference: `app/page.tsx` suggestedFollowUps state
-
-### TICKET-010: Add Follow-Up Questions for Action Plans
-**Priority:** Medium
-**Status:** To Do
-**Description:** Add follow-up question interface for action plans
-- Current: Action plans are one-way, no ability to ask clarifying questions
-- Target: Interactive follow-up interface showing:
-  - "Ask a follow-up question:" heading
-  - Text area with placeholder: "Ask for more specific information, clarify details, or request additional resources..."
-  - "Ask Follow-Up" button with message icon
-  - Context-aware responses based on action plan content
-- Allows case managers to clarify steps, get more details, or adapt plans
-- Reference: Screenshot of follow-up interface
 
 ### TICKET-011: Add Streaming Resource Display
 **Priority:** Medium
@@ -158,6 +146,8 @@ Compare prod version with current repo to identify features/improvements to port
 - Helps staff personalize recommendations before generating action plans
 
 ### TICKET-013: Add Pilot/Beta Banner
+<img width="778" height="80" alt="Screenshot 2025-10-22 at 4 18 33 PM" src="https://github.com/user-attachments/assets/e83c0f51-29c1-4013-b214-e3afa538f0ca" />
+
 **Priority:** High
 **Status:** To Do
 **Description:** Add prominent banner at top of page indicating pilot status
@@ -171,6 +161,8 @@ Compare prod version with current repo to identify features/improvements to port
 - Reference: `app/page.tsx` lines 1885-1911
 
 ### TICKET-014: Add Header with Goodwill Branding
+<img width="791" height="337" alt="Screenshot 2025-10-22 at 4 18 15 PM" src="https://github.com/user-attachments/assets/56f4fb57-3fff-4504-aaf8-b1479fb094ba" />
+
 **Priority:** High
 **Status:** To Do
 **Description:** Add header section with logo and tool title
@@ -181,131 +173,6 @@ Compare prod version with current repo to identify features/improvements to port
   - "GenAI Referral Tool" subtitle (blue text)
   - "PILOT" badge (amber badge with border)
 - Reference: `app/page.tsx` lines 1920-1942
-
-## LLM Prompt Improvements
-
-### TICKET-015: Add GCTA Class Dates Field
-**Priority:** High
-**Status:** To Do
-**Description:** Separate class start/end dates from eligibility for GCTA/CAT courses
-- Current: Dates mixed with eligibility requirements
-- Target: Dedicated "Class Dates" field showing:
-  - Start and end dates
-  - Schedule (Mon-Fri 7am-3pm, etc.)
-- Makes scheduling information more visible
-- Reference: PR #4 (`gcta-resource-updates` branch)
-
-### TICKET-016: Require Full Campus Addresses for GCTA/CAT
-**Priority:** Medium
-**Status:** To Do
-**Description:** Update LLM prompt to require specific campus addresses
-- Current: Generic "Austin, TX" addresses
-- Target: Full street address with ZIP code
-- Example: "1015 Norwood Park Blvd, Austin, TX 78758"
-- Prompt includes explicit search instructions
-- Reference: PR #4, `app/api/generate-referrals/route.ts` lines 211-212
-
-### TICKET-017: Require Authoritative .gov Sources for Government Benefits
-**Priority:** High
-**Status:** To Do
-**Description:** Ensure government benefit listings link to official .gov websites only
-- Current: May link to third-party explanation sites
-- Target: Only official government sources:
-  - SNAP: hhs.texas.gov/services/food/snap-food-benefits
-  - Medicaid: hhs.texas.gov/services/health/medicaid-chip
-  - TANF, WIC, Housing, Social Security, Unemployment (all official .gov)
-- Include specific eligibility details (income limits, household size)
-- Include specific benefit amounts
-- Reference: `gov-services-improve-listings` branch (not yet merged)
-
-### TICKET-018: Prevent Generic Hours Text for GCTA
-**Priority:** Low
-**Status:** To Do
-**Description:** Remove unhelpful "Hours: Varies by class; call for details" from contact info
-- Handled through LLM prompt instructions, not frontend filtering
-- Reference: PR #4
-
-## Backend Improvements
-
-### TICKET-019: Switch to GPT-5-mini for Resource Generation
-**Priority:** Medium
-**Status:** To Do
-**Description:** Update model from gpt-5 to gpt-5-mini for cost/speed optimization
-- Current: May be using older or different model
-- Target: gpt-5-mini for:
-  - Resource generation
-  - Follow-up questions
-  - Chat mode
-- Still use gpt-5 for action plans (if quality needed)
-- Reference: PR #4, `LLM-PROMPTS-REFERENCE.md`
-
-### TICKET-020: Add Web Search Integration
-**Priority:** High
-**Status:** To Do
-**Description:** Enable web search for LLM to verify URLs and find current information
-- Critical for preventing hallucinated/404 URLs
-- Search context size: "low" for speed
-- Used for all endpoints (referrals, follow-ups, action plans, chat)
-- Reference: All route files use `openai.tools.webSearch()`
-
-### TICKET-021: Implement Progressive Streaming for Multiple Resources
-**Priority:** Medium
-**Status:** To Do
-**Description:** Stream resources individually as they're generated (not all at once)
-- Improves UX by showing results faster
-- Technical implementation using TransformStream
-- Sends JSON chunks: metadata, resources (one at a time), followups, complete
-- Reference: `app/api/generate-referrals/route.ts` lines 296-459
-
-## Content/Data Improvements
-
-### TICKET-022: Add Goodwill Program Context File
-**Priority:** High
-**Status:** To Do
-**Description:** Load Goodwill program details from external file instead of inline
-- Allows updating program info without code changes
-- File: `lib/goodwill-context.txt`
-- Loaded via `lib/context-loader.ts`
-- Injected into all LLM prompts
-- Reference: `lib/context-loader.ts`
-
-### TICKET-023: Add Trusted Sources List to Chat Mode
-**Priority:** Medium
-**Status:** To Do
-**Description:** Provide chat LLM with curated list of trusted organizations/websites
-- Helps LLM prioritize reliable information sources
-- Includes Texas HHS, TWC, ACC, GCTA, nonprofit organizations
-- Reference: `app/api/chat/route.ts` lines 143-169
-
-## Testing & Quality
-
-### TICKET-024: Test Multi-Language Output
-**Priority:** Medium
-**Status:** To Do
-**Description:** Verify all 7 languages generate properly formatted resources
-- Test each language for:
-  - Bilingual titles
-  - Translated field labels
-  - Proper character encoding
-- Reference: `LANGUAGE-SELECTION-REFERENCE.md`
-
-### TICKET-025: Test Government Benefits Generation
-**Priority:** High
-**Status:** To Do
-**Description:** Verify government benefit resources use .gov sources only
-- Test SNAP, Medicaid, TANF, WIC, Housing, SSA, Unemployment
-- Verify income limits, household size requirements included
-- Verify specific benefit amounts included
-- No third-party sites like benefits.gov
-
-### TICKET-026: Test GCTA/CAT Resource Format
-**Priority:** High
-**Status:** To Do
-**Description:** Verify GCTA/CAT resources show proper structure
-- Class dates appear separately (not in eligibility)
-- Full campus address included (not "Austin, TX")
-- No generic "Hours: Varies by class" text
-- Actual class schedules from web search
 
 ---
 
