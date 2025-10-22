@@ -177,6 +177,23 @@ Compare prod version with current repo to identify features/improvements to port
   - Customize list for specific client needs
 - Helps staff personalize recommendations before generating action plans
 
+### TICKET-013: Better Loading State for Resource Generation
+**Priority:** Medium
+**Status:** To Do
+**Description:** Improve loading experience when generating resources
+- Current Prod: Spinner shows on submit button only, user stays on search page
+- Target: Navigate to results page immediately showing:
+  - User's search prompt/query
+  - Active filters applied
+  - Proper loading skeleton/state for resources
+  - Status messages during generation (e.g., "Finding resources...", "Analyzing matches...")
+- Benefits:
+  - Better perceived performance
+  - Clearer feedback to user
+  - Context preserved (shows what they searched for)
+  - More professional loading experience
+- Works with streaming display (TICKET-011) to show resources as they appear
+
 ---
 
 ## Summary by Priority
@@ -188,7 +205,7 @@ Compare prod version with current repo to identify features/improvements to port
 - TICKET-004: Add Pilot/Beta Banner
 - TICKET-005: Add Header with Goodwill Branding
 
-**Medium Priority (7 tickets):**
+**Medium Priority (8 tickets):**
 - TICKET-006: Add More Resource Category Badges
 - TICKET-007: Add Sub-Category Filters
 - TICKET-008: Show Active Filters in Referral Prompt
@@ -196,8 +213,9 @@ Compare prod version with current repo to identify features/improvements to port
 - TICKET-010: Add Chat Mode
 - TICKET-011: Add Streaming Resource Display
 - TICKET-012: Allow Staff to Edit/Remove Generated Listings
+- TICKET-013: Better Loading State for Resource Generation
 
 ---
 
 **Last Updated:** 2025-10-22
-**Total Tickets:** 12 (5 High, 7 Medium)
+**Total Tickets:** 13 (5 High, 8 Medium)
