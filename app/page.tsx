@@ -2710,15 +2710,11 @@ export default function ReferralTool() {
                                               <span className="font-semibold">{labels.support}</span> {resource.support}
                                             </p>
                                           )}
-                                          {resource.contact && (() => {
-                                            // Filter out unhelpful generic hours text
-                                            const filteredContact = resource.contact.replace(/\s*\|\s*Hours:\s*Varies\s+by\s+class;?\s*call\s+for\s+details\.?/gi, '');
-                                            return filteredContact.trim() && (
-                                              <p className="text-black mt-3 text-sm">
-                                                <span className="font-semibold">{labels.contact}</span> {filteredContact}
-                                              </p>
-                                            );
-                                          })()}
+                                          {resource.contact && (
+                                            <p className="text-black mt-3 text-sm">
+                                              <span className="font-semibold">{labels.contact}</span> {resource.contact}
+                                            </p>
+                                          )}
                                         </>
                                       )
                                     })()}
@@ -2979,15 +2975,11 @@ export default function ReferralTool() {
                                                 ))}
                                             </div>
 
-                                            {resource.contact && (() => {
-                                              // Filter out unhelpful generic hours text
-                                              const filteredContact = resource.contact.replace(/\s*\|\s*Hours:\s*Varies\s+by\s+class;?\s*call\s+for\s+details\.?/gi, '');
-                                              return filteredContact.trim() && (
-                                                <p className="text-black mt-3 text-sm">
-                                                  <span className="font-semibold">{labels.contact}</span> {filteredContact}
-                                                </p>
-                                              );
-                                            })()}
+                                            {resource.contact && (
+                                              <p className="text-black mt-3 text-sm">
+                                                <span className="font-semibold">{labels.contact}</span> {resource.contact}
+                                              </p>
+                                            )}
                                           </>
                                         )
                                       })()}
