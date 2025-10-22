@@ -68,24 +68,35 @@ Compare prod version with current repo to identify features/improvements to port
     - Example: "Local Community Resources" → "Food & Nutrition", "Housing & Shelter", "Healthcare Services", etc.
 - Reference: `app/api/generate-referrals/route.ts` lines 15-71, `SUB-CATEGORY-FILTERS-REFERENCE.md`
 
+### TICKET-006: Show Active Filters in Referral Prompt
+**Priority:** Medium
+**Status:** To Do
+**Description:** Display active filters above search results for better context
+- Current Prod: Filters are applied but not visible in results
+- Target: "Active Filters:" section showing:
+  - 🏛️ funnel icon
+  - Categories selected (e.g., "Government Benefits")
+  - Sub-categories if any
+  - Other filter criteria
+- Helps users understand why certain results are shown/hidden
+- Reference: Screenshot shows "Active Filters: Categories: Government Benefits"
+
 ## Feature Additions
 
-### TICKET-006: Add Action Plan Generation
-**Priority:** High
+### TICKET-007: Improve Action Plan Design
+**Priority:** Medium
 **Status:** To Do
-**Description:** Add ability to generate step-by-step action plans from selected resources
-- Feature: Case managers can select multiple resources and generate comprehensive action plan
-- Includes:
-  - Quick summary (multi-resource overview)
-  - Individual resource guides (carousel view for multiple)
-  - How to apply steps
-  - Documents needed
-  - Timeline
-  - Key tips
-- Parallel generation for faster results (summary + all resources generated simultaneously)
-- Reference: `app/api/generate-action-plan/route.ts`, `TICKET-RAG-ACTION-PLANS.md`
+**Description:** Enhance action plan UI with separate components for better organization
+- Current: Action plan and resource guides combined in single view
+- Target: Separate components with carousel navigation:
+  - Action Plan Summary (dedicated component)
+  - Individual Resource Guides (carousel view for multiple resources)
+  - Clear navigation between guides with indicators
+  - Better visual hierarchy and spacing
+- Improves readability for multi-resource action plans
+- Reference: `app/api/generate-action-plan/route.ts`
 
-### TICKET-007: Add Chat Mode
+### TICKET-008: Add Chat Mode
 **Priority:** Medium
 **Status:** To Do
 **Description:** Add conversational AI chat interface for Q&A about programs
@@ -95,7 +106,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Includes trusted source list for accurate information
 - Reference: `app/api/chat/route.ts`, `CHAT-MODE-REFERENCE.md`
 
-### TICKET-008: Add Follow-Up Questions
+### TICKET-009: Add Follow-Up Questions
 **Priority:** High
 **Status:** To Do
 **Description:** Add suggested follow-up questions after resource results
@@ -106,7 +117,7 @@ Compare prod version with current repo to identify features/improvements to port
   - Maintain conversation context
 - Reference: `app/page.tsx` suggestedFollowUps state
 
-### TICKET-009: Add Streaming Resource Display
+### TICKET-010: Add Streaming Resource Display
 **Priority:** Medium
 **Status:** To Do
 **Description:** Show resources progressively as they're generated
@@ -116,7 +127,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Shows status messages during generation
 - Reference: `app/api/generate-referrals/route.ts` streaming implementation
 
-### TICKET-010: Add Pilot/Beta Banner
+### TICKET-011: Add Pilot/Beta Banner
 **Priority:** High
 **Status:** To Do
 **Description:** Add prominent banner at top of page indicating pilot status
@@ -129,7 +140,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Visual: Amber background (#FEF3C7), amber border, amber text
 - Reference: `app/page.tsx` lines 1885-1911
 
-### TICKET-011: Add Header with Goodwill Branding
+### TICKET-012: Add Header with Goodwill Branding
 **Priority:** High
 **Status:** To Do
 **Description:** Add header section with logo and tool title
@@ -143,7 +154,7 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## LLM Prompt Improvements
 
-### TICKET-012: Add GCTA Class Dates Field
+### TICKET-013: Add GCTA Class Dates Field
 **Priority:** High
 **Status:** To Do
 **Description:** Separate class start/end dates from eligibility for GCTA/CAT courses
@@ -154,7 +165,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Makes scheduling information more visible
 - Reference: PR #4 (`gcta-resource-updates` branch)
 
-### TICKET-013: Require Full Campus Addresses for GCTA/CAT
+### TICKET-014: Require Full Campus Addresses for GCTA/CAT
 **Priority:** Medium
 **Status:** To Do
 **Description:** Update LLM prompt to require specific campus addresses
@@ -164,7 +175,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Prompt includes explicit search instructions
 - Reference: PR #4, `app/api/generate-referrals/route.ts` lines 211-212
 
-### TICKET-014: Require Authoritative .gov Sources for Government Benefits
+### TICKET-015: Require Authoritative .gov Sources for Government Benefits
 **Priority:** High
 **Status:** To Do
 **Description:** Ensure government benefit listings link to official .gov websites only
@@ -177,7 +188,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Include specific benefit amounts
 - Reference: `gov-services-improve-listings` branch (not yet merged)
 
-### TICKET-015: Prevent Generic Hours Text for GCTA
+### TICKET-016: Prevent Generic Hours Text for GCTA
 **Priority:** Low
 **Status:** To Do
 **Description:** Remove unhelpful "Hours: Varies by class; call for details" from contact info
@@ -186,7 +197,7 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## Backend Improvements
 
-### TICKET-016: Switch to GPT-5-mini for Resource Generation
+### TICKET-017: Switch to GPT-5-mini for Resource Generation
 **Priority:** Medium
 **Status:** To Do
 **Description:** Update model from gpt-5 to gpt-5-mini for cost/speed optimization
@@ -198,7 +209,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Still use gpt-5 for action plans (if quality needed)
 - Reference: PR #4, `LLM-PROMPTS-REFERENCE.md`
 
-### TICKET-017: Add Web Search Integration
+### TICKET-018: Add Web Search Integration
 **Priority:** High
 **Status:** To Do
 **Description:** Enable web search for LLM to verify URLs and find current information
@@ -207,7 +218,7 @@ Compare prod version with current repo to identify features/improvements to port
 - Used for all endpoints (referrals, follow-ups, action plans, chat)
 - Reference: All route files use `openai.tools.webSearch()`
 
-### TICKET-018: Implement Progressive Streaming for Multiple Resources
+### TICKET-019: Implement Progressive Streaming for Multiple Resources
 **Priority:** Medium
 **Status:** To Do
 **Description:** Stream resources individually as they're generated (not all at once)
@@ -218,7 +229,7 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## Content/Data Improvements
 
-### TICKET-019: Add Goodwill Program Context File
+### TICKET-020: Add Goodwill Program Context File
 **Priority:** High
 **Status:** To Do
 **Description:** Load Goodwill program details from external file instead of inline
@@ -228,28 +239,13 @@ Compare prod version with current repo to identify features/improvements to port
 - Injected into all LLM prompts
 - Reference: `lib/context-loader.ts`
 
-### TICKET-020: Add Trusted Sources List to Chat Mode
+### TICKET-021: Add Trusted Sources List to Chat Mode
 **Priority:** Medium
 **Status:** To Do
 **Description:** Provide chat LLM with curated list of trusted organizations/websites
 - Helps LLM prioritize reliable information sources
 - Includes Texas HHS, TWC, ACC, GCTA, nonprofit organizations
 - Reference: `app/api/chat/route.ts` lines 143-169
-
-## Documentation
-
-### TICKET-021: Create Reference Documentation
-**Priority:** Low
-**Status:** To Do
-**Description:** Add reference documentation for future developers/maintainers
-- Files to create:
-  - `LLM-PROMPTS-REFERENCE.md` - All LLM prompts and configurations
-  - `CHAT-MODE-REFERENCE.md` - Chat mode implementation details
-  - `LANGUAGE-SELECTION-REFERENCE.md` - Multi-language support guide
-  - `SUB-CATEGORY-FILTERS-REFERENCE.md` - Filter system documentation
-  - `MARKDOWN-PARSER-REFERENCE.md` - Markdown rendering pipeline
-  - `GCTA-SCRAPING-REFERENCE.md` - GCTA course data structure (future)
-  - `TICKET-RAG-ACTION-PLANS.md` - Action plan generation guide
 
 ## Testing & Quality
 
@@ -285,35 +281,35 @@ Compare prod version with current repo to identify features/improvements to port
 
 ## Summary by Priority
 
-**High Priority (12 tickets):**
+**High Priority (11 tickets):**
 - TICKET-001: Structured Resource Cards
 - TICKET-004: Language Selection
-- TICKET-006: Action Plan Generation
-- TICKET-008: Follow-Up Questions
-- TICKET-010: Add Pilot/Beta Banner
-- TICKET-011: Add Header with Goodwill Branding
-- TICKET-012: GCTA Class Dates Field
-- TICKET-014: Government .gov Sources
-- TICKET-017: Web Search Integration
-- TICKET-019: Goodwill Context File
+- TICKET-009: Follow-Up Questions
+- TICKET-011: Pilot/Beta Banner
+- TICKET-012: Header with Goodwill Branding
+- TICKET-013: GCTA Class Dates Field
+- TICKET-015: Government .gov Sources
+- TICKET-018: Web Search Integration
+- TICKET-020: Goodwill Context File
 - TICKET-023: Test Government Benefits
 - TICKET-024: Test GCTA/CAT Format
 
-**Medium Priority (9 tickets):**
+**Medium Priority (11 tickets):**
 - TICKET-002: Category Badges
 - TICKET-003: Multiple View Tabs
 - TICKET-005: Sub-Category Filters
-- TICKET-007: Chat Mode
-- TICKET-009: Streaming Display
-- TICKET-013: Full Campus Addresses
-- TICKET-016: Switch to GPT-5-mini
-- TICKET-018: Progressive Streaming
-- TICKET-020: Trusted Sources List
+- TICKET-006: Show Active Filters
+- TICKET-007: Improve Action Plan Design
+- TICKET-008: Chat Mode
+- TICKET-010: Streaming Display
+- TICKET-014: Full Campus Addresses
+- TICKET-017: Switch to GPT-5-mini
+- TICKET-019: Progressive Streaming
+- TICKET-021: Trusted Sources List
 - TICKET-022: Test Multi-Language
 
-**Low Priority (3 tickets):**
-- TICKET-015: Prevent Generic Hours
-- TICKET-021: Reference Documentation
+**Low Priority (1 ticket):**
+- TICKET-016: Prevent Generic Hours
 
 ---
 
