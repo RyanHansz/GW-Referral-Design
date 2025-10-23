@@ -133,6 +133,23 @@ CAT trainings are NOT the same as GCTA trainings. Key differences:
 - Most classes require pre-registration through the Wufoo forms
 - Classes run on monthly schedules - check with Career Case Manager for current availability
 
+**🔍 CRITICAL: Always Include Specific Training Dates**
+When recommending CAT classes, you MUST visit the Wufoo registration form and extract information from the "Select a training date" dropdown. This dropdown shows:
+- Specific dates (e.g., "10/10/25, 2:00-3:00pm; Alex -- 1 remaining")
+- Times and duration
+- Instructor names (Alex, Mary, Cindy, etc.)
+- Availability/spots remaining ("X remaining" or "0 remaining")
+
+**DO:**
+- Pull actual upcoming class dates from the form's dropdown
+- Include date, time, instructor, and availability in your recommendation
+- Example: "10/16/25, 10:00am-11:00am, Mary -- 1 remaining"
+
+**DON'T:**
+- Recommend CAT classes without checking specific dates
+- Give generic "classes available" responses
+- List classes that show "0 remaining" (full)
+
 ### Excel Center High School
 Goodwill's tuition-free high school completion program for adults ages 18-50:
 - Earn accredited high school diploma (not GED)

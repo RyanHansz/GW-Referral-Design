@@ -216,13 +216,20 @@ RESOURCE TYPES & EXAMPLES:
   - Example classes: Career Advancement Essentials, Computer Basics, Digital Skills 1:1, Financial Empowerment, Interview Prep, Job Prep, Indeed Lab
   - Use location-specific Wufoo registration link as the source URL (e.g., https://gwcareeradvancement.wufoo.com/forms/grc-career-advancement-essentials/)
   - Contact info: Specify GRC or GCC location based on client's area
+  - 🔍 CRITICAL: Visit the Wufoo form and extract specific training dates from "Select a training date" dropdown
+  - Include: Date, time, instructor name, and spots remaining (e.g., "10/16/25, 10:00am-11:00am, Mary -- 1 remaining")
+  - Put specific class date/time/instructor in the "classDate" field
+  - DO NOT recommend classes showing "0 remaining" (full classes)
 
 EXAMPLES:
 ❌ BAD: "GCTA Class Schedule" linking to schedule page
 ✓ GOOD: "GCTA - CompTIA A+ (Jan 15, 2026)" with course details
 
-❌ BAD: "CAT Classes" linking to general schedule
-✓ GOOD: "CAT - Career Advancement Essentials (GRC)" with specific Wufoo registration URL
+❌ BAD: "CAT - Career Advancement Essentials" without dates
+✓ GOOD: "CAT - Career Advancement Essentials (GRC)" with classDate: "10/16/25, 10:00am-11:00am, Mary -- 1 remaining"
+
+❌ BAD: "CAT Classes available" (generic)
+✓ GOOD: "CAT - Digital Skills 1:1 (GCC)" with classDate: "10/20/25, 3:00pm-4:00pm, Cindy -- 1 remaining"
 
 ❌ BAD: "Address: Austin, TX" (too generic)
 ✓ GOOD: "Address: 1015 Norwood Park Blvd, Austin, TX 78758" (specific campus location)
