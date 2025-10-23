@@ -62,6 +62,18 @@ GCTA delivers tuition-free vocational training programs ranging from 4-12 weeks,
 ### Career Advancement Training (CAT)
 Free short-term training courses (1-4 weeks) covering essential workplace skills and prerequisites. CAT serves as both standalone skill-building and as required preparation for GCTA programs.
 
+**⚠️ CRITICAL DISTINCTION: CAT ≠ GCTA**
+CAT trainings are NOT the same as GCTA trainings. Key differences:
+- **Duration:** CAT classes are much shorter (1-4 weeks) vs GCTA programs (4-12 weeks)
+- **Enrollment:** CAT has a simpler, faster enrollment process - often just requires online registration through Wufoo forms
+- **Prerequisites:** CAT courses often serve as prerequisites TO GCTA programs (e.g., Career Advancement Essentials must be completed before GCTA enrollment)
+- **Certification:** GCTA leads to industry certifications and job placement; CAT builds foundational skills
+- **Complexity:** GCTA requires extensive documentation, assessments (Wonderlic/CASAS), and multi-level approvals; CAT enrollment is streamlined
+
+**When to recommend:**
+- CAT: For clients needing foundational skills, GCTA prerequisites, or quick skill refreshers
+- GCTA: For clients ready for intensive vocational training leading to industry certification and career placement
+
 **Computer & Digital Skills:**
 - Computer Basics
 - Microsoft Office (Word, Excel, PowerPoint)
