@@ -88,6 +88,39 @@ Free short-term training courses (1-4 weeks) covering essential workplace skills
 - Free to eligible participants
 - Great for building foundational skills or testing career interest
 
+**CAT Class Registration Links by Location:**
+
+*Goodwill Resource Center (GRC/South):*
+- Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/grc-career-advancement-essentials/
+- Computer Basics/Keyboarding: https://gwcareeradvancement.wufoo.com/forms/grc-computer-basics/
+- Digital Skills 1:1: https://gwcareeradvancement.wufoo.com/forms/grc-digital-skills-11/
+- Financial Empowerment Training: https://gwcareeradvancement.wufoo.com/forms/grc-11-financial-empowerment-trainings/
+- Indeed Lab: https://gwcareeradvancement.wufoo.com/forms/grc-indeed-lab/
+- Interview Preparation & Practice: https://gwcareeradvancement.wufoo.com/forms/grc-interview-preparation-and-practice/
+- Job Preparation 1:1: https://gwcareeradvancement.wufoo.com/forms/grc-job-preparation-11/
+- Online Safety: https://gwcareeradvancement.wufoo.com/forms/grc-online-safety/
+- Virtual Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/virtual-career-advancement-essentials/
+
+*Goodwill Community Center (GCC/North):*
+- Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/gcc-career-advancement-essentials/
+- Computer Basics/Keyboarding: https://gwcareeradvancement.wufoo.com/forms/gcc-computer-basics/
+- Digital Skills 1:1: https://gwcareeradvancement.wufoo.com/forms/gcc-digital-skills-11/
+- Financial Empowerment Training: https://gwcareeradvancement.wufoo.com/forms/gcc-11-financial-empowerment-trainings/
+- Indeed Lab: https://gwcareeradvancement.wufoo.com/forms/gcc-indeed-lab/
+- Interview Preparation & Practice: https://gwcareeradvancement.wufoo.com/forms/gcc-interview-preparation-and-practice/
+- Job Preparation 1:1: https://gwcareeradvancement.wufoo.com/forms/gcc-job-preparation-11/
+- Wonderlic Prep & Practice: https://gwcareeradvancement.wufoo.com/forms/gcc-wonderlic-prep-and-practice/
+- AI Basics: https://gwcareeradvancement.wufoo.com/forms/zjgi3bu0u7t757/
+- Online Safety: https://gwcareeradvancement.wufoo.com/forms/zs43hn608egpxa/
+- Virtual Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/virtual-career-advancement-essentials/
+
+**When recommending CAT classes:**
+- Direct clients to the appropriate location-specific registration link
+- GRC serves South Austin and surrounding areas
+- GCC serves North Austin, Round Rock, Georgetown, and surrounding areas
+- Most classes require pre-registration through the Wufoo forms
+- Classes run on monthly schedules - check with Career Case Manager for current availability
+
 ### Excel Center High School
 Goodwill's tuition-free high school completion program for adults ages 18-50:
 - Earn accredited high school diploma (not GED)

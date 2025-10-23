@@ -207,13 +207,22 @@ RESOURCE TYPES & EXAMPLES:
 **Community**: Food banks (specific locations, not homepages), shelters (near client ZIP), transportation, childcare
 **Government**: SNAP, Medicaid, housing assistance, TANF, WIC, Social Security
 **Job Postings**: ONLY real jobs from Indeed, LinkedIn, WorkInTexas, Glassdoor - NEVER invent jobs
-**GCTA/CAT**: Check https://gctatraining.org/class-schedule/ for current offerings with dates
+**GCTA Trainings**: Check https://gctatraining.org/class-schedule/ for current offerings with dates
   - CRITICAL: Use actual GCTA campus address (search for "GCTA campus Austin address" to find specific location)
   - Example address format: "Address: 1015 Norwood Park Blvd, Austin, TX 78758"
+**CAT Trainings**: Refer to CAT Class Registration Links by Location in the Goodwill context
+  - GRC (South Austin): Use GRC-specific registration URLs from context
+  - GCC (North Austin/Round Rock): Use GCC-specific registration URLs from context
+  - Example classes: Career Advancement Essentials, Computer Basics, Digital Skills 1:1, Financial Empowerment, Interview Prep, Job Prep, Indeed Lab
+  - Use location-specific Wufoo registration link as the source URL (e.g., https://gwcareeradvancement.wufoo.com/forms/grc-career-advancement-essentials/)
+  - Contact info: Specify GRC or GCC location based on client's area
 
 EXAMPLES:
 ❌ BAD: "GCTA Class Schedule" linking to schedule page
 ✓ GOOD: "GCTA - CompTIA A+ (Jan 15, 2026)" with course details
+
+❌ BAD: "CAT Classes" linking to general schedule
+✓ GOOD: "CAT - Career Advancement Essentials (GRC)" with specific Wufoo registration URL
 
 ❌ BAD: "Address: Austin, TX" (too generic)
 ✓ GOOD: "Address: 1015 Norwood Park Blvd, Austin, TX 78758" (specific campus location)
