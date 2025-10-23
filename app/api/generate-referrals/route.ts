@@ -216,11 +216,23 @@ RESOURCE TYPES & EXAMPLES:
   - Example classes: Career Advancement Essentials, Computer Basics, Digital Skills 1:1, Financial Empowerment, Interview Prep, Job Prep, Indeed Lab
   - Use location-specific Wufoo registration link as the source URL (e.g., https://gwcareeradvancement.wufoo.com/forms/grc-career-advancement-essentials/)
   - Contact info: Specify GRC or GCC location based on client's area
-  - 🔍 CRITICAL: Visit the Wufoo form and extract specific training dates from "Select a training date" dropdown
-  - Include: Date, time, instructor name, and spots remaining (e.g., "10/16/25, 10:00am-11:00am, Mary -- 1 remaining")
-  - Put specific class date/time/instructor in the "classDate" field
-  - DO NOT recommend classes showing "0 remaining" (full classes)
-  - ⚠️ ONLY recommend classes with FUTURE dates (check today's date and skip any past dates)
+
+  🚨🚨🚨 MANDATORY CAT CLASS DATE EXTRACTION 🚨🚨🚨
+  YOU MUST FOLLOW THESE STEPS FOR EVERY CAT CLASS:
+
+  Step 1: Use web_search to visit the Wufoo registration form URL
+  Step 2: Look for a dropdown field labeled "Select a training date" or "Select a Training Date"
+  Step 3: Extract ALL dates shown in that dropdown (format: "MM/DD/YY, time-time, Instructor -- X remaining")
+  Step 4: Filter to only FUTURE dates (after today's date: check <env> for today)
+  Step 5: Filter out classes showing "0 remaining" (full classes)
+  Step 6: Include the first available future class date in the "classDate" field
+
+  ⚠️ CRITICAL RULES:
+  - The dropdown field contains the actual class dates - you MUST look at this field specifically
+  - If the dropdown shows dates, there ARE classes available - do not say "no classes found"
+  - Each dropdown option format: "10/28/25, 10:00am-11:00am, Mary -- 1 remaining"
+  - NEVER say "no CAT classes available" without visiting the form and checking the dropdown
+  - Example classDate value: "10/28/25, 10:00am-11:00am, Mary -- 1 remaining"
 
 EXAMPLES:
 ❌ BAD: "GCTA Class Schedule" linking to schedule page
@@ -234,6 +246,12 @@ EXAMPLES:
 
 ❌ BAD: Recommending a class dated "10/20/25" when today is "10/23/25" (past date)
 ✓ GOOD: Only recommending classes with dates after today
+
+❌ BAD: Saying "no CAT classes available" without visiting the Wufoo form
+✓ GOOD: Visiting the Wufoo form, checking "Select a training date" dropdown, extracting actual dates
+
+❌ BAD: Generic response about CAT classes without specific dates
+✓ GOOD: Specific class with date from dropdown: "10/28/25, 10:00am-11:00am, Mary -- 1 remaining"
 
 ❌ BAD: "Address: Austin, TX" (too generic)
 ✓ GOOD: "Address: 1015 Norwood Park Blvd, Austin, TX 78758" (specific campus location)
@@ -296,6 +314,9 @@ CRITICAL NOTES:
 - For GCTA/CAT: DO NOT include "Hours: Varies by class; call for details" in contact
 - For GCTA/CAT: Use FULL campus address (search "GCTA campus Austin address"), NOT generic "Austin, TX"
 - For ALL resources: Web search to find complete street address with ZIP code
+- 🚨 FOR CAT CLASSES: You MUST visit the Wufoo form and check the "Select a training date" dropdown field
+- 🚨 FOR CAT CLASSES: NEVER say "no classes available" without checking that specific dropdown field
+- 🚨 FOR CAT CLASSES: The dropdown shows actual available class dates - if it has dates, classes ARE available
 - Generate resources in order (1, 2, 3, 4) - complete each before next
 - Generate in ${outputLanguage}
 - Return ONLY JSON, no markdown code blocks
