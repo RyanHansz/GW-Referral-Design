@@ -220,6 +220,7 @@ RESOURCE TYPES & EXAMPLES:
   - Include: Date, time, instructor name, and spots remaining (e.g., "10/16/25, 10:00am-11:00am, Mary -- 1 remaining")
   - Put specific class date/time/instructor in the "classDate" field
   - DO NOT recommend classes showing "0 remaining" (full classes)
+  - ⚠️ ONLY recommend classes with FUTURE dates (check today's date and skip any past dates)
 
 EXAMPLES:
 ❌ BAD: "GCTA Class Schedule" linking to schedule page
@@ -229,7 +230,10 @@ EXAMPLES:
 ✓ GOOD: "CAT - Career Advancement Essentials (GRC)" with classDate: "10/16/25, 10:00am-11:00am, Mary -- 1 remaining"
 
 ❌ BAD: "CAT Classes available" (generic)
-✓ GOOD: "CAT - Digital Skills 1:1 (GCC)" with classDate: "10/20/25, 3:00pm-4:00pm, Cindy -- 1 remaining"
+✓ GOOD: "CAT - Digital Skills 1:1 (GCC)" with classDate: "10/28/25, 3:00pm-4:00pm, Cindy -- 1 remaining"
+
+❌ BAD: Recommending a class dated "10/20/25" when today is "10/23/25" (past date)
+✓ GOOD: Only recommending classes with dates after today
 
 ❌ BAD: "Address: Austin, TX" (too generic)
 ✓ GOOD: "Address: 1015 Norwood Park Blvd, Austin, TX 78758" (specific campus location)

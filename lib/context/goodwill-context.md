@@ -144,11 +144,13 @@ When recommending CAT classes, you MUST visit the Wufoo registration form and ex
 - Pull actual upcoming class dates from the form's dropdown
 - Include date, time, instructor, and availability in your recommendation
 - Example: "10/16/25, 10:00am-11:00am, Mary -- 1 remaining"
+- ONLY recommend classes with future dates (after today's date)
 
 **DON'T:**
 - Recommend CAT classes without checking specific dates
 - Give generic "classes available" responses
 - List classes that show "0 remaining" (full)
+- Recommend classes with dates in the past (check today's date first)
 
 ### Excel Center High School
 Goodwill's tuition-free high school completion program for adults ages 18-50:
