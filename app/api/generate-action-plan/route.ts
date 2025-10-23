@@ -27,7 +27,10 @@ export async function POST(request: Request) {
 Generate a CONCISE action plan in ${outputLanguage} for registering for this CAT class. Use simple language (8th grade reading level max).
 
 Selected Resource:
-${resourceList}
+Title: ${resource.title}
+Service: ${resource.service}
+Registration URL: ${resource.source || "See resource for URL"}
+${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
 
 STRUCTURE:
 ### ${resource.title}
@@ -176,7 +179,10 @@ Return ONLY the "## Quick Summary" section markdown, nothing else.`
 Generate a CONCISE guide in ${outputLanguage} for registering for this CAT class. Use simple language (8th grade reading level max).
 
 Resource to cover:
-${resource.title} - ${resource.service} (${resource.providerType})
+Title: ${resource.title}
+Service: ${resource.service}
+Registration URL: ${resource.source || "See resource for URL"}
+${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
 
 STRUCTURE:
 ### ${resource.title}
