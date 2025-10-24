@@ -18,7 +18,51 @@ export async function POST(request: Request) {
 
     // Single resource: use original simple approach
     if (resources.length === 1) {
-      const aiPrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
+      const resource = resources[0]
+      const isCATTraining = resource.category === "CAT Trainings" || resource.title?.toLowerCase().includes("cat -")
+
+      // Simplified prompt for CAT trainings
+      const catPrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program.
+
+Generate a CONCISE action plan in ${outputLanguage} for registering for this CAT class. Use simple language (8th grade reading level max).
+
+Selected Resource:
+Title: ${resource.title}
+Service: ${resource.service}
+Registration URL: ${resource.source || "See resource for URL"}
+${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
+
+CRITICAL: Use web_search to visit the Registration URL and extract:
+1. The class description (the paragraph explaining what the class covers)
+2. The topics/curriculum items (the bullet points showing what participants will learn)
+
+STRUCTURE:
+### ${resource.title}
+
+**What you'll learn:**
+[Extract the class description and topics from the Wufoo page - this is typically shown before the "Select a Training Date" dropdown. Format as a brief paragraph followed by bullet points of topics covered]
+
+**How to register:**
+- Visit the class registration page to view details and available dates: [Format as proper markdown link using exact URL from Registration URL above]
+- Fill out the online registration form with your contact information
+- Select your preferred training date from the dropdown menu${resource.classDate ? ` (next class: ${resource.classDate})` : ""}
+- Submit the form to complete registration
+
+**Key tip:**
+- Register early as spots fill up quickly; the registration form shows how many spots remain for each class date
+
+🚨 CORE RULES:
+1. **Extract Class Info**: Use web_search to visit the Wufoo URL and extract the class description and topics covered
+2. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
+3. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
+4. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
+5. **Be Brief**: 4-6 steps maximum in the "How to register" section
+6. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
+
+Return ONLY the markdown content directly, no JSON.`
+
+      // Standard prompt for other resources
+      const standardPrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
 
 Generate a CONCISE action plan in ${outputLanguage} for accessing this resource. Use simple language (8th grade reading level max).
 
@@ -47,6 +91,8 @@ STRUCTURE:
 5. **Simple Formatting**: Only use **bold**, bullet points (-), and headers (###)
 
 Return ONLY the markdown content directly, no JSON.`
+
+      const aiPrompt = isCATTraining ? catPrompt : standardPrompt
 
       const result = streamText({
         model: openai("gpt-5"),
@@ -135,7 +181,50 @@ Return ONLY the "## Quick Summary" section markdown, nothing else.`
 
         // Resource generations - all launch immediately
         const resourcePromises = resources.map(async (resource: any, index: number) => {
-          const resourcePrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
+          const isCATTraining = resource.category === "CAT Trainings" || resource.title?.toLowerCase().includes("cat -")
+
+          // Simplified prompt for CAT trainings
+          const catPrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program.
+
+Generate a CONCISE guide in ${outputLanguage} for registering for this CAT class. Use simple language (8th grade reading level max).
+
+Resource to cover:
+Title: ${resource.title}
+Service: ${resource.service}
+Registration URL: ${resource.source || "See resource for URL"}
+${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
+
+CRITICAL: Use web_search to visit the Registration URL and extract:
+1. The class description (the paragraph explaining what the class covers)
+2. The topics/curriculum items (the bullet points showing what participants will learn)
+
+STRUCTURE:
+### ${resource.title}
+
+**What you'll learn:**
+[Extract the class description and topics from the Wufoo page - this is typically shown before the "Select a Training Date" dropdown. Format as a brief paragraph followed by bullet points of topics covered]
+
+**How to register:**
+- Visit the class registration page to view details and available dates: [Format as proper markdown link using exact URL from Registration URL above]
+- Fill out the online registration form with your contact information
+- Select your preferred training date from the dropdown menu${resource.classDate ? ` (next class: ${resource.classDate})` : ""}
+- Submit the form to complete registration
+
+**Key tip:**
+- Register early as spots fill up quickly; the registration form shows how many spots remain for each class date
+
+🚨 CORE RULES:
+1. **Extract Class Info**: Use web_search to visit the Wufoo URL and extract the class description and topics covered
+2. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
+3. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
+4. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
+5. **Be Brief**: 4-6 steps maximum in the "How to register" section
+6. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
+
+Return ONLY the markdown content for this one resource (starting with ###), no JSON.`
+
+          // Standard prompt for other resources
+          const standardPrompt = `You are creating an action plan for a client enrolled in Goodwill Central Texas's Workforce Advancement Program with career coaching support.
 
 Generate a CONCISE guide in ${outputLanguage} for accessing this specific resource. Use simple language (8th grade reading level max).
 
@@ -164,6 +253,8 @@ STRUCTURE:
 5. **Simple Formatting**: Only use **bold**, bullet points (-), and headers (###)
 
 Return ONLY the markdown content for this one resource (starting with ###), no JSON.`
+
+          const resourcePrompt = isCATTraining ? catPrompt : standardPrompt
 
           const resourceResult = streamText({
             model: openai("gpt-5"),

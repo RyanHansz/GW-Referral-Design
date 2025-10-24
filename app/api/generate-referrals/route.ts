@@ -59,15 +59,17 @@ const subCategoryLabels: Record<string, string> = {
   hvac: "HVAC",
   forklift: "Forklift Certification",
   cdl: "CDL Training",
-  // CAT sub-categories
-  "computer-skills": "Computer Skills",
-  "microsoft-office": "Microsoft Office",
-  "professional-dev": "Professional Development",
-  leadership: "Leadership Training",
-  communication: "Communication Skills",
-  "time-management": "Time Management",
-  "financial-literacy": "Financial Literacy",
-  "digital-literacy": "Digital Literacy",
+  // CAT sub-categories (matching actual CAT classes)
+  "career-essentials": "Career Advancement Essentials",
+  "computer-basics": "Computer Basics & Keyboarding",
+  "digital-skills": "Digital Skills 1:1",
+  "financial-empowerment": "Financial Empowerment",
+  "job-search": "Job Search & Indeed Lab",
+  "interview-prep": "Interview Preparation",
+  "job-prep": "Job Preparation 1:1",
+  "assessment-prep": "Assessment Prep (Wonderlic)",
+  "ai-basics": "AI Basics",
+  "online-safety": "Online Safety",
 }
 
 export async function POST(request: Request) {
@@ -207,13 +209,62 @@ RESOURCE TYPES & EXAMPLES:
 **Community**: Food banks (specific locations, not homepages), shelters (near client ZIP), transportation, childcare
 **Government**: SNAP, Medicaid, housing assistance, TANF, WIC, Social Security
 **Job Postings**: ONLY real jobs from Indeed, LinkedIn, WorkInTexas, Glassdoor - NEVER invent jobs
-**GCTA/CAT**: Check https://gctatraining.org/class-schedule/ for current offerings with dates
+**GCTA Trainings**: Check https://gctatraining.org/class-schedule/ for current offerings with dates
   - CRITICAL: Use actual GCTA campus address (search for "GCTA campus Austin address" to find specific location)
   - Example address format: "Address: 1015 Norwood Park Blvd, Austin, TX 78758"
+**CAT Trainings**: Refer to CAT Class Registration Links by Location in the Goodwill context
+  - GRC (South Austin): Use GRC-specific registration URLs from context (9 different classes available)
+  - GCC (North Austin/Round Rock): Use GCC-specific registration URLs from context (11 different classes available)
+  - Example classes: Career Advancement Essentials, Computer Basics, Digital Skills 1:1, Financial Empowerment, Interview Prep, Job Prep, Indeed Lab, Wonderlic Prep, AI Basics, Online Safety
+  - Use location-specific Wufoo registration link as the source URL (e.g., https://gwcareeradvancement.wufoo.com/forms/grc-career-advancement-essentials/)
+  - Contact info: Specify GRC or GCC location based on client's area
+
+  🚨🚨🚨 WHEN FILTERED FOR "CAT TRAININGS" CATEGORY 🚨🚨🚨
+  YOU MUST CHECK MULTIPLE CAT CLASSES:
+  - Check at LEAST 4-6 different CAT registration forms from the context
+  - Return up to 4 CAT classes that have upcoming available dates
+  - Show variety (don't return 4 of the same class type)
+  - Check both GRC and GCC locations if no location filter specified
+  - Example: If user filters for CAT Trainings → check Digital Skills, Career Advancement Essentials, Interview Prep, Computer Basics, etc.
+
+  🚨🚨🚨 MANDATORY CAT CLASS DATE EXTRACTION (FOR EACH CLASS) 🚨🚨🚨
+  YOU MUST FOLLOW THESE STEPS FOR EVERY CAT CLASS YOU CHECK:
+
+  Step 1: Use web_search to visit the Wufoo registration form URL
+  Step 2: Look for a dropdown field labeled "Select a training date" or "Select a Training Date"
+  Step 3: Extract ALL dates shown in that dropdown (format: "MM/DD/YY, time-time, Instructor -- X remaining")
+  Step 4: Filter to only FUTURE dates (after today's date: check <env> for today)
+  Step 5: Filter out classes showing "0 remaining" (full classes)
+  Step 6: Include the first available future class date in the "classDate" field
+
+  ⚠️ CRITICAL RULES:
+  - The dropdown field contains the actual class dates - you MUST look at this field specifically
+  - If the dropdown shows dates, there ARE classes available - do not say "no classes found"
+  - Each dropdown option format: "10/28/25, 10:00am-11:00am, Mary -- 1 remaining"
+  - NEVER say "no CAT classes available" without visiting the form and checking the dropdown
+  - Example classDate value: "10/28/25, 10:00am-11:00am, Mary -- 1 remaining"
 
 EXAMPLES:
 ❌ BAD: "GCTA Class Schedule" linking to schedule page
 ✓ GOOD: "GCTA - CompTIA A+ (Jan 15, 2026)" with course details
+
+❌ BAD: "CAT - Career Advancement Essentials" without dates
+✓ GOOD: "CAT - Career Advancement Essentials (GRC)" with classDate: "10/16/25, 10:00am-11:00am, Mary -- 1 remaining"
+
+❌ BAD: "CAT Classes available" (generic)
+✓ GOOD: "CAT - Digital Skills 1:1 (GCC)" with classDate: "10/28/25, 3:00pm-4:00pm, Cindy -- 1 remaining"
+
+❌ BAD: Recommending a class dated "10/20/25" when today is "10/23/25" (past date)
+✓ GOOD: Only recommending classes with dates after today
+
+❌ BAD: Saying "no CAT classes available" without visiting the Wufoo form
+✓ GOOD: Visiting the Wufoo form, checking "Select a training date" dropdown, extracting actual dates
+
+❌ BAD: Generic response about CAT classes without specific dates
+✓ GOOD: Specific class with date from dropdown: "10/28/25, 10:00am-11:00am, Mary -- 1 remaining"
+
+❌ BAD: When filtered for "CAT Trainings", only returning 1 CAT class
+✓ GOOD: When filtered for "CAT Trainings", checking multiple CAT registration forms and returning 3-4 different CAT classes with upcoming dates (e.g., Digital Skills 1:1, Career Advancement Essentials, Interview Prep, Computer Basics)
 
 ❌ BAD: "Address: Austin, TX" (too generic)
 ✓ GOOD: "Address: 1015 Norwood Park Blvd, Austin, TX 78758" (specific campus location)
@@ -276,6 +327,11 @@ CRITICAL NOTES:
 - For GCTA/CAT: DO NOT include "Hours: Varies by class; call for details" in contact
 - For GCTA/CAT: Use FULL campus address (search "GCTA campus Austin address"), NOT generic "Austin, TX"
 - For ALL resources: Web search to find complete street address with ZIP code
+- 🚨 FOR CAT CLASSES: When filtered for "CAT Trainings", check MULTIPLE registration forms (4-6 different classes) from context
+- 🚨 FOR CAT CLASSES: Return 3-4 DIFFERENT CAT classes with upcoming dates (don't stop after finding just 1)
+- 🚨 FOR CAT CLASSES: You MUST visit EACH Wufoo form and check the "Select a training date" dropdown field
+- 🚨 FOR CAT CLASSES: NEVER say "no classes available" without checking that specific dropdown field
+- 🚨 FOR CAT CLASSES: The dropdown shows actual available class dates - if it has dates, classes ARE available
 - Generate resources in order (1, 2, 3, 4) - complete each before next
 - Generate in ${outputLanguage}
 - Return ONLY JSON, no markdown code blocks

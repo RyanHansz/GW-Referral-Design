@@ -62,6 +62,18 @@ GCTA delivers tuition-free vocational training programs ranging from 4-12 weeks,
 ### Career Advancement Training (CAT)
 Free short-term training courses (1-4 weeks) covering essential workplace skills and prerequisites. CAT serves as both standalone skill-building and as required preparation for GCTA programs.
 
+**⚠️ CRITICAL DISTINCTION: CAT ≠ GCTA**
+CAT trainings are NOT the same as GCTA trainings. Key differences:
+- **Duration:** CAT classes are much shorter (1-4 weeks) vs GCTA programs (4-12 weeks)
+- **Enrollment:** CAT has a simpler, faster enrollment process - often just requires online registration through Wufoo forms
+- **Prerequisites:** CAT courses often serve as prerequisites TO GCTA programs (e.g., Career Advancement Essentials must be completed before GCTA enrollment)
+- **Certification:** GCTA leads to industry certifications and job placement; CAT builds foundational skills
+- **Complexity:** GCTA requires extensive documentation, assessments (Wonderlic/CASAS), and multi-level approvals; CAT enrollment is streamlined
+
+**When to recommend:**
+- CAT: For clients needing foundational skills, GCTA prerequisites, or quick skill refreshers
+- GCTA: For clients ready for intensive vocational training leading to industry certification and career placement
+
 **Computer & Digital Skills:**
 - Computer Basics
 - Microsoft Office (Word, Excel, PowerPoint)
@@ -87,6 +99,58 @@ Free short-term training courses (1-4 weeks) covering essential workplace skills
 - Career Advancement Essentials is mandatory before GCTA enrollment
 - Free to eligible participants
 - Great for building foundational skills or testing career interest
+
+**CAT Class Registration Links by Location:**
+
+*Goodwill Resource Center (GRC/South):*
+- Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/grc-career-advancement-essentials/
+- Computer Basics/Keyboarding: https://gwcareeradvancement.wufoo.com/forms/grc-computer-basics/
+- Digital Skills 1:1: https://gwcareeradvancement.wufoo.com/forms/grc-digital-skills-11/
+- Financial Empowerment Training: https://gwcareeradvancement.wufoo.com/forms/grc-11-financial-empowerment-trainings/
+- Indeed Lab: https://gwcareeradvancement.wufoo.com/forms/grc-indeed-lab/
+- Interview Preparation & Practice: https://gwcareeradvancement.wufoo.com/forms/grc-interview-preparation-and-practice/
+- Job Preparation 1:1: https://gwcareeradvancement.wufoo.com/forms/grc-job-preparation-11/
+- Online Safety: https://gwcareeradvancement.wufoo.com/forms/grc-online-safety/
+- Virtual Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/virtual-career-advancement-essentials/
+
+*Goodwill Community Center (GCC/North):*
+- Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/gcc-career-advancement-essentials/
+- Computer Basics/Keyboarding: https://gwcareeradvancement.wufoo.com/forms/gcc-computer-basics/
+- Digital Skills 1:1: https://gwcareeradvancement.wufoo.com/forms/gcc-digital-skills-11/
+- Financial Empowerment Training: https://gwcareeradvancement.wufoo.com/forms/gcc-11-financial-empowerment-trainings/
+- Indeed Lab: https://gwcareeradvancement.wufoo.com/forms/gcc-indeed-lab/
+- Interview Preparation & Practice: https://gwcareeradvancement.wufoo.com/forms/gcc-interview-preparation-and-practice/
+- Job Preparation 1:1: https://gwcareeradvancement.wufoo.com/forms/gcc-job-preparation-11/
+- Wonderlic Prep & Practice: https://gwcareeradvancement.wufoo.com/forms/gcc-wonderlic-prep-and-practice/
+- AI Basics: https://gwcareeradvancement.wufoo.com/forms/zjgi3bu0u7t757/
+- Online Safety: https://gwcareeradvancement.wufoo.com/forms/zs43hn608egpxa/
+- Virtual Career Advancement Essentials: https://gwcareeradvancement.wufoo.com/forms/virtual-career-advancement-essentials/
+
+**When recommending CAT classes:**
+- Direct clients to the appropriate location-specific registration link
+- GRC serves South Austin and surrounding areas
+- GCC serves North Austin, Round Rock, Georgetown, and surrounding areas
+- Most classes require pre-registration through the Wufoo forms
+- Classes run on monthly schedules - check with Career Case Manager for current availability
+
+**🔍 CRITICAL: Always Include Specific Training Dates**
+When recommending CAT classes, you MUST visit the Wufoo registration form and extract information from the "Select a training date" dropdown. This dropdown shows:
+- Specific dates (e.g., "10/10/25, 2:00-3:00pm; Alex -- 1 remaining")
+- Times and duration
+- Instructor names (Alex, Mary, Cindy, etc.)
+- Availability/spots remaining ("X remaining" or "0 remaining")
+
+**DO:**
+- Pull actual upcoming class dates from the form's dropdown
+- Include date, time, instructor, and availability in your recommendation
+- Example: "10/16/25, 10:00am-11:00am, Mary -- 1 remaining"
+- ONLY recommend classes with future dates (after today's date)
+
+**DON'T:**
+- Recommend CAT classes without checking specific dates
+- Give generic "classes available" responses
+- List classes that show "0 remaining" (full)
+- Recommend classes with dates in the past (check today's date first)
 
 ### Excel Center High School
 Goodwill's tuition-free high school completion program for adults ages 18-50:
