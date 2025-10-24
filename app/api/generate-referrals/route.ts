@@ -59,15 +59,17 @@ const subCategoryLabels: Record<string, string> = {
   hvac: "HVAC",
   forklift: "Forklift Certification",
   cdl: "CDL Training",
-  // CAT sub-categories
-  "computer-skills": "Computer Skills",
-  "microsoft-office": "Microsoft Office",
-  "professional-dev": "Professional Development",
-  leadership: "Leadership Training",
-  communication: "Communication Skills",
-  "time-management": "Time Management",
-  "financial-literacy": "Financial Literacy",
-  "digital-literacy": "Digital Literacy",
+  // CAT sub-categories (matching actual CAT classes)
+  "career-essentials": "Career Advancement Essentials",
+  "computer-basics": "Computer Basics & Keyboarding",
+  "digital-skills": "Digital Skills 1:1",
+  "financial-empowerment": "Financial Empowerment",
+  "job-search": "Job Search & Indeed Lab",
+  "interview-prep": "Interview Preparation",
+  "job-prep": "Job Preparation 1:1",
+  "assessment-prep": "Assessment Prep (Wonderlic)",
+  "ai-basics": "AI Basics",
+  "online-safety": "Online Safety",
 }
 
 export async function POST(request: Request) {
