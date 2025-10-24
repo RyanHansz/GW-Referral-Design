@@ -32,8 +32,16 @@ Service: ${resource.service}
 Registration URL: ${resource.source || "See resource for URL"}
 ${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
 
+CRITICAL: Use web_search to visit the Registration URL and extract:
+1. The class description (the paragraph explaining what the class covers)
+2. The topics/curriculum items (the bullet points showing what participants will learn)
+
 STRUCTURE:
 ### ${resource.title}
+
+**What you'll learn:**
+[Extract the class description and topics from the Wufoo page - this is typically shown before the "Select a Training Date" dropdown. Format as a brief paragraph followed by bullet points of topics covered]
+
 **How to register:**
 - Visit the class registration page to view details and available dates: [Format as proper markdown link using exact URL from Registration URL above]
 - Fill out the online registration form with your contact information
@@ -44,11 +52,12 @@ STRUCTURE:
 - Register early as spots fill up quickly; the registration form shows how many spots remain for each class date
 
 🚨 CORE RULES:
-1. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
-2. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
-3. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
-4. **Be Brief**: 4-5 steps maximum
-5. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
+1. **Extract Class Info**: Use web_search to visit the Wufoo URL and extract the class description and topics covered
+2. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
+3. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
+4. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
+5. **Be Brief**: 4-6 steps maximum in the "How to register" section
+6. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
 
 Return ONLY the markdown content directly, no JSON.`
 
@@ -185,8 +194,16 @@ Service: ${resource.service}
 Registration URL: ${resource.source || "See resource for URL"}
 ${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
 
+CRITICAL: Use web_search to visit the Registration URL and extract:
+1. The class description (the paragraph explaining what the class covers)
+2. The topics/curriculum items (the bullet points showing what participants will learn)
+
 STRUCTURE:
 ### ${resource.title}
+
+**What you'll learn:**
+[Extract the class description and topics from the Wufoo page - this is typically shown before the "Select a Training Date" dropdown. Format as a brief paragraph followed by bullet points of topics covered]
+
 **How to register:**
 - Visit the class registration page to view details and available dates: [Format as proper markdown link using exact URL from Registration URL above]
 - Fill out the online registration form with your contact information
@@ -197,11 +214,12 @@ STRUCTURE:
 - Register early as spots fill up quickly; the registration form shows how many spots remain for each class date
 
 🚨 CORE RULES:
-1. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
-2. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
-3. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
-4. **Be Brief**: 4-5 steps maximum
-5. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
+1. **Extract Class Info**: Use web_search to visit the Wufoo URL and extract the class description and topics covered
+2. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
+3. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
+4. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
+5. **Be Brief**: 4-6 steps maximum in the "How to register" section
+6. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
 
 Return ONLY the markdown content for this one resource (starting with ###), no JSON.`
 
