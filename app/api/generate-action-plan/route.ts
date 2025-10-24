@@ -35,19 +35,20 @@ ${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
 STRUCTURE:
 ### ${resource.title}
 **How to register:**
-- Click the registration link: [exact URL from resource]
-- Fill out the online form with your contact information
-- Select your training date from the dropdown: [specific date/time from resource if available]
-- Submit the form
+- Visit the class registration page to view details and available dates: [Format as proper markdown link using exact URL from Registration URL above]
+- Fill out the online registration form with your contact information
+- Select your preferred training date from the dropdown menu${resource.classDate ? ` (next class: ${resource.classDate})` : ""}
+- Submit the form to complete registration
 
 **Key tip:**
-- Register early as spots fill up quickly; classes show how many spots remain
+- Register early as spots fill up quickly; the registration form shows how many spots remain for each class date
 
 🚨 CORE RULES:
 1. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
-2. **Use Resource URL**: Pull the exact registration link from the resource data provided
-3. **Be Brief**: 3-4 steps maximum
-4. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
+2. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
+3. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
+4. **Be Brief**: 4-5 steps maximum
+5. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
 
 Return ONLY the markdown content directly, no JSON.`
 
@@ -187,19 +188,20 @@ ${resource.classDate ? `Next Available Class: ${resource.classDate}` : ""}
 STRUCTURE:
 ### ${resource.title}
 **How to register:**
-- Click the registration link: [exact URL from resource]
-- Fill out the online form with your contact information
-- Select your training date from the dropdown: [specific date/time from resource if available]
-- Submit the form
+- Visit the class registration page to view details and available dates: [Format as proper markdown link using exact URL from Registration URL above]
+- Fill out the online registration form with your contact information
+- Select your preferred training date from the dropdown menu${resource.classDate ? ` (next class: ${resource.classDate})` : ""}
+- Submit the form to complete registration
 
 **Key tip:**
-- Register early as spots fill up quickly; classes show how many spots remain
+- Register early as spots fill up quickly; the registration form shows how many spots remain for each class date
 
 🚨 CORE RULES:
 1. **Keep It Simple**: CAT registration is ONLY through the Wufoo form - do NOT include general Goodwill enrollment steps
-2. **Use Resource URL**: Pull the exact registration link from the resource data provided
-3. **Be Brief**: 3-4 steps maximum
-4. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
+2. **Use Resource URL**: Pull the exact registration link from the resource data provided and format it as a proper markdown link
+3. **Link Purpose**: The Wufoo registration link contains class details, schedules, and registration - emphasize this is where they learn more
+4. **Be Brief**: 4-5 steps maximum
+5. **No Extra Info**: Do NOT add sections about documents, general enrollment processes, or calling intake
 
 Return ONLY the markdown content for this one resource (starting with ###), no JSON.`
 
