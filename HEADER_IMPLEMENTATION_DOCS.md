@@ -3,6 +3,9 @@
 ## Overview
 This document specifies the implementation requirements for the feedback banner and page header components for the GenAI Referral Tool.
 
+<img width="958" height="522" alt="Screenshot 2025-10-28 at 9 21 06 AM" src="https://github.com/user-attachments/assets/eb862402-9eda-4e86-94df-aca020dc302d" />
+
+
 ---
 
 ## 1. Feedback Banner Component
