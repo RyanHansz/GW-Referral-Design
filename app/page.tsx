@@ -555,6 +555,7 @@ export default function ReferralTool() {
   const [userEmailInput, setUserEmailInput] = useState("")
   const [userEmailError, setUserEmailError] = useState("")
   const [userEmailTouched, setUserEmailTouched] = useState(false)
+  const [isCheckingUser, setIsCheckingUser] = useState(true)
 
   // Check if user has provided info on first load
   useEffect(() => {
@@ -565,6 +566,7 @@ export default function ReferralTool() {
       setUserName(storedUserName)
       setUserEmail(storedUserEmail)
     }
+    setIsCheckingUser(false)
   }, [])
 
   // Simple email validation
@@ -1930,6 +1932,11 @@ export default function ReferralTool() {
     } finally {
       setIsGeneratingActionPlan(false)
     }
+  }
+
+  // Show nothing while checking localStorage to prevent flash
+  if (isCheckingUser) {
+    return null
   }
 
   // If no user info, show the welcome page
