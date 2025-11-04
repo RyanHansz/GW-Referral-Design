@@ -46,6 +46,8 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  X,
+  RotateCcw,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -550,6 +552,13 @@ export default function ReferralTool() {
   const [showActionPlanSection, setShowActionPlanSection] = useState(false)
   const [streamingFollowUpContent, setStreamingFollowUpContent] = useState("")
 
+  // Remove functionality state
+  const [removedResourceIds, setRemovedResourceIds] = useState<Set<string>>(new Set())
+  const [recentlyRemoved, setRecentlyRemoved] = useState<{
+    id: string
+    timestamp: number
+  } | null>(null)
+
   // Chat mode state
   const [chatMessages, setChatMessages] = useState<
     Array<{
@@ -917,6 +926,45 @@ export default function ReferralTool() {
         </body>
       </html>
     `
+  }
+
+  // Remove resource handler
+  const handleRemoveResource = (conversationIndex: number, resourceNumber: number) => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    setRemovedResourceIds((prev) => {
+      const newSet = new Set(prev)
+      newSet.add(resourceId)
+      return newSet
+    })
+    setRecentlyRemoved({ id: resourceId, timestamp: Date.now() })
+
+    // Auto-clear the undo notification after 5 seconds
+    setTimeout(() => {
+      setRecentlyRemoved((current) => {
+        if (current && current.id === resourceId) {
+          return null
+        }
+        return current
+      })
+    }, 5000)
+  }
+
+  // Undo remove handler
+  const handleUndoRemove = () => {
+    if (recentlyRemoved) {
+      setRemovedResourceIds((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(recentlyRemoved.id)
+        return newSet
+      })
+      setRecentlyRemoved(null)
+    }
+  }
+
+  // Check if resource is removed
+  const isResourceRemoved = (conversationIndex: number, resourceNumber: number): boolean => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    return removedResourceIds.has(resourceId)
   }
 
   const handleDirectPrint = () => {
@@ -1772,13 +1820,20 @@ export default function ReferralTool() {
     }
   }
 
-  const handleSelectAllResources = (resources: Resource[]) => {
-    if (resources && selectedResources.length === resources.length) {
-      // If all are selected, deselect all
-      setSelectedResources([])
-    } else if (resources) {
-      // Otherwise, select all
-      setSelectedResources(resources)
+  const handleSelectAllResources = (resources: Resource[], conversationIndex: number) => {
+    if (resources) {
+      // Filter out removed resources
+      const availableResources = resources.filter(
+        (resource) => !isResourceRemoved(conversationIndex, resource.number)
+      )
+
+      if (selectedResources.length === availableResources.length) {
+        // If all available resources are selected, deselect all
+        setSelectedResources([])
+      } else {
+        // Otherwise, select all available resources
+        setSelectedResources(availableResources)
+      }
     }
   }
 
@@ -2602,6 +2657,7 @@ export default function ReferralTool() {
                           {streamingResources
                             .slice()
                             .sort((a, b) => Number(a.number) - Number(b.number))
+                            .filter((resource) => !isResourceRemoved(0, resource.number))
                             .map((resource, idx) => {
                             const getCategoryStyle = (category) => {
                               switch (category) {
@@ -2669,11 +2725,21 @@ export default function ReferralTool() {
                             return (
                               <div
                                 key={resource.number}
-                                className="p-4 rounded-lg border border-gray-200 animate-fadeIn"
+                                className="p-4 rounded-lg border border-gray-200 animate-fadeIn relative"
                                 style={{
                                   animation: `fadeIn 0.3s ease-in ${(resource.number - 1) * 0.1}s both`,
                                 }}
                               >
+                                {/* Remove button */}
+                                <button
+                                  onClick={() => handleRemoveResource(0, resource.number)}
+                                  className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200"
+                                  title="Remove resource"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                  <span className="hidden sm:inline">Remove</span>
+                                </button>
+
                                 <div className="flex items-start gap-4">
                                   <span className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">
                                     {resource.number}
@@ -2853,6 +2919,7 @@ export default function ReferralTool() {
                             {exchange.response.resources
                               .slice()
                               .sort((a, b) => Number(a.number) - Number(b.number))
+                              .filter((resource) => !isResourceRemoved(index, resource.number))
                               .map((resource) => {
                               const getCategoryStyle = (category) => {
                                 switch (category) {
@@ -2917,7 +2984,17 @@ export default function ReferralTool() {
                               const categoryStyle = getCategoryStyle(resource.category)
 
                               return (
-                                <div key={resource.number} className="p-4 rounded-lg border border-gray-200">
+                                <div key={resource.number} className="p-4 rounded-lg border border-gray-200 relative">
+                                  {/* Remove button */}
+                                  <button
+                                    onClick={() => handleRemoveResource(index, resource.number)}
+                                    className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200"
+                                    title="Remove resource"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Remove</span>
+                                  </button>
+
                                   <div className="flex items-start gap-4">
                                     <span className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">
                                       {resource.number}
@@ -3032,17 +3109,23 @@ export default function ReferralTool() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleSelectAllResources(exchange.response.resources)}
+                                  onClick={() => handleSelectAllResources(exchange.response.resources, index)}
                                   className="text-xs"
                                 >
-                                  {selectedResources.length === exchange.response.resources.length
-                                    ? "Deselect All"
-                                    : "Select All"}
+                                  {(() => {
+                                    const availableResources = exchange.response.resources.filter(
+                                      (resource) => !isResourceRemoved(index, resource.number)
+                                    )
+                                    return selectedResources.length === availableResources.length
+                                      ? "Deselect All"
+                                      : "Select All"
+                                  })()}
                                 </Button>
                               </div>
                               {exchange.response.resources
                                 .slice()
                                 .sort((a, b) => Number(a.number) - Number(b.number))
+                                .filter((resource) => !isResourceRemoved(index, resource.number))
                                 .map((resource: Resource, resourceIndex: number) => (
                                 <div key={resourceIndex} className="flex items-start gap-3 p-3 bg-white rounded border">
                                   <input
@@ -3387,6 +3470,27 @@ export default function ReferralTool() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Undo Notification */}
+      {recentlyRemoved && (
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 duration-300">
+          <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center">
+                <span className="text-xs">ℹ️</span>
+              </div>
+              <span className="text-sm font-medium">Resource removed</span>
+            </div>
+            <button
+              onClick={handleUndoRemove}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 rounded-md hover:bg-gray-100 transition-colors text-sm font-medium"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Undo
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
