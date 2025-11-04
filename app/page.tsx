@@ -48,6 +48,8 @@ import {
   ChevronRight,
   X,
   RotateCcw,
+  StickyNote,
+  Save,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -559,6 +561,10 @@ export default function ReferralTool() {
     timestamp: number
   } | null>(null)
 
+  // Notes functionality state
+  const [resourceNotes, setResourceNotes] = useState<Map<string, string>>(new Map())
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+
   // Chat mode state
   const [chatMessages, setChatMessages] = useState<
     Array<{
@@ -849,6 +855,24 @@ export default function ReferralTool() {
                 page-break-inside: avoid;
               }
             }
+            .resource-note {
+              margin-top: 12px;
+              padding: 10px;
+              background: #fef3c7;
+              border-left: 3px solid #f59e0b;
+              border-radius: 4px;
+            }
+            .resource-note-label {
+              font-weight: 600;
+              color: #92400e;
+              font-size: 13px;
+              margin-bottom: 4px;
+            }
+            .resource-note-text {
+              color: #78350f;
+              font-size: 14px;
+              line-height: 1.5;
+            }
           </style>
         </head>
         <body>
@@ -873,8 +897,11 @@ export default function ReferralTool() {
               ${
                 exchange.response.resources
                   ? exchange.response.resources
+                      .filter((resource) => !isResourceRemoved(index, resource.number))
                       .map(
-                        (resource) => `
+                        (resource) => {
+                          const note = getResourceNote(index, resource.number)
+                          return `
                 <div class="resource">
                   <div class="resource-header">
                     <div class="resource-number">${resource.number}</div>
@@ -885,8 +912,18 @@ export default function ReferralTool() {
                   <div class="resource-detail"><strong>Why it fits:</strong> ${resource.whyItFits}</div>
                   <div class="resource-detail resource-contact"><strong>Contact:</strong> ${resource.contact}</div>
                   <div class="resource-source"><strong>Source:</strong> ${resource.source} - ${resource.badge}</div>
+                  ${
+                    note
+                      ? `
+                  <div class="resource-note">
+                    <div class="resource-note-label">📝 Case Manager's Note:</div>
+                    <div class="resource-note-text">${note.replace(/\n/g, "<br>")}</div>
+                  </div>`
+                      : ""
+                  }
                 </div>
-              `,
+              `
+                        },
                       )
                       .join("")
                   : ""
@@ -965,6 +1002,26 @@ export default function ReferralTool() {
   const isResourceRemoved = (conversationIndex: number, resourceNumber: number): boolean => {
     const resourceId = `${conversationIndex}-${resourceNumber}`
     return removedResourceIds.has(resourceId)
+  }
+
+  // Notes handlers
+  const handleSaveNote = (conversationIndex: number, resourceNumber: number, note: string) => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    setResourceNotes((prev) => {
+      const newMap = new Map(prev)
+      if (note.trim()) {
+        newMap.set(resourceId, note)
+      } else {
+        newMap.delete(resourceId)
+      }
+      return newMap
+    })
+    setEditingNoteId(null)
+  }
+
+  const getResourceNote = (conversationIndex: number, resourceNumber: number): string => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    return resourceNotes.get(resourceId) || ""
   }
 
   const handleDirectPrint = () => {
@@ -1847,13 +1904,30 @@ export default function ReferralTool() {
     setCurrentGuideIndex(0)
 
     try {
+      // Find conversation index for selected resources and add notes
+      const resourcesWithNotes = selectedResources.map((resource) => {
+        // Find the conversation index for this resource
+        let conversationIndex = 0
+        conversationHistory.forEach((exchange, idx) => {
+          if (exchange.response.resources?.some((r) => r.number === resource.number && r.title === resource.title)) {
+            conversationIndex = idx
+          }
+        })
+
+        const note = getResourceNote(conversationIndex, resource.number)
+        return {
+          ...resource,
+          caseManagerNote: note || undefined,
+        }
+      })
+
       const response = await fetch("/api/generate-action-plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          resources: selectedResources,
+          resources: resourcesWithNotes,
           outputLanguage: outputLanguage,
         }),
       })
@@ -2803,6 +2877,76 @@ export default function ReferralTool() {
                                         </>
                                       )
                                     })()}
+
+                                    {/* Notes Section */}
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                      {editingNoteId === `0-${resource.number}` ? (
+                                        <div className="space-y-2">
+                                          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                            <StickyNote className="w-4 h-4" />
+                                            Add Note for Client:
+                                          </label>
+                                          <Textarea
+                                            placeholder="Add instructions, reminders, or important details for your client..."
+                                            defaultValue={getResourceNote(0, resource.number)}
+                                            className="min-h-[80px] text-sm"
+                                            id={`note-textarea-0-${resource.number}`}
+                                          />
+                                          <div className="flex gap-2">
+                                            <Button
+                                              size="sm"
+                                              onClick={() => {
+                                                const textarea = document.getElementById(
+                                                  `note-textarea-0-${resource.number}`
+                                                ) as HTMLTextAreaElement
+                                                handleSaveNote(0, resource.number, textarea?.value || "")
+                                              }}
+                                              className="flex items-center gap-1"
+                                            >
+                                              <Save className="w-3.5 h-3.5" />
+                                              Save Note
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => setEditingNoteId(null)}
+                                            >
+                                              Cancel
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ) : getResourceNote(0, resource.number) ? (
+                                        <div className="space-y-2">
+                                          <div className="flex items-center justify-between">
+                                            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                              <StickyNote className="w-4 h-4" />
+                                              Note for Client:
+                                            </label>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => setEditingNoteId(`0-${resource.number}`)}
+                                              className="text-xs h-7"
+                                            >
+                                              Edit
+                                            </Button>
+                                          </div>
+                                          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-gray-800">
+                                            {getResourceNote(0, resource.number)}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => setEditingNoteId(`0-${resource.number}`)}
+                                          className="flex items-center gap-1.5"
+                                        >
+                                          <StickyNote className="w-3.5 h-3.5" />
+                                          Add Note for Client
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -3079,6 +3223,76 @@ export default function ReferralTool() {
                                           </>
                                         )
                                       })()}
+
+                                      {/* Notes Section */}
+                                      <div className="mt-4 pt-4 border-t border-gray-200">
+                                        {editingNoteId === `${index}-${resource.number}` ? (
+                                          <div className="space-y-2">
+                                            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                              <StickyNote className="w-4 h-4" />
+                                              Add Note for Client:
+                                            </label>
+                                            <Textarea
+                                              placeholder="Add instructions, reminders, or important details for your client..."
+                                              defaultValue={getResourceNote(index, resource.number)}
+                                              className="min-h-[80px] text-sm"
+                                              id={`note-textarea-${index}-${resource.number}`}
+                                            />
+                                            <div className="flex gap-2">
+                                              <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                  const textarea = document.getElementById(
+                                                    `note-textarea-${index}-${resource.number}`
+                                                  ) as HTMLTextAreaElement
+                                                  handleSaveNote(index, resource.number, textarea?.value || "")
+                                                }}
+                                                className="flex items-center gap-1"
+                                              >
+                                                <Save className="w-3.5 h-3.5" />
+                                                Save Note
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setEditingNoteId(null)}
+                                              >
+                                                Cancel
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ) : getResourceNote(index, resource.number) ? (
+                                          <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                                <StickyNote className="w-4 h-4" />
+                                                Note for Client:
+                                              </label>
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setEditingNoteId(`${index}-${resource.number}`)}
+                                                className="text-xs h-7"
+                                              >
+                                                Edit
+                                              </Button>
+                                            </div>
+                                            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-gray-800">
+                                              {getResourceNote(index, resource.number)}
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setEditingNoteId(`${index}-${resource.number}`)}
+                                            className="flex items-center gap-1.5"
+                                          >
+                                            <StickyNote className="w-3.5 h-3.5" />
+                                            Add Note for Client
+                                          </Button>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
