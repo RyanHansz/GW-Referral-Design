@@ -2723,21 +2723,20 @@ export default function ReferralTool() {
                                               <span className="font-semibold">{labels.contact}</span> {resource.contact}
                                             </p>
                                           )}
+                                          <p className="text-black mt-3 text-sm">
+                                            <span className="font-semibold">{labels.website}</span>{" "}
+                                            <a
+                                              href={`https://${resource.badge}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-600 hover:text-blue-800 underline"
+                                            >
+                                              {resource.badge}
+                                            </a>
+                                          </p>
                                         </>
                                       )
                                     })()}
-
-                                    <p className="text-black mt-3 text-sm">
-                                      <span className="font-semibold">{labels.website}</span>{" "}
-                                      <a
-                                        href={`https://${resource.badge}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:text-blue-800 underline"
-                                      >
-                                        {resource.badge}
-                                      </a>
-                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -2989,21 +2988,20 @@ export default function ReferralTool() {
                                                 <span className="font-semibold">{labels.contact}</span> {resource.contact}
                                               </p>
                                             )}
+                                            <p className="text-black mt-3 text-sm">
+                                              <span className="font-semibold">{labels.website}</span>{" "}
+                                              <a
+                                                href={`https://${resource.badge}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-800 underline"
+                                              >
+                                                {resource.badge}
+                                              </a>
+                                            </p>
                                           </>
                                         )
                                       })()}
-
-                                      <p className="text-black mt-3 text-sm">
-                                        <span className="font-semibold">{labels.website}</span>{" "}
-                                        <a
-                                          href={`https://${resource.badge}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 hover:text-blue-800 underline"
-                                        >
-                                          {resource.badge}
-                                        </a>
-                                      </p>
                                     </div>
                                   </div>
                                 </div>
