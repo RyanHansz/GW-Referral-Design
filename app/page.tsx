@@ -333,6 +333,7 @@ const translateLabels = (category: string, language: string) => {
     support: "🤲 Support:",
     contact: "📞 Contact:",
     classDate: "📅 Class Dates:",
+    website: "🌐 Website:",
   }
 
   const labelTranslations: Record<string, Record<string, any>> = {
@@ -434,6 +435,7 @@ const translateLabels = (category: string, language: string) => {
         support: "💰 Financial Support:",
         contact: "📞 Enrollment Info:",
         classDate: "📅 Class Dates:",
+        website: "🌐 Website:",
       }
     case "Job Postings":
       return {
@@ -441,6 +443,7 @@ const translateLabels = (category: string, language: string) => {
         services: "💼 Position Details:",
         support: "🎯 Benefits & Perks:",
         contact: "📧 Apply Here:",
+        website: "🌐 Website:",
       }
     case "Government Benefits":
       return {
@@ -448,6 +451,7 @@ const translateLabels = (category: string, language: string) => {
         services: "🏛️ Benefits Included:",
         support: "📝 Application Help:",
         contact: "📍 Get Started:",
+        website: "🌐 Website:",
       }
     case "Local Community Resources":
       return {
@@ -455,6 +459,7 @@ const translateLabels = (category: string, language: string) => {
         services: "🤝 Services Provided:",
         support: "💙 Additional Support:",
         contact: "📍 Location & Hours:",
+        website: "🌐 Website:",
       }
     case "Goodwill Resources & Programs":
       return {
@@ -462,6 +467,7 @@ const translateLabels = (category: string, language: string) => {
         services: "🛠️ Services Offered:",
         support: "🎁 What's Included:",
         contact: "📞 Contact Info:",
+        website: "🌐 Website:",
       }
     default:
       return defaultLabels
@@ -1901,9 +1907,9 @@ export default function ReferralTool() {
               <Button
                 variant="outline"
                 size="sm"
-                className="bg-white hover:bg-amber-50 border-amber-300 text-amber-900 hover:text-amber-950 flex items-center gap-2 whitespace-nowrap"
+                className="bg-white hover:bg-amber-50 border-amber-300 text-amber-900 hover:text-amber-950 flex items-center gap-2 whitespace-nowrap cursor-pointer"
                 onClick={() => {
-                  window.location.href = "mailto:feedback@goodwillcentraltexas.org?subject=GenAI Referral Tool Feedback&body=Please share your feedback, issues, or suggestions about the GenAI Referral Tool:%0D%0A%0D%0A"
+                  window.open("https://forms.gle/nfBWHpVbXT1kdSX3A", "_blank")
                 }}
               >
                 <MessageCircle className="w-4 h-4" />
@@ -2721,7 +2727,8 @@ export default function ReferralTool() {
                                       )
                                     })()}
 
-                                    <p className="text-black text-xs mt-2 text-gray-600">
+                                    <p className="text-black mt-3 text-sm">
+                                      <span className="font-semibold">{labels.website}</span>{" "}
                                       <a
                                         href={`https://${resource.badge}`}
                                         target="_blank"
@@ -2986,7 +2993,8 @@ export default function ReferralTool() {
                                         )
                                       })()}
 
-                                      <p className="text-black text-xs mt-2 text-gray-600">
+                                      <p className="text-black mt-3 text-sm">
+                                        <span className="font-semibold">{labels.website}</span>{" "}
                                         <a
                                           href={`https://${resource.badge}`}
                                           target="_blank"
