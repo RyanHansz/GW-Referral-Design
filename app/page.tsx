@@ -3687,7 +3687,7 @@ export default function ReferralTool() {
 
       {/* Undo Notification */}
       {recentlyRemoved && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top-5 duration-300">
           <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center">
