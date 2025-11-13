@@ -6,6 +6,53 @@ A user-friendly feature allowing case managers to remove unwanted resources from
 
 ---
 
+## Codebase Reference Map
+
+All implementation is in **`app/page.tsx`** - the main referral tool component.
+
+### Key Locations in Code
+
+| Element | Line(s) | Description |
+|---------|---------|-------------|
+| **Data Structure** | | |
+| Resource interface | 59-89 | TypeScript interface defining all resource fields |
+| State: removedResourceIds | 558 | Set tracking which resources are removed |
+| State: recentlyRemoved | 559-562 | Tracks most recent removal for undo notification |
+| **Functions** | | |
+| handleRemoveResource() | 969-987 | Main removal handler with 5-second timeout |
+| handleUndoRemove() | 990-999 | Undo handler that restores removed resource |
+| isResourceRemoved() | 1002-1005 | Check function used in filter operations |
+| **UI Components** | | |
+| Remove button (streaming) | 2808-2815 | Button on streaming resource cards |
+| Remove button (history) | 3133-3137 | Button on conversation history resource cards |
+| Undo notification | 3688-3707 | Fixed notification at top-center of viewport |
+| **Integration Points** | | |
+| PDF generation filter | 900 | Excludes removed resources from PDF |
+| Streaming display filter | 2734 | Filters removed from live streaming view |
+| History display filter | 3066 | Filters removed from conversation history |
+| Action plan filter | 3342 | Filters removed from action plan selection |
+| **Icons** | | |
+| Import X icon | 49 | lucide-react X icon for remove button |
+| Import RotateCcw icon | 50 | lucide-react RotateCcw icon for undo button |
+
+### File Structure
+```
+app/page.tsx (3,710 lines)
+├── Imports (1-57)
+├── Interface definitions (59-89)
+│   └── Resource interface
+├── Main component (470+)
+│   ├── State declarations (478-569)
+│   │   └── Remove feature state (558-562)
+│   ├── Handler functions (600-1400)
+│   │   └── Remove handlers (969-1005)
+│   └── JSX rendering (1500-3710)
+│       ├── Resource cards with remove buttons (2800+, 3100+)
+│       └── Undo notification (3688-3707)
+```
+
+---
+
 ## Design Philosophy
 
 **Core Principles:**
@@ -44,7 +91,23 @@ A user-friendly feature allowing case managers to remove unwanted resources from
 
 ### 1. Remove Button
 
-**Location**: Top-right corner of resource card
+**Code Location:**
+- Streaming view: `app/page.tsx:2808-2815`
+- History view: `app/page.tsx:3133-3137`
+
+**Visual Location**: Top-right corner of resource card
+
+**Implementation:**
+```jsx
+<button
+  onClick={() => handleRemoveResource(0, resource.number)}
+  className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200"
+  title="Remove resource"
+>
+  <X className="w-3.5 h-3.5" />
+  <span className="hidden sm:inline">Remove</span>
+</button>
+```
 
 **Visual Specs:**
 ```css
@@ -72,7 +135,32 @@ Label: "Remove" (hidden on mobile: hidden sm:inline)
 
 ### 2. Undo Notification
 
-**Location**: Top-center of viewport (fixed positioning)
+**Code Location:** `app/page.tsx:3688-3707`
+
+**Visual Location**: Top-center of viewport (fixed positioning)
+
+**Implementation:**
+```jsx
+{recentlyRemoved && (
+  <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top-5 duration-300">
+    <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center">
+          <span className="text-xs">ℹ️</span>
+        </div>
+        <span className="text-sm font-medium">Resource removed</span>
+      </div>
+      <button
+        onClick={handleUndoRemove}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 rounded-md hover:bg-gray-100 transition-colors text-sm font-medium"
+      >
+        <RotateCcw className="w-3.5 h-3.5" />
+        Undo
+      </button>
+    </div>
+  </div>
+)}
+```
 
 **Visual Specs:**
 ```css
@@ -138,6 +226,8 @@ animate-in slide-in-from-top-5 duration-300
 
 ### State Structure
 
+**Location:** `app/page.tsx:558-562`
+
 ```typescript
 // Primary removal tracking
 const [removedResourceIds, setRemovedResourceIds] = useState<Set<string>>(new Set())
@@ -165,33 +255,68 @@ Examples:
 
 ### Key Functions
 
-**1. Remove Handler**
+**1. Remove Handler** (`app/page.tsx:969-987`)
+
 ```typescript
-handleRemoveResource(conversationIndex, resourceNumber)
-  ↓
-1. Create resource ID
-2. Add ID to removedResourceIds Set
-3. Set recentlyRemoved with timestamp
-4. Start 5-second timeout
-5. Re-render → resource filtered out
+const handleRemoveResource = (conversationIndex: number, resourceNumber: number) => {
+  const resourceId = `${conversationIndex}-${resourceNumber}`
+  setRemovedResourceIds((prev) => {
+    const newSet = new Set(prev)
+    newSet.add(resourceId)
+    return newSet
+  })
+  setRecentlyRemoved({ id: resourceId, timestamp: Date.now() })
+
+  // Auto-clear the undo notification after 5 seconds
+  setTimeout(() => {
+    setRecentlyRemoved((current) => {
+      if (current && current.id === resourceId) {
+        return null
+      }
+      return current
+    })
+  }, 5000)
+}
 ```
 
-**2. Undo Handler**
+**Flow:**
+1. Create resource ID from conversationIndex + resourceNumber
+2. Add ID to removedResourceIds Set (immutable update)
+3. Set recentlyRemoved with ID and timestamp
+4. Start 5-second timeout to auto-clear notification
+5. Re-render → resource filtered out everywhere
+
+**2. Undo Handler** (`app/page.tsx:990-999`)
+
 ```typescript
-handleUndoRemove()
-  ↓
-1. Get resource ID from recentlyRemoved
-2. Remove ID from removedResourceIds Set
-3. Clear recentlyRemoved state
+const handleUndoRemove = () => {
+  if (recentlyRemoved) {
+    setRemovedResourceIds((prev) => {
+      const newSet = new Set(prev)
+      newSet.delete(recentlyRemoved.id)
+      return newSet
+    })
+    setRecentlyRemoved(null)
+  }
+}
+```
+
+**Flow:**
+1. Check if recentlyRemoved exists (within 5-second window)
+2. Remove ID from removedResourceIds Set (immutable update)
+3. Clear recentlyRemoved state (hides notification)
 4. Re-render → resource appears again
+
+**3. Check Function** (`app/page.tsx:1002-1005`)
+
+```typescript
+const isResourceRemoved = (conversationIndex: number, resourceNumber: number): boolean => {
+  const resourceId = `${conversationIndex}-${resourceNumber}`
+  return removedResourceIds.has(resourceId)
+}
 ```
 
-**3. Check Function**
-```typescript
-isResourceRemoved(conversationIndex, resourceNumber)
-  ↓
-Returns boolean - used in .filter() calls
-```
+**Purpose:** Used in all `.filter()` calls to exclude removed resources. Returns boolean for efficient Set lookup (O(1)).
 
 ### Rendering Pattern
 
@@ -206,10 +331,22 @@ Returns boolean - used in .filter() calls
 ```
 
 **Applied in 4 places:**
-1. Streaming resources display (first render)
-2. Conversation history resources display
-3. Action plan resource selection checkboxes
-4. PDF generation content compilation
+1. **PDF generation** (`app/page.tsx:900`) - Excludes removed resources from PDF content
+2. **Streaming resources display** (`app/page.tsx:2734`) - Filters removed from live AI stream
+3. **Conversation history display** (`app/page.tsx:3066`) - Filters removed from past responses
+4. **Action plan selection** (`app/page.tsx:3342`) - Only shows non-removed in checkbox list
+
+**Example from streaming display (line 2734):**
+```jsx
+{streamingResources
+  .slice()
+  .sort((a, b) => Number(a.number) - Number(b.number))
+  .filter((resource) => !isResourceRemoved(0, resource.number))
+  .map((resource, idx) => {
+    // Render resource card
+  })
+}
+```
 
 ---
 
@@ -337,23 +474,50 @@ aria-live="polite"
 
 ## Integration Points
 
-### Action Plan Generation
-- Removed resources excluded from selection list
-- Checkboxes only show non-removed resources
-- Action plan API receives filtered list only
+All integration points use the `isResourceRemoved()` check function to filter out removed resources.
 
-### PDF Export
+### PDF Generation (`app/page.tsx:900`)
+```jsx
+exchange.response.resources
+  .filter((resource) => !isResourceRemoved(index, resource.number))
+  .map((resource) => { /* Add to PDF content */ })
+```
 - Removed resources not included in PDF
 - Page formatting adjusts for fewer resources
 - Numbering stays consistent with displayed list
 
+### Streaming Display (`app/page.tsx:2734`)
+```jsx
+streamingResources
+  .filter((resource) => !isResourceRemoved(0, resource.number))
+  .map((resource) => { /* Render card */ })
+```
+- Resources removed during streaming won't reappear
+- Filter applied in real-time as AI generates results
+
+### Conversation History (`app/page.tsx:3066`)
+```jsx
+exchange.response.resources
+  .filter((resource) => !isResourceRemoved(index, resource.number))
+  .map((resource) => { /* Render card */ })
+```
+- Past conversation responses show filtered resources
+- User sees consistent view across all exchanges
+
+### Action Plan Selection (`app/page.tsx:3342`)
+```jsx
+exchange.response.resources
+  .filter((resource) => !isResourceRemoved(index, resource.number))
+  .map((resource) => { /* Checkbox option */ })
+```
+- Removed resources excluded from selection checkboxes
+- Action plan API receives only non-removed resources
+- Prevents removed items from appearing in generated plans
+
 ### Email Functionality
 - Uses same PDF as export (removed resources excluded)
-- No additional logic needed
-
-### Case Notes
-- Should reference only non-removed resources
-- Compilation function uses same filter
+- No additional filtering logic needed
+- Piggybacks on PDF generation integration
 
 ---
 
@@ -478,3 +642,32 @@ The remove feature provides a **clean, intuitive, and reversible** way for case 
 ✅ **Performance**: Efficient Set operations and CSS animations
 
 The implementation is **non-destructive** - original data remains untouched in `conversationHistory`, making the feature safe and reversible at any scale.
+
+---
+
+## Quick Reference: Code Navigation
+
+For engineers working on this feature, here are direct links to key sections:
+
+### Core Logic
+- **State declarations**: Jump to line 558
+- **Remove handler**: Jump to line 969
+- **Undo handler**: Jump to line 990
+- **Check function**: Jump to line 1002
+
+### UI Components
+- **Remove button (streaming)**: Jump to line 2808
+- **Remove button (history)**: Jump to line 3133
+- **Undo notification**: Jump to line 3688
+
+### Integration Points
+- **PDF generation filter**: Jump to line 900
+- **Streaming display filter**: Jump to line 2734
+- **History display filter**: Jump to line 3066
+- **Action plan filter**: Jump to line 3342
+
+### Dependencies
+- **Resource interface**: Jump to line 59
+- **Icon imports**: Jump to lines 49-50
+
+**File:** All code is in `app/page.tsx` (3,710 lines total)
