@@ -1,5 +1,39 @@
 # Remove Resources Feature - Frontend & Design Guide
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Codebase Reference Map](#codebase-reference-map)
+  - [Key Locations in Code](#key-locations-in-code)
+  - [File Structure](#file-structure)
+- [Design Philosophy](#design-philosophy)
+- [User Experience Flow](#user-experience-flow)
+  - [Happy Path](#happy-path)
+  - [Undo Path](#undo-path)
+- [Visual Design](#visual-design)
+  - [1. Remove Button](#1-remove-button)
+  - [2. Undo Notification](#2-undo-notification)
+  - [3. Animation & Transitions](#3-animation--transitions)
+- [Component Architecture](#component-architecture)
+  - [State Structure](#state-structure)
+  - [Key Functions](#key-functions)
+  - [Rendering Pattern](#rendering-pattern)
+- [Interaction Details](#interaction-details)
+  - [Remove Button Click](#remove-button-click)
+  - [Undo Button Click](#undo-button-click)
+- [Accessibility Considerations](#accessibility-considerations)
+- [Responsive Design](#responsive-design)
+- [Edge Cases & Considerations](#edge-cases--considerations)
+- [Integration Points](#integration-points)
+- [Design Tokens (Color Scheme)](#design-tokens-color-scheme)
+- [Performance Optimizations](#performance-optimizations)
+- [Testing Checklist](#testing-checklist)
+- [Future Enhancements](#future-enhancements)
+- [Summary](#summary)
+- [Quick Reference: Code Navigation](#quick-reference-code-navigation)
+
+---
+
 ## Overview
 
 A user-friendly feature allowing case managers to remove unwanted resources from referral lists with a simple undo mechanism. This guide focuses on the UI/UX implementation and design decisions.
@@ -50,6 +84,8 @@ app/page.tsx (3,710 lines)
 │       ├── Resource cards with remove buttons (2800+, 3100+)
 │       └── Undo notification (3688-3707)
 ```
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -220,6 +256,8 @@ animate-in slide-in-from-top-5 duration-300
 - No layout thrashing - fixed positioning for alert
 - Efficient Set lookups for removal checks (O(1))
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## Component Architecture
@@ -348,6 +386,8 @@ const isResourceRemoved = (conversationIndex: number, resourceNumber: number): b
 }
 ```
 
+[↑ Back to top](#table-of-contents)
+
 ---
 
 ## Interaction Details
@@ -382,6 +422,8 @@ const isResourceRemoved = (conversationIndex: number, resourceNumber: number): b
 - Notification disappears immediately
 - Resource card reappears in place
 - No jarring animations
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -436,6 +478,8 @@ aria-live="polite"
 - Same touch target size maintained
 - Notification stacks vertically if needed
 - Top positioning ensures it doesn't block content
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
@@ -518,6 +562,8 @@ exchange.response.resources
 - Uses same PDF as export (removed resources excluded)
 - No additional filtering logic needed
 - Piggybacks on PDF generation integration
+
+[↑ Back to top](#table-of-contents)
 
 ---
 
