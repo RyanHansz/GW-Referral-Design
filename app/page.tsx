@@ -534,6 +534,7 @@ export default function ReferralTool() {
   const [currentGuideIndex, setCurrentGuideIndex] = useState(0)
 
   const [outputLanguage, setOutputLanguage] = useState<string>("English")
+  const [actionPlanLanguage, setActionPlanLanguage] = useState<string>("English")
 
   const [showPrintDialog, setShowPrintDialog] = useState(false)
   const [emailAddress, setEmailAddress] = useState("")
@@ -1799,7 +1800,7 @@ export default function ReferralTool() {
         },
         body: JSON.stringify({
           resources: selectedResources,
-          outputLanguage: outputLanguage,
+          outputLanguage: actionPlanLanguage,
         }),
       })
 
@@ -3060,7 +3061,35 @@ export default function ReferralTool() {
                               ))}
                             </div>
                             {selectedResources.length > 0 && (
-                              <div className="mt-4 pt-3 border-t">
+                              <div className="mt-4 pt-3 border-t space-y-3">
+                                {/* Language selector for action plan */}
+                                <div className="flex items-center gap-3">
+                                  <label htmlFor="action-plan-language" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                    <Globe className="w-4 h-4 text-blue-600" />
+                                    Action Plan Language:
+                                  </label>
+                                  <select
+                                    id="action-plan-language"
+                                    value={actionPlanLanguage}
+                                    onChange={(e) => setActionPlanLanguage(e.target.value)}
+                                    className="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 text-sm"
+                                  >
+                                    <option value="English">English</option>
+                                    <option value="Spanish">Español (Spanish)</option>
+                                    <option value="Vietnamese">Tiếng Việt (Vietnamese)</option>
+                                    <option value="Chinese">中文 (Chinese)</option>
+                                    <option value="Korean">한국어 (Korean)</option>
+                                    <option value="Arabic">العربية (Arabic)</option>
+                                    <option value="Hindi">हिन्दी (Hindi)</option>
+                                    <option value="French">Français (French)</option>
+                                    <option value="German">Deutsch (German)</option>
+                                    <option value="Portuguese">Português (Portuguese)</option>
+                                    <option value="Russian">Русский (Russian)</option>
+                                    <option value="Japanese">日本語 (Japanese)</option>
+                                    <option value="Italian">Italiano (Italian)</option>
+                                  </select>
+                                </div>
+
                                 <Button
                                   onClick={generateActionPlan}
                                   disabled={isGeneratingActionPlan}
