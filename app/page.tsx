@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useCallback, useMemo } from "react"
+import { useState, useRef, useCallback, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -562,6 +562,70 @@ export default function ReferralTool() {
   const [isChatStreaming, setIsChatStreaming] = useState(false)
   const [streamingChatContent, setStreamingChatContent] = useState("")
   const [followUpPrompts, setFollowUpPrompts] = useState<string[]>([])
+
+  // User info state
+  const [userName, setUserName] = useState("")
+  const [userEmail, setUserEmail] = useState("")
+  const [userNameInput, setUserNameInput] = useState("")
+  const [userEmailInput, setUserEmailInput] = useState("")
+  const [userEmailError, setUserEmailError] = useState("")
+  const [userEmailTouched, setUserEmailTouched] = useState(false)
+  const [isCheckingUser, setIsCheckingUser] = useState(true)
+
+  // Check if user has provided info on first load
+  useEffect(() => {
+    const storedUserName = localStorage.getItem("userName")
+    const storedUserEmail = localStorage.getItem("userEmail")
+
+    if (storedUserName && storedUserEmail) {
+      setUserName(storedUserName)
+      setUserEmail(storedUserEmail)
+    }
+    setIsCheckingUser(false)
+  }, [])
+
+  // Simple email validation
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
+
+  // Validate user email and set error message
+  const validateUserEmail = (email: string) => {
+    if (!email.trim()) {
+      setUserEmailError("Email is required")
+      return false
+    }
+    if (!isValidEmail(email)) {
+      setUserEmailError("Please enter a valid email address")
+      return false
+    }
+    setUserEmailError("")
+    return true
+  }
+
+  // Handle user email blur to show validation errors
+  const handleUserEmailBlur = () => {
+    setUserEmailTouched(true)
+    validateUserEmail(userEmailInput)
+  }
+
+  // Handle user email change and clear error if valid
+  const handleUserEmailChange = (email: string) => {
+    setUserEmailInput(email)
+    // If email was touched and user is now typing, validate in real-time
+    if (userEmailTouched) {
+      validateUserEmail(email)
+    }
+  }
+
+  const handleUserInfoSubmit = () => {
+    if (userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
+      localStorage.setItem("userName", userNameInput.trim())
+      localStorage.setItem("userEmail", userEmailInput.trim())
+      setUserName(userNameInput.trim())
+      setUserEmail(userEmailInput.trim())
+    }
+  }
 
   // Generate contextual follow-up prompts based on assistant response
   const generateFollowUpPrompts = (responseContent: string): string[] => {
@@ -1885,6 +1949,99 @@ export default function ReferralTool() {
     }
   }
 
+  // Show nothing while checking localStorage to prevent flash
+  if (isCheckingUser) {
+    return null
+  }
+
+  // If no user info, show the welcome page
+  if (!userName || !userEmail) {
+    return (
+      <div className="min-h-screen bg-gray-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-2xl">
+          <CardContent className="pt-8 pb-8 px-8">
+            <div className="text-center mb-8">
+              <div className="mb-4">
+                <Image src="/goodwill-logo.svg" alt="Goodwill Logo" width={72} height={72} className="mx-auto" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                Welcome to the Goodwill Referral Tool
+              </h1>
+              <p className="text-gray-600 text-base">
+                To help us understand how this tool is being used and make improvements, please provide your name and
+                email.
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="userName" className="text-sm font-medium text-gray-700">
+                  Your Name *
+                </Label>
+                <Input
+                  id="userName"
+                  name="userName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={userNameInput}
+                  onChange={(e) => setUserNameInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
+                      handleUserInfoSubmit()
+                    }
+                  }}
+                  autoComplete="off"
+                  data-form-type="other"
+                  className="w-full bg-white focus-visible:ring-blue-600 focus-visible:ring-offset-0 focus-visible:border-blue-600"
+                  autoFocus
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="userEmail" className="text-sm font-medium text-gray-700">
+                  Your Goodwill Email *
+                </Label>
+                <Input
+                  id="userEmail"
+                  name="userEmail"
+                  type="email"
+                  placeholder="Enter your Goodwill email address"
+                  value={userEmailInput}
+                  onChange={(e) => handleUserEmailChange(e.target.value)}
+                  onBlur={handleUserEmailBlur}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && userNameInput.trim() && userEmailInput.trim() && isValidEmail(userEmailInput)) {
+                      handleUserInfoSubmit()
+                    }
+                  }}
+                  autoComplete="off"
+                  data-form-type="other"
+                  className={`w-full bg-white focus-visible:ring-offset-0 ${
+                    userEmailTouched && userEmailError
+                      ? "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500"
+                      : "focus-visible:ring-blue-600 focus-visible:border-blue-600"
+                  }`}
+                />
+                {userEmailTouched && userEmailError && (
+                  <p className="text-sm text-red-600 mt-1">{userEmailError}</p>
+                )}
+              </div>
+
+              <Button
+                onClick={handleUserInfoSubmit}
+                disabled={!userNameInput.trim() || !userEmailInput.trim() || !isValidEmail(userEmailInput)}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-semibold"
+              >
+                Get Started
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Main application (only shown after user info is provided)
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       <div className="flex flex-1 relative">

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iframe Test - Goodwill Referral Tool</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .description {
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .test-controls {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .test-controls h2 {
+      margin-top: 0;
+      color: #495057;
+      font-size: 18px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    button.primary {
+      background: #667eea;
+      color: white;
+    }
+
+    button.primary:hover {
+      background: #5568d3;
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    button.secondary:hover {
+      background: #5a6268;
+    }
+
+    button.danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    button.danger:hover {
+      background: #c82333;
+    }
+
+    .height-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .height-selector label {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .height-selector select {
+      padding: 8px 12px;
+      border: 2px solid #ced4da;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .info-box {
+      background: #d1ecf1;
+      border: 2px solid #bee5eb;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #0c5460;
+    }
+
+    .info-box strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .iframe-container {
+      border: 3px solid #e9ecef;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    iframe {
+      width: 100%;
+      border: none;
+      display: block;
+      transition: height 0.3s ease;
+    }
+
+    .scroll-indicator {
+      height: 1500px;
+      background: linear-gradient(to bottom,
+        white 0%,
+        #f8f9fa 50%,
+        #e9ecef 100%
+      );
+      margin-top: 20px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6c757d;
+      font-size: 18px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Iframe Embedding Test</h1>
+    <p class="description">
+      This page tests the Goodwill Referral Tool embedded in an iframe to verify modal behavior,
+      localStorage persistence, and scrolling issues.
+    </p>
+
+    <div class="test-controls">
+      <h2>Test Controls</h2>
+
+      <div class="button-group">
+        <button class="primary" onclick="reloadIframe()">🔄 Reload Iframe</button>
+        <button class="secondary" onclick="toggleScroll()">📜 Toggle Parent Scroll</button>
+        <button class="danger" onclick="clearStorage()">🗑️ Clear localStorage</button>
+        <button class="secondary" onclick="checkStorage()">🔍 Check localStorage</button>
+      </div>
+
+      <div class="height-selector">
+        <label for="heightSelect">Iframe Height:</label>
+        <select id="heightSelect" onchange="changeHeight(this.value)">
+          <option value="400">400px (Small - Modal Cut Off)</option>
+          <option value="600" selected>600px (Minimum Recommended)</option>
+          <option value="800">800px (Comfortable)</option>
+          <option value="1000">1000px (Large)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info-box" id="infoBox">
+      <strong>ℹ️ Test Instructions:</strong>
+      1. The iframe should show the user info modal on first load<br>
+      2. Try scrolling this page while the modal is open<br>
+      3. Fill out the modal and submit<br>
+      4. Click "Reload Iframe" - modal should NOT appear again<br>
+      5. Click "Clear localStorage" then "Reload Iframe" - modal should appear<br>
+      6. Try different iframe heights to see if modal is cut off
+    </div>
+
+    <div class="iframe-container">
+      <iframe
+        id="testIframe"
+        src="http://localhost:3001"
+        height="600"
+        title="Goodwill Referral Tool"
+      ></iframe>
+    </div>
+
+    <div class="scroll-indicator">
+      ⬇️ Scroll down to test parent page scrolling while modal is open ⬇️
+    </div>
+  </div>
+
+  <script>
+    let scrollEnabled = true;
+
+    function reloadIframe() {
+      const iframe = document.getElementById('testIframe');
+      iframe.src = iframe.src;
+    }
+
+    function toggleScroll() {
+      scrollEnabled = !scrollEnabled;
+      document.body.style.overflow = scrollEnabled ? '' : 'hidden';
+      updateInfo(`Parent scroll ${scrollEnabled ? 'enabled' : 'disabled'}`);
+    }
+
+    function clearStorage() {
+      // Clear storage for the iframe's origin
+      const iframe = document.getElementById('testIframe');
+
+      // Note: Can only clear if same origin
+      try {
+        iframe.contentWindow.localStorage.clear();
+        updateInfo('✅ localStorage cleared! Reload iframe to see modal again.');
+      } catch (e) {
+        updateInfo('❌ Cannot access iframe localStorage (cross-origin). Open iframe URL directly and clear manually.');
+      }
+    }
+
+    function checkStorage() {
+      try {
+        const iframe = document.getElementById('testIframe');
+        const userName = iframe.contentWindow.localStorage.getItem('userName');
+        const userEmail = iframe.contentWindow.localStorage.getItem('userEmail');
+
+        if (userName && userEmail) {
+          updateInfo(`✅ User Info Stored:<br>Name: ${userName}<br>Email: ${userEmail}`);
+        } else {
+          updateInfo('❌ No user info in localStorage');
+        }
+      } catch (e) {
+        updateInfo('❌ Cannot access iframe localStorage (cross-origin)');
+      }
+    }
+
+    function changeHeight(height) {
+      const iframe = document.getElementById('testIframe');
+      iframe.height = height;
+      updateInfo(`Iframe height changed to ${height}px`);
+    }
+
+    function updateInfo(message) {
+      const infoBox = document.getElementById('infoBox');
+      infoBox.innerHTML = `<strong>ℹ️ Status:</strong> ${message}`;
+
+      // Reset after 5 seconds
+      setTimeout(() => {
+        infoBox.innerHTML = `<strong>ℹ️ Test Instructions:</strong>
+          1. The iframe should show the user info modal on first load<br>
+          2. Try scrolling this page while the modal is open<br>
+          3. Fill out the modal and submit<br>
+          4. Click "Reload Iframe" - modal should NOT appear again<br>
+          5. Click "Clear localStorage" then "Reload Iframe" - modal should appear<br>
+          6. Try different iframe heights to see if modal is cut off`;
+      }, 5000);
+    }
+
+    // Listen for messages from iframe (for future postMessage implementation)
+    window.addEventListener('message', (event) => {
+      console.log('Message from iframe:', event.data);
+
+      if (event.data.type === 'disableScroll') {
+        document.body.style.overflow = 'hidden';
+        updateInfo('🔒 Iframe requested: Disable parent scroll');
+      } else if (event.data.type === 'enableScroll') {
+        document.body.style.overflow = '';
+        updateInfo('🔓 Iframe requested: Enable parent scroll');
+      }
+    });
+  </script>
+</body>
+</html>
