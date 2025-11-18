@@ -95,7 +95,7 @@ Return ONLY the markdown content directly, no JSON.`
       const aiPrompt = isCATTraining ? catPrompt : standardPrompt
 
       const result = streamText({
-        model: openai("gpt-5"),
+        model: openai("gpt-5.1"),
         prompt: aiPrompt,
         maxTokens: 2500,
         tools: {
@@ -105,7 +105,7 @@ Return ONLY the markdown content directly, no JSON.`
         },
         providerOptions: {
           openai: {
-            reasoningEffort: "low",
+            reasoningEffort: "none",
           },
         },
       })
@@ -149,7 +149,7 @@ Return ONLY the "## Quick Summary" section markdown, nothing else.`
 
         const summaryPromise = (async () => {
           const summaryResult = streamText({
-            model: openai("gpt-5"),
+            model: openai("gpt-5.1"),
             prompt: summaryPrompt,
             maxTokens: 500,
             tools: {
@@ -159,7 +159,7 @@ Return ONLY the "## Quick Summary" section markdown, nothing else.`
             },
             providerOptions: {
               openai: {
-                reasoningEffort: "low",
+                reasoningEffort: "none",
               },
             },
           })
@@ -257,7 +257,7 @@ Return ONLY the markdown content for this one resource (starting with ###), no J
           const resourcePrompt = isCATTraining ? catPrompt : standardPrompt
 
           const resourceResult = streamText({
-            model: openai("gpt-5"),
+            model: openai("gpt-5.1"),
             prompt: resourcePrompt,
             maxTokens: 800,
             tools: {
@@ -267,7 +267,7 @@ Return ONLY the markdown content for this one resource (starting with ###), no J
             },
             providerOptions: {
               openai: {
-                reasoningEffort: "low",
+                reasoningEffort: "none",
               },
             },
           })

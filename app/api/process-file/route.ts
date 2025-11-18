@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       const base64 = buffer.toString("base64")
 
       const { text } = await generateText({
-        model: openai("gpt-5"),
+        model: openai("gpt-5.1"),
         messages: [
           {
             role: "user",
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
       const base64 = buffer.toString("base64")
 
       const { text } = await generateText({
-        model: openai("gpt-5"),
+        model: openai("gpt-5.1"),
         messages: [
           {
             role: "user",
