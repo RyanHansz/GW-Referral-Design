@@ -341,7 +341,7 @@ Client description: ${prompt}`
     // Use streaming for follow-up questions
     if (isFollowUp) {
       const result = streamText({
-        model: openai("gpt-5-mini"),
+        model: openai("gpt-5.1"),
         prompt: aiPrompt,
         maxTokens: 2000,
         tools: {
@@ -351,7 +351,7 @@ Client description: ${prompt}`
         },
         providerOptions: {
           openai: {
-            reasoningEffort: "low",
+            reasoningEffort: "none",
           },
         },
       })
@@ -371,7 +371,7 @@ Client description: ${prompt}`
         await writer.write(encoder.encode(JSON.stringify({ type: "status", message: "Searching for resources..." }) + "\n"))
 
         const result = streamText({
-          model: openai("gpt-5-mini"),
+          model: openai("gpt-5.1"),
           prompt: aiPrompt,
           maxTokens: 3000,
           tools: {
@@ -381,7 +381,7 @@ Client description: ${prompt}`
           },
           providerOptions: {
             openai: {
-              reasoningEffort: "low",
+              reasoningEffort: "none",
             },
           },
         })

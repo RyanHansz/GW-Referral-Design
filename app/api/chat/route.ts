@@ -185,7 +185,7 @@ Provide a helpful response in markdown format with citations. Use proper markdow
 Respond directly with the markdown content - do not wrap it in JSON or any other format.`
 
     const result = streamText({
-      model: openai("gpt-5-mini"),
+      model: openai("gpt-5.1"),
       prompt: aiPrompt,
       maxTokens: 2000,
       tools: {
@@ -195,7 +195,7 @@ Respond directly with the markdown content - do not wrap it in JSON or any other
       },
       providerOptions: {
         openai: {
-          reasoningEffort: "low",
+          reasoningEffort: "none",
         },
       },
     })
