@@ -559,6 +559,8 @@ export default function ReferralTool() {
   const [showRefinementPanel, setShowRefinementPanel] = useState(false)
   const [isEditingPrompt, setIsEditingPrompt] = useState(false)
   const [editedPromptText, setEditedPromptText] = useState("")
+  const [promptSuggestions, setPromptSuggestions] = useState("")
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
 
   // Chat mode state
   const [chatMessages, setChatMessages] = useState<
@@ -1421,6 +1423,34 @@ export default function ReferralTool() {
       setError(error.message || "An unexpected error occurred.")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Fetch prompt improvement suggestions
+  const fetchPromptSuggestions = async (prompt: string) => {
+    setIsLoadingSuggestions(true)
+    setPromptSuggestions("")
+
+    try {
+      const response = await fetch("/api/suggest-prompt-improvements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ prompt }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch suggestions")
+      }
+
+      const data = await response.json()
+      setPromptSuggestions(data.suggestions)
+    } catch (error) {
+      console.error("Error fetching suggestions:", error)
+      setPromptSuggestions("")
+    } finally {
+      setIsLoadingSuggestions(false)
     }
   }
 
@@ -2695,11 +2725,13 @@ export default function ReferralTool() {
                                         handlePromptRefinement(editedPromptText.trim())
                                         setIsEditingPrompt(false)
                                         setEditedPromptText("")
+                                        setPromptSuggestions("")
                                       }
                                     } else if (e.key === "Escape") {
                                       e.preventDefault()
                                       setIsEditingPrompt(false)
                                       setEditedPromptText("")
+                                      setPromptSuggestions("")
                                     }
                                   }}
                                   placeholder="Add more details about what the client needs..."
@@ -2710,6 +2742,30 @@ export default function ReferralTool() {
                                   💡 Add details like: age, family size, income level, location, urgency, specific needs
                                 </div>
                               </div>
+
+                              {/* AI Suggestions */}
+                              {(isLoadingSuggestions || promptSuggestions) && (
+                                <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                  <div className="flex items-start gap-2">
+                                    <Sparkles className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-semibold text-blue-900 mb-1">
+                                        AI Suggestions
+                                      </div>
+                                      {isLoadingSuggestions ? (
+                                        <div className="flex items-center gap-2 text-sm text-blue-700">
+                                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                          <span>Analyzing your prompt...</span>
+                                        </div>
+                                      ) : (
+                                        <div className="text-sm text-blue-800 whitespace-pre-line">
+                                          {promptSuggestions}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
 
                               {/* Show filters in edit mode too */}
                               {conversationHistory.length <= 1 &&
@@ -2792,6 +2848,7 @@ export default function ReferralTool() {
                                     onClick={() => {
                                       setIsEditingPrompt(false)
                                       setEditedPromptText("")
+                                      setPromptSuggestions("")
                                     }}
                                     className="gap-1"
                                   >
@@ -2804,6 +2861,7 @@ export default function ReferralTool() {
                                         handlePromptRefinement(editedPromptText.trim())
                                         setIsEditingPrompt(false)
                                         setEditedPromptText("")
+                                        setPromptSuggestions("")
                                       }
                                     }}
                                     size="sm"
@@ -2899,6 +2957,7 @@ export default function ReferralTool() {
                                     onClick={() => {
                                       setEditedPromptText(streamingQuestion)
                                       setIsEditingPrompt(true)
+                                      fetchPromptSuggestions(streamingQuestion)
                                     }}
                                     className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 gap-1.5 font-medium"
                                   >
