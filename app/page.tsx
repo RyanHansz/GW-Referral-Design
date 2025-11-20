@@ -2676,6 +2676,75 @@ export default function ReferralTool() {
                         prompt={streamingQuestion}
                         onUpdate={handlePromptRefinement}
                         className="mb-6"
+                        filters={
+                          conversationHistory.length === 0 &&
+                          (outputLanguage !== "English" ||
+                            selectedCategories.length > 0 ||
+                            selectedSubCategories.length > 0 ||
+                            selectedResourceTypes.length > 0 ||
+                            location ||
+                            selectedLocations.length > 0 ||
+                            selectedLanguages.length > 0) ? (
+                            <>
+                              <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
+                                <Filter className="w-4 h-4" />
+                                Active Filters:
+                              </div>
+                              <div className="space-y-1 text-gray-700 text-sm">
+                                {outputLanguage !== "English" && (
+                                  <div>
+                                    <span className="font-medium">Output Language:</span> {outputLanguage}
+                                  </div>
+                                )}
+                                {selectedCategories.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Categories:</span>{" "}
+                                    {selectedCategories
+                                      .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                      .filter(Boolean)
+                                      .join(", ")}
+                                  </div>
+                                )}
+                                {selectedSubCategories.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Sub-Categories:</span>{" "}
+                                    {selectedSubCategories
+                                      .map((id) => {
+                                        for (const cat of resourceCategories) {
+                                          const subCat = cat.subCategories.find((s) => s.id === id)
+                                          if (subCat) return subCat.label
+                                        }
+                                        return null
+                                      })
+                                      .filter(Boolean)
+                                      .join(", ")}
+                                  </div>
+                                )}
+                                {selectedResourceTypes.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Resource Types:</span>{" "}
+                                    {selectedResourceTypes.join(", ")}
+                                  </div>
+                                )}
+                                {location && (
+                                  <div>
+                                    <span className="font-medium">Location:</span> {location}
+                                  </div>
+                                )}
+                                {selectedLocations.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
+                                  </div>
+                                )}
+                                {selectedLanguages.length > 0 && (
+                                  <div>
+                                    <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          ) : undefined
+                        }
                       />
                     )}
 
