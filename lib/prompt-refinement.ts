@@ -260,29 +260,36 @@ export function getSuggestionsForSearch(prompt: string, maxSuggestions = 8): Ref
 
 /**
  * Build a refined prompt from original prompt, manual input, and selected chips
+ *
+ * Logic:
+ * - If manual input provided: Use manual input + chips (REPLACE original)
+ * - If only chips selected: Use original + chips (ENHANCE original)
  */
 export function buildRefinedPrompt(
   originalPrompt: string,
   manualInput: string,
   selectedSuggestions: RefinementSuggestion[]
 ): string {
-  const parts: string[] = [originalPrompt.trim()]
-
-  // Add manual input if provided
-  if (manualInput.trim()) {
-    parts.push(manualInput.trim())
-  }
-
-  // Add selected suggestion values
   const suggestionText = selectedSuggestions
     .map(s => s.value)
     .join(', ')
 
-  if (suggestionText) {
-    parts.push(suggestionText)
+  // If user provided manual input, use that as the base (replaces original)
+  if (manualInput.trim()) {
+    const parts: string[] = [manualInput.trim()]
+    if (suggestionText) {
+      parts.push(suggestionText)
+    }
+    return parts.join(' ')
   }
 
-  return parts.filter(Boolean).join(' ')
+  // If only chips selected, enhance the original prompt
+  if (suggestionText) {
+    return `${originalPrompt.trim()} ${suggestionText}`
+  }
+
+  // Fallback to original (shouldn't happen, but just in case)
+  return originalPrompt.trim()
 }
 
 /**

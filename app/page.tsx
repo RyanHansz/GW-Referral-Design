@@ -1163,9 +1163,12 @@ export default function ReferralTool() {
     selectedAccessibilityNeeds,
   ])
 
-  const handleGenerateReferrals = async (isFollowUp = false, followUpText = "") => {
+  const handleGenerateReferrals = async (isFollowUp = false, followUpText = "", overridePrompt = "") => {
+    // Determine the prompt to use - override takes precedence
+    const promptToUse = overridePrompt || userInput.trim()
+
     // Add check for user input
-    if (!isFollowUp && !userInput.trim()) {
+    if (!isFollowUp && !promptToUse) {
       alert("Please provide some information about your client.")
       return
     }
@@ -1177,17 +1180,19 @@ export default function ReferralTool() {
     if (!isFollowUp) {
       setActionPlanContent("")
       setSelectedResources([])
-      // Track original prompt for refinement
-      setOriginalPrompt(userInput.trim())
-      setIsRefined(false)
-      // Detect if prompt is vague
-      const isVague = isPromptVague(userInput.trim())
-      setShowRefinementPanel(isVague)
+      // Track original prompt for refinement (only if not already refining)
+      if (!overridePrompt) {
+        setOriginalPrompt(promptToUse)
+        setIsRefined(false)
+        // Detect if prompt is vague
+        const isVague = isPromptVague(promptToUse)
+        setShowRefinementPanel(isVague)
+      }
     }
 
     try {
       const promptFromFilters = buildPrompt()
-      const userText = isFollowUp ? followUpText : userInput.trim()
+      const userText = isFollowUp ? followUpText : promptToUse
 
       const fullPrompt = promptFromFilters ? `${userText} ${promptFromFilters}`.trim() : userText.trim()
 
@@ -1416,8 +1421,8 @@ export default function ReferralTool() {
     setIsRefined(true)
     setUserInput(refinedPrompt)
     setShowRefinementPanel(false)
-    // Trigger new search with refined prompt
-    handleGenerateReferrals(false, "")
+    // Trigger new search with refined prompt (pass as override to avoid async state issue)
+    handleGenerateReferrals(false, "", refinedPrompt)
   }
 
   // Handle undo refinement
@@ -1425,8 +1430,8 @@ export default function ReferralTool() {
     setIsRefined(false)
     setUserInput(originalPrompt)
     setShowRefinementPanel(true)
-    // Trigger search with original prompt
-    handleGenerateReferrals(false, "")
+    // Trigger search with original prompt (pass as override to avoid async state issue)
+    handleGenerateReferrals(false, "", originalPrompt)
   }
 
   const handleSendChatMessage = async () => {
