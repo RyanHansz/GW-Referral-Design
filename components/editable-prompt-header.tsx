@@ -69,6 +69,13 @@ export function EditablePromptHeader({
           </div>
         </div>
 
+        {/* Show filters in edit mode too */}
+        {filters && (
+          <div className="mb-4 pb-4 border-b border-blue-300">
+            {filters}
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-600">
             Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded">⌘</kbd>+
