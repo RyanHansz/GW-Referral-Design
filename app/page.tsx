@@ -2677,7 +2677,7 @@ export default function ReferralTool() {
                           <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
 
                           {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
-                          {conversationHistory.length === 0 &&
+                          {conversationHistory.length <= 1 &&
                             (outputLanguage !== "English" ||
                               selectedCategories.length > 0 ||
                               selectedSubCategories.length > 0 ||
@@ -2745,8 +2745,8 @@ export default function ReferralTool() {
                             </div>
                           )}
 
-                          {/* Refine Search Button - only show after streaming completes */}
-                          {!isStreaming && conversationHistory.length === 0 && (
+                          {/* Refine Search Button - only show after streaming completes (for first search only, not follow-ups) */}
+                          {!isStreaming && conversationHistory.length <= 1 && (
                             <div className="mt-3 pt-3 border-t border-gray-300 flex justify-center">
                               <Button
                                 variant="outline"
