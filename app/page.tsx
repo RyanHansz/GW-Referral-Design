@@ -1654,6 +1654,11 @@ export default function ReferralTool() {
     // Clear action plan related states
     setSelectedResources([])
     setActionPlanContent("")
+    // Clear prompt refinement states
+    setIsEditingPrompt(false)
+    setEditedPromptText("")
+    setPromptSuggestions("")
+    setIsLoadingSuggestions(false)
   }
 
   const handleSuggestedFollowUp = (suggestion: string) => {
