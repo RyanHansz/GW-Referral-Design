@@ -3044,79 +3044,12 @@ export default function ReferralTool() {
 
                     {conversationHistory.map((exchange, index) => (
                       <div key={index} className="space-y-4 pb-6 border-b border-gray-200 last:border-b-0">
-                        {/* Question Header */}
-                        <div className="bg-gray-100 rounded-2xl p-4 border">
-                          <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{exchange.response.question}</h2>
-
-                          {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
-                          {index === 0 &&
-                            (outputLanguage !== "English" ||
-                              selectedCategories.length > 0 ||
-                              selectedSubCategories.length > 0 ||
-                              selectedResourceTypes.length > 0 ||
-                              location ||
-                              selectedLocations.length > 0 ||
-                              selectedLanguages.length > 0) && (
-                              <div className="mt-3 pt-3 border-t border-gray-300">
-                                <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
-                                  <Filter className="w-4 h-4" />
-                                  Active Filters:
-                                </div>
-                                <div className="space-y-1 text-gray-700 text-sm">
-                                  {outputLanguage !== "English" && (
-                                    <div>
-                                      <span className="font-medium">Output Language:</span> {outputLanguage}
-                                    </div>
-                                  )}
-                                  {selectedCategories.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Categories:</span>{" "}
-                                      {selectedCategories
-                                        .map((id) => resourceCategories.find((c) => c.id === id)?.label)
-                                        .filter(Boolean)
-                                        .join(", ")}
-                                    </div>
-                                  )}
-                                  {selectedSubCategories.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Sub-Categories:</span>{" "}
-                                      {selectedSubCategories
-                                        .map((id) => {
-                                          for (const cat of resourceCategories) {
-                                            const subCat = cat.subCategories.find((s) => s.id === id)
-                                            if (subCat) return subCat.label
-                                          }
-                                          return null
-                                        })
-                                        .filter(Boolean)
-                                        .join(", ")}
-                                    </div>
-                                  )}
-                                  {selectedResourceTypes.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Resource Types:</span>{" "}
-                                      {selectedResourceTypes.join(", ")}
-                                    </div>
-                                  )}
-                                  {location && (
-                                    <div>
-                                      <span className="font-medium">Location:</span> {location}
-                                    </div>
-                                  )}
-                                  {selectedLocations.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
-                                    </div>
-                                  )}
-                                  {selectedLanguages.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                        </div>
+                        {/* Question Header - Skip for first exchange since EditablePromptHeader handles it */}
+                        {index > 0 && (
+                          <div className="bg-gray-100 rounded-2xl p-4 border">
+                            <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{exchange.response.question}</h2>
+                          </div>
+                        )}
 
                         {/* Processing Time - only show for latest */}
                         {index === conversationHistory.length - 1 && (
