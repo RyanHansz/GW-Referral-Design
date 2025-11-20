@@ -52,9 +52,7 @@ import Image from "next/image"
 // Import the new parseMarkdownToHTML function
 import { parseMarkdownToHTML } from "@/lib/markdown"
 // Import refinement components and utilities
-import { RefinePromptPanel } from "@/components/refine-prompt-panel"
-import { RefinementHistory } from "@/components/refinement-history"
-import { InlinePromptRefiner } from "@/components/inline-prompt-refiner"
+import { EditablePromptHeader } from "@/components/editable-prompt-header"
 import { isPromptVague } from "@/lib/prompt-refinement"
 
 interface Resource {
@@ -2672,12 +2670,11 @@ export default function ReferralTool() {
                       </div>
                     </div>
 
-                    {/* Inline Prompt Refiner - shown after results load */}
-                    {!isStreaming && streamingResources.length > 0 && (
-                      <InlinePromptRefiner
-                        initialPrompt={userInput}
-                        onSearch={handlePromptRefinement}
-                        showSuggestions={showRefinementPanel}
+                    {/* Editable Prompt Header - shown after results load */}
+                    {!isStreaming && streamingQuestion && (
+                      <EditablePromptHeader
+                        prompt={streamingQuestion}
+                        onUpdate={handlePromptRefinement}
                         className="mb-6"
                       />
                     )}
@@ -2685,7 +2682,7 @@ export default function ReferralTool() {
                     {/* Show streaming metadata (question and summary) */}
                     {isStreaming && (streamingQuestion || streamingSummary) && (
                       <div className="space-y-4 pb-6">
-                        {/* Question Header */}
+                        {/* Question Header (during streaming only) */}
                         {streamingQuestion && (
                           <div className="bg-gray-100 rounded-2xl p-4 border">
                             <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
