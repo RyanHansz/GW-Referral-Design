@@ -46,6 +46,10 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  X,
+  RotateCcw,
+  StickyNote,
+  Save,
 } from "lucide-react"
 import Image from "next/image"
 
@@ -550,6 +554,17 @@ export default function ReferralTool() {
   const [showActionPlanSection, setShowActionPlanSection] = useState(false)
   const [streamingFollowUpContent, setStreamingFollowUpContent] = useState("")
 
+  // Remove functionality state
+  const [removedResourceIds, setRemovedResourceIds] = useState<Set<string>>(new Set())
+  const [recentlyRemoved, setRecentlyRemoved] = useState<{
+    id: string
+    timestamp: number
+  } | null>(null)
+
+  // Notes functionality state
+  const [resourceNotes, setResourceNotes] = useState<Map<string, string>>(new Map())
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
+
   // Chat mode state
   const [chatMessages, setChatMessages] = useState<
     Array<{
@@ -904,6 +919,24 @@ export default function ReferralTool() {
                 page-break-inside: avoid;
               }
             }
+            .resource-note {
+              margin-top: 12px;
+              padding: 10px;
+              background: #fef3c7;
+              border-left: 3px solid #f59e0b;
+              border-radius: 4px;
+            }
+            .resource-note-label {
+              font-weight: 600;
+              color: #92400e;
+              font-size: 13px;
+              margin-bottom: 4px;
+            }
+            .resource-note-text {
+              color: #78350f;
+              font-size: 14px;
+              line-height: 1.5;
+            }
           </style>
         </head>
         <body>
@@ -928,8 +961,11 @@ export default function ReferralTool() {
               ${
                 exchange.response.resources
                   ? exchange.response.resources
+                      .filter((resource) => !isResourceRemoved(index, resource.number))
                       .map(
-                        (resource) => `
+                        (resource) => {
+                          const note = getResourceNote(index, resource.number)
+                          return `
                 <div class="resource">
                   <div class="resource-header">
                     <div class="resource-number">${resource.number}</div>
@@ -940,8 +976,18 @@ export default function ReferralTool() {
                   <div class="resource-detail"><strong>Why it fits:</strong> ${resource.whyItFits}</div>
                   <div class="resource-detail resource-contact"><strong>Contact:</strong> ${resource.contact}</div>
                   <div class="resource-source"><strong>Source:</strong> ${resource.source} - ${resource.badge}</div>
+                  ${
+                    note
+                      ? `
+                  <div class="resource-note">
+                    <div class="resource-note-label">📝 Case Manager's Note:</div>
+                    <div class="resource-note-text">${note.replace(/\n/g, "<br>")}</div>
+                  </div>`
+                      : ""
+                  }
                 </div>
-              `,
+              `
+                        },
                       )
                       .join("")
                   : ""
@@ -981,6 +1027,65 @@ export default function ReferralTool() {
         </body>
       </html>
     `
+  }
+
+  // Remove resource handler
+  const handleRemoveResource = (conversationIndex: number, resourceNumber: number) => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    setRemovedResourceIds((prev) => {
+      const newSet = new Set(prev)
+      newSet.add(resourceId)
+      return newSet
+    })
+    setRecentlyRemoved({ id: resourceId, timestamp: Date.now() })
+
+    // Auto-clear the undo notification after 5 seconds
+    setTimeout(() => {
+      setRecentlyRemoved((current) => {
+        if (current && current.id === resourceId) {
+          return null
+        }
+        return current
+      })
+    }, 5000)
+  }
+
+  // Undo remove handler
+  const handleUndoRemove = () => {
+    if (recentlyRemoved) {
+      setRemovedResourceIds((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(recentlyRemoved.id)
+        return newSet
+      })
+      setRecentlyRemoved(null)
+    }
+  }
+
+  // Check if resource is removed
+  const isResourceRemoved = (conversationIndex: number, resourceNumber: number): boolean => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    return removedResourceIds.has(resourceId)
+  }
+
+  // Notes handlers
+  const handleSaveNote = (conversationIndex: number, resourceNumber: number, note: string) => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    setResourceNotes((prev) => {
+      const newMap = new Map(prev)
+      if (note.trim()) {
+        newMap.set(resourceId, note)
+      } else {
+        newMap.delete(resourceId)
+      }
+      return newMap
+    })
+    setEditingNoteId(null)
+  }
+
+  const getResourceNote = (conversationIndex: number, resourceNumber: number): string => {
+    const resourceId = `${conversationIndex}-${resourceNumber}`
+    return resourceNotes.get(resourceId) || ""
   }
 
   const handleDirectPrint = () => {
@@ -1836,13 +1941,20 @@ export default function ReferralTool() {
     }
   }
 
-  const handleSelectAllResources = (resources: Resource[]) => {
-    if (resources && selectedResources.length === resources.length) {
-      // If all are selected, deselect all
-      setSelectedResources([])
-    } else if (resources) {
-      // Otherwise, select all
-      setSelectedResources(resources)
+  const handleSelectAllResources = (resources: Resource[], conversationIndex: number) => {
+    if (resources) {
+      // Filter out removed resources
+      const availableResources = resources.filter(
+        (resource) => !isResourceRemoved(conversationIndex, resource.number)
+      )
+
+      if (selectedResources.length === availableResources.length) {
+        // If all available resources are selected, deselect all
+        setSelectedResources([])
+      } else {
+        // Otherwise, select all available resources
+        setSelectedResources(availableResources)
+      }
     }
   }
 
@@ -1856,13 +1968,30 @@ export default function ReferralTool() {
     setCurrentGuideIndex(0)
 
     try {
+      // Find conversation index for selected resources and add notes
+      const resourcesWithNotes = selectedResources.map((resource) => {
+        // Find the conversation index for this resource
+        let conversationIndex = 0
+        conversationHistory.forEach((exchange, idx) => {
+          if (exchange.response.resources?.some((r) => r.number === resource.number && r.title === resource.title)) {
+            conversationIndex = idx
+          }
+        })
+
+        const note = getResourceNote(conversationIndex, resource.number)
+        return {
+          ...resource,
+          caseManagerNote: note || undefined,
+        }
+      })
+
       const response = await fetch("/api/generate-action-plan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          resources: selectedResources,
+          resources: resourcesWithNotes,
           outputLanguage: outputLanguage,
         }),
       })
@@ -2759,6 +2888,7 @@ export default function ReferralTool() {
                           {streamingResources
                             .slice()
                             .sort((a, b) => Number(a.number) - Number(b.number))
+                            .filter((resource) => !isResourceRemoved(0, resource.number))
                             .map((resource, idx) => {
                             const getCategoryStyle = (category) => {
                               switch (category) {
@@ -2826,11 +2956,21 @@ export default function ReferralTool() {
                             return (
                               <div
                                 key={resource.number}
-                                className="p-4 rounded-lg border border-gray-200 animate-fadeIn"
+                                className="p-4 rounded-lg border border-gray-200 animate-fadeIn relative"
                                 style={{
                                   animation: `fadeIn 0.3s ease-in ${(resource.number - 1) * 0.1}s both`,
                                 }}
                               >
+                                {/* Remove button */}
+                                <button
+                                  onClick={() => handleRemoveResource(0, resource.number)}
+                                  className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200"
+                                  title="Remove resource"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                  <span className="hidden sm:inline">Remove</span>
+                                </button>
+
                                 <div className="flex items-start gap-4">
                                   <span className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">
                                     {resource.number}
@@ -2894,6 +3034,76 @@ export default function ReferralTool() {
                                         </>
                                       )
                                     })()}
+
+                                    {/* Notes Section */}
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                      {editingNoteId === `0-${resource.number}` ? (
+                                        <div className="space-y-2">
+                                          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                            <StickyNote className="w-4 h-4" />
+                                            Add Note for Client:
+                                          </label>
+                                          <Textarea
+                                            placeholder="Add instructions, reminders, or important details for your client..."
+                                            defaultValue={getResourceNote(0, resource.number)}
+                                            className="min-h-[80px] text-sm"
+                                            id={`note-textarea-0-${resource.number}`}
+                                          />
+                                          <div className="flex gap-2">
+                                            <Button
+                                              size="sm"
+                                              onClick={() => {
+                                                const textarea = document.getElementById(
+                                                  `note-textarea-0-${resource.number}`
+                                                ) as HTMLTextAreaElement
+                                                handleSaveNote(0, resource.number, textarea?.value || "")
+                                              }}
+                                              className="flex items-center gap-1"
+                                            >
+                                              <Save className="w-3.5 h-3.5" />
+                                              Save Note
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              onClick={() => setEditingNoteId(null)}
+                                            >
+                                              Cancel
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      ) : getResourceNote(0, resource.number) ? (
+                                        <div className="space-y-2">
+                                          <div className="flex items-center justify-between">
+                                            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                              <StickyNote className="w-4 h-4" />
+                                              Note for Client:
+                                            </label>
+                                            <Button
+                                              size="sm"
+                                              variant="ghost"
+                                              onClick={() => setEditingNoteId(`0-${resource.number}`)}
+                                              className="text-xs h-7"
+                                            >
+                                              Edit
+                                            </Button>
+                                          </div>
+                                          <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-gray-800">
+                                            {getResourceNote(0, resource.number)}
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => setEditingNoteId(`0-${resource.number}`)}
+                                          className="flex items-center gap-1.5"
+                                        >
+                                          <StickyNote className="w-3.5 h-3.5" />
+                                          Add Note for Client
+                                        </Button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -3010,6 +3220,7 @@ export default function ReferralTool() {
                             {exchange.response.resources
                               .slice()
                               .sort((a, b) => Number(a.number) - Number(b.number))
+                              .filter((resource) => !isResourceRemoved(index, resource.number))
                               .map((resource) => {
                               const getCategoryStyle = (category) => {
                                 switch (category) {
@@ -3074,7 +3285,17 @@ export default function ReferralTool() {
                               const categoryStyle = getCategoryStyle(resource.category)
 
                               return (
-                                <div key={resource.number} className="p-4 rounded-lg border border-gray-200">
+                                <div key={resource.number} className="p-4 rounded-lg border border-gray-200 relative">
+                                  {/* Remove button */}
+                                  <button
+                                    onClick={() => handleRemoveResource(index, resource.number)}
+                                    className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors text-xs font-medium border border-red-200"
+                                    title="Remove resource"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Remove</span>
+                                  </button>
+
                                   <div className="flex items-start gap-4">
                                     <span className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">
                                       {resource.number}
@@ -3159,6 +3380,76 @@ export default function ReferralTool() {
                                           </>
                                         )
                                       })()}
+
+                                      {/* Notes Section */}
+                                      <div className="mt-4 pt-4 border-t border-gray-200">
+                                        {editingNoteId === `${index}-${resource.number}` ? (
+                                          <div className="space-y-2">
+                                            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                              <StickyNote className="w-4 h-4" />
+                                              Add Note for Client:
+                                            </label>
+                                            <Textarea
+                                              placeholder="Add instructions, reminders, or important details for your client..."
+                                              defaultValue={getResourceNote(index, resource.number)}
+                                              className="min-h-[80px] text-sm"
+                                              id={`note-textarea-${index}-${resource.number}`}
+                                            />
+                                            <div className="flex gap-2">
+                                              <Button
+                                                size="sm"
+                                                onClick={() => {
+                                                  const textarea = document.getElementById(
+                                                    `note-textarea-${index}-${resource.number}`
+                                                  ) as HTMLTextAreaElement
+                                                  handleSaveNote(index, resource.number, textarea?.value || "")
+                                                }}
+                                                className="flex items-center gap-1"
+                                              >
+                                                <Save className="w-3.5 h-3.5" />
+                                                Save Note
+                                              </Button>
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => setEditingNoteId(null)}
+                                              >
+                                                Cancel
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        ) : getResourceNote(index, resource.number) ? (
+                                          <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                                <StickyNote className="w-4 h-4" />
+                                                Note for Client:
+                                              </label>
+                                              <Button
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => setEditingNoteId(`${index}-${resource.number}`)}
+                                                className="text-xs h-7"
+                                              >
+                                                Edit
+                                              </Button>
+                                            </div>
+                                            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-gray-800">
+                                              {getResourceNote(index, resource.number)}
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => setEditingNoteId(`${index}-${resource.number}`)}
+                                            className="flex items-center gap-1.5"
+                                          >
+                                            <StickyNote className="w-3.5 h-3.5" />
+                                            Add Note for Client
+                                          </Button>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -3189,17 +3480,23 @@ export default function ReferralTool() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleSelectAllResources(exchange.response.resources)}
+                                  onClick={() => handleSelectAllResources(exchange.response.resources, index)}
                                   className="text-xs"
                                 >
-                                  {selectedResources.length === exchange.response.resources.length
-                                    ? "Deselect All"
-                                    : "Select All"}
+                                  {(() => {
+                                    const availableResources = exchange.response.resources.filter(
+                                      (resource) => !isResourceRemoved(index, resource.number)
+                                    )
+                                    return selectedResources.length === availableResources.length
+                                      ? "Deselect All"
+                                      : "Select All"
+                                  })()}
                                 </Button>
                               </div>
                               {exchange.response.resources
                                 .slice()
                                 .sort((a, b) => Number(a.number) - Number(b.number))
+                                .filter((resource) => !isResourceRemoved(index, resource.number))
                                 .map((resource: Resource, resourceIndex: number) => (
                                 <div key={resourceIndex} className="flex items-start gap-3 p-3 bg-white rounded border">
                                   <input
@@ -3544,6 +3841,27 @@ export default function ReferralTool() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Undo Notification */}
+      {recentlyRemoved && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-in slide-in-from-top-5 duration-300">
+          <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center">
+                <span className="text-xs">ℹ️</span>
+              </div>
+              <span className="text-sm font-medium">Resource removed</span>
+            </div>
+            <button
+              onClick={handleUndoRemove}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-900 rounded-md hover:bg-gray-100 transition-colors text-sm font-medium"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Undo
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
