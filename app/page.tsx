@@ -556,6 +556,8 @@ export default function ReferralTool() {
   const [originalPrompt, setOriginalPrompt] = useState("")
   const [isRefined, setIsRefined] = useState(false)
   const [showRefinementPanel, setShowRefinementPanel] = useState(false)
+  const [isEditingPrompt, setIsEditingPrompt] = useState(false)
+  const [editedPromptText, setEditedPromptText] = useState("")
 
   // Chat mode state
   const [chatMessages, setChatMessages] = useState<
@@ -2674,96 +2676,237 @@ export default function ReferralTool() {
                       <div className="space-y-4 pb-6">
                         {/* Question Header */}
                         <div className="bg-gray-100 rounded-2xl p-4 border">
-                          <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
-
-                          {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
-                          {conversationHistory.length <= 1 &&
-                            (outputLanguage !== "English" ||
-                              selectedCategories.length > 0 ||
-                              selectedSubCategories.length > 0 ||
-                              selectedResourceTypes.length > 0 ||
-                              location ||
-                              selectedLocations.length > 0 ||
-                              selectedLanguages.length > 0) && (
-                            <div className="mt-3 pt-3 border-t border-gray-300">
-                              <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
-                                <Filter className="w-4 h-4" />
-                                Active Filters:
+                          {isEditingPrompt ? (
+                            /* Inline Edit Mode */
+                            <>
+                              <div className="mb-3">
+                                <div className="flex items-center gap-2 mb-2 text-gray-900">
+                                  <Sparkles className="w-4 h-4" />
+                                  <span className="text-sm font-semibold">Refine your search to get better results</span>
+                                </div>
+                                <Textarea
+                                  value={editedPromptText}
+                                  onChange={(e) => setEditedPromptText(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                                      e.preventDefault()
+                                      if (editedPromptText.trim() && editedPromptText.trim() !== streamingQuestion) {
+                                        handlePromptRefinement(editedPromptText.trim())
+                                        setIsEditingPrompt(false)
+                                        setEditedPromptText("")
+                                      }
+                                    } else if (e.key === "Escape") {
+                                      e.preventDefault()
+                                      setIsEditingPrompt(false)
+                                      setEditedPromptText("")
+                                    }
+                                  }}
+                                  placeholder="Add more details about what the client needs..."
+                                  className="w-full min-h-[100px] text-base bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none"
+                                  autoFocus
+                                />
+                                <div className="mt-2 text-xs text-gray-600">
+                                  💡 Add details like: age, family size, income level, location, urgency, specific needs
+                                </div>
                               </div>
-                              <div className="space-y-1 text-gray-700 text-sm">
-                                {outputLanguage !== "English" && (
-                                  <div>
-                                    <span className="font-medium">Output Language:</span> {outputLanguage}
-                                  </div>
-                                )}
-                                {selectedCategories.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Categories:</span>{" "}
-                                    {selectedCategories
-                                      .map((id) => resourceCategories.find((c) => c.id === id)?.label)
-                                      .filter(Boolean)
-                                      .join(", ")}
-                                  </div>
-                                )}
-                                {selectedSubCategories.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Sub-Categories:</span>{" "}
-                                    {selectedSubCategories
-                                      .map((id) => {
-                                        for (const cat of resourceCategories) {
-                                          const subCat = cat.subCategories.find((s) => s.id === id)
-                                          if (subCat) return subCat.label
-                                        }
-                                        return null
-                                      })
-                                      .filter(Boolean)
-                                      .join(", ")}
-                                  </div>
-                                )}
-                                {selectedResourceTypes.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Resource Types:</span>{" "}
-                                    {selectedResourceTypes.join(", ")}
-                                  </div>
-                                )}
-                                {location && (
-                                  <div>
-                                    <span className="font-medium">Location:</span> {location}
-                                  </div>
-                                )}
-                                {selectedLocations.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
-                                  </div>
-                                )}
-                                {selectedLanguages.length > 0 && (
-                                  <div>
-                                    <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
 
-                          {/* Refine Search Button - only show after streaming completes (for first search only, not follow-ups) */}
-                          {!isStreaming && conversationHistory.length <= 1 && (
-                            <div className="mt-3 pt-3 border-t border-gray-300 flex justify-center">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  // TODO: Implement refinement UI
-                                  const refinedPrompt = window.prompt("Refine your search:", streamingQuestion)
-                                  if (refinedPrompt && refinedPrompt.trim()) {
-                                    handlePromptRefinement(refinedPrompt.trim())
-                                  }
-                                }}
-                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 gap-1.5 font-medium"
-                              >
-                                <Sparkles className="w-3.5 h-3.5" />
-                                Refine Search
-                              </Button>
-                            </div>
+                              {/* Show filters in edit mode too */}
+                              {conversationHistory.length <= 1 &&
+                                (outputLanguage !== "English" ||
+                                  selectedCategories.length > 0 ||
+                                  selectedSubCategories.length > 0 ||
+                                  selectedResourceTypes.length > 0 ||
+                                  location ||
+                                  selectedLocations.length > 0 ||
+                                  selectedLanguages.length > 0) && (
+                                <div className="mb-3 pb-3 border-b border-gray-300">
+                                  <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
+                                    <Filter className="w-4 h-4" />
+                                    Active Filters:
+                                  </div>
+                                  <div className="space-y-1 text-gray-700 text-sm">
+                                    {outputLanguage !== "English" && (
+                                      <div>
+                                        <span className="font-medium">Output Language:</span> {outputLanguage}
+                                      </div>
+                                    )}
+                                    {selectedCategories.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Categories:</span>{" "}
+                                        {selectedCategories
+                                          .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                          .filter(Boolean)
+                                          .join(", ")}
+                                      </div>
+                                    )}
+                                    {selectedSubCategories.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Sub-Categories:</span>{" "}
+                                        {selectedSubCategories
+                                          .map((id) => {
+                                            for (const cat of resourceCategories) {
+                                              const subCat = cat.subCategories.find((s) => s.id === id)
+                                              if (subCat) return subCat.label
+                                            }
+                                            return null
+                                          })
+                                          .filter(Boolean)
+                                          .join(", ")}
+                                      </div>
+                                    )}
+                                    {selectedResourceTypes.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Resource Types:</span>{" "}
+                                        {selectedResourceTypes.join(", ")}
+                                      </div>
+                                    )}
+                                    {location && (
+                                      <div>
+                                        <span className="font-medium">Location:</span> {location}
+                                      </div>
+                                    )}
+                                    {selectedLocations.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
+                                      </div>
+                                    )}
+                                    {selectedLanguages.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs text-gray-600">
+                                  Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded">⌘</kbd>+
+                                  <kbd className="px-1.5 py-0.5 bg-gray-200 rounded">Enter</kbd> to search
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setIsEditingPrompt(false)
+                                      setEditedPromptText("")
+                                    }}
+                                    className="gap-1"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    onClick={() => {
+                                      if (editedPromptText.trim() && editedPromptText.trim() !== streamingQuestion) {
+                                        handlePromptRefinement(editedPromptText.trim())
+                                        setIsEditingPrompt(false)
+                                        setEditedPromptText("")
+                                      }
+                                    }}
+                                    size="sm"
+                                    disabled={!editedPromptText.trim() || editedPromptText.trim() === streamingQuestion}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md gap-1.5"
+                                  >
+                                    <Search className="w-4 h-4" />
+                                    Get Better Results
+                                  </Button>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            /* Normal Display Mode */
+                            <>
+                              <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
+
+                              {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
+                              {conversationHistory.length <= 1 &&
+                                (outputLanguage !== "English" ||
+                                  selectedCategories.length > 0 ||
+                                  selectedSubCategories.length > 0 ||
+                                  selectedResourceTypes.length > 0 ||
+                                  location ||
+                                  selectedLocations.length > 0 ||
+                                  selectedLanguages.length > 0) && (
+                                <div className="mt-3 pt-3 border-t border-gray-300">
+                                  <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
+                                    <Filter className="w-4 h-4" />
+                                    Active Filters:
+                                  </div>
+                                  <div className="space-y-1 text-gray-700 text-sm">
+                                    {outputLanguage !== "English" && (
+                                      <div>
+                                        <span className="font-medium">Output Language:</span> {outputLanguage}
+                                      </div>
+                                    )}
+                                    {selectedCategories.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Categories:</span>{" "}
+                                        {selectedCategories
+                                          .map((id) => resourceCategories.find((c) => c.id === id)?.label)
+                                          .filter(Boolean)
+                                          .join(", ")}
+                                      </div>
+                                    )}
+                                    {selectedSubCategories.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Sub-Categories:</span>{" "}
+                                        {selectedSubCategories
+                                          .map((id) => {
+                                            for (const cat of resourceCategories) {
+                                              const subCat = cat.subCategories.find((s) => s.id === id)
+                                              if (subCat) return subCat.label
+                                            }
+                                            return null
+                                          })
+                                          .filter(Boolean)
+                                          .join(", ")}
+                                      </div>
+                                    )}
+                                    {selectedResourceTypes.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Resource Types:</span>{" "}
+                                        {selectedResourceTypes.join(", ")}
+                                      </div>
+                                    )}
+                                    {location && (
+                                      <div>
+                                        <span className="font-medium">Location:</span> {location}
+                                      </div>
+                                    )}
+                                    {selectedLocations.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
+                                      </div>
+                                    )}
+                                    {selectedLanguages.length > 0 && (
+                                      <div>
+                                        <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Refine Search Button - only show after streaming completes (for first search only, not follow-ups) */}
+                              {!isStreaming && conversationHistory.length <= 1 && (
+                                <div className="mt-3 pt-3 border-t border-gray-300 flex justify-center">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setEditedPromptText(streamingQuestion)
+                                      setIsEditingPrompt(true)
+                                    }}
+                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 gap-1.5 font-medium"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    Refine Search
+                                  </Button>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
 
