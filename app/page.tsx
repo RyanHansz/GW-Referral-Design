@@ -1180,6 +1180,13 @@ export default function ReferralTool() {
     if (!isFollowUp) {
       setActionPlanContent("")
       setSelectedResources([])
+      // Clear conversation history when refining (to replace old results)
+      if (overridePrompt) {
+        setConversationHistory([])
+        setStreamingResources([])
+        setStreamingQuestion("")
+        setStreamingSummary("")
+      }
       // Track original prompt for refinement (only if not already refining)
       if (!overridePrompt) {
         setOriginalPrompt(promptToUse)
