@@ -2715,58 +2715,118 @@ export default function ReferralTool() {
                               </div>
 
                               {/* Filter Controls in Edit Mode */}
-                              <div className="mb-3">
-                                <div className="text-sm font-medium text-gray-700 mb-2">Adjust Filters:</div>
-                                <div className="space-y-2">
+                              <div className="mb-3 pb-3 border-b border-gray-300">
+                                <div className="text-sm font-medium text-gray-700 mb-3">Adjust Filters:</div>
+                                <div className="space-y-4">
                                   {/* Category Filter */}
                                   <div>
-                                    <label className="text-xs text-gray-600 mb-1 block">Main Category</label>
-                                    <select
-                                      value={selectedCategories[0] || ""}
-                                      onChange={(e) => {
-                                        if (e.target.value) {
-                                          setSelectedCategories([e.target.value])
-                                          setSelectedSubCategories([])
-                                        } else {
-                                          setSelectedCategories([])
-                                          setSelectedSubCategories([])
-                                        }
-                                      }}
-                                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                    >
-                                      <option value="">All Categories</option>
-                                      {resourceCategories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
-                                          {cat.label}
-                                        </option>
-                                      ))}
-                                    </select>
+                                    <p className="text-xs text-gray-600 mb-2">
+                                      Select categories to refine your search
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                      {resourceCategories.map((category) => {
+                                        const Icon = category.icon
+                                        const isSelected = selectedCategories.includes(category.id)
+                                        return (
+                                          <button
+                                            type="button"
+                                            key={category.id}
+                                            className={`p-3 rounded-lg border-2 cursor-pointer transition-all text-left w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                                              isSelected
+                                                ? `bg-blue-50 border-blue-300 shadow-md ring-2 ring-blue-200`
+                                                : `bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm`
+                                            }`}
+                                            onClick={() => toggleCategory(category.id)}
+                                            aria-pressed={isSelected}
+                                            aria-label={`${isSelected ? 'Deselect' : 'Select'} ${category.label} category`}
+                                          >
+                                            <div className="flex items-start gap-2">
+                                              <div
+                                                className={`p-1.5 rounded ${isSelected ? "bg-blue-100" : "bg-gray-50"}`}
+                                              >
+                                                <Icon
+                                                  className={`w-5 h-5 ${isSelected ? "text-blue-700" : "text-gray-600"}`}
+                                                />
+                                              </div>
+                                              <div className="flex-1 min-w-0">
+                                                <p
+                                                  className={`text-sm font-semibold ${isSelected ? "text-blue-900" : "text-gray-800"}`}
+                                                >
+                                                  {category.label}
+                                                </p>
+                                                <p
+                                                  className={`text-xs mt-0.5 ${
+                                                    isSelected ? "text-blue-600" : "text-gray-600"
+                                                  }`}
+                                                >
+                                                  {category.description}
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </button>
+                                        )
+                                      })}
+                                    </div>
                                   </div>
 
-                                  {/* Sub-Category Filter */}
-                                  {selectedCategories.length > 0 && (
-                                    <div>
-                                      <label className="text-xs text-gray-600 mb-1 block">Sub-Category</label>
-                                      <select
-                                        value={selectedSubCategories[0] || ""}
-                                        onChange={(e) => {
-                                          if (e.target.value) {
-                                            setSelectedSubCategories([e.target.value])
-                                          } else {
-                                            setSelectedSubCategories([])
-                                          }
-                                        }}
-                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                                      >
-                                        <option value="">All Sub-Categories</option>
-                                        {resourceCategories
-                                          .find((c) => c.id === selectedCategories[0])
-                                          ?.subCategories.map((subCat) => (
-                                            <option key={subCat.id} value={subCat.id}>
-                                              {subCat.label}
-                                            </option>
-                                          ))}
-                                      </select>
+                                  {/* Sub-Categories Section */}
+                                  {selectedCategories.some(catId => {
+                                    const cat = resourceCategories.find(c => c.id === catId)
+                                    return cat?.subCategories && cat.subCategories.length > 0
+                                  }) && (
+                                    <div className="pt-2">
+                                      <p className="text-xs text-gray-600 mb-2">
+                                        Refine with sub-categories
+                                      </p>
+                                      <div className="space-y-3">
+                                        {selectedCategories.map(catId => {
+                                          const category = resourceCategories.find(c => c.id === catId)
+                                          if (!category?.subCategories || category.subCategories.length === 0) return null
+                                          return (
+                                            <div key={catId} className="space-y-2">
+                                              <p className="text-xs font-medium text-gray-700">{category.label}</p>
+                                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                                {category.subCategories.map((subCat) => {
+                                                  const isSubSelected = selectedSubCategories.includes(subCat.id)
+                                                  return (
+                                                    <button
+                                                      type="button"
+                                                      key={subCat.id}
+                                                      onClick={() => toggleSubCategory(subCat.id)}
+                                                      className={`p-2.5 rounded-lg border cursor-pointer transition-all text-left w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                                                        isSubSelected
+                                                          ? "bg-indigo-50 border-indigo-300 shadow-sm"
+                                                          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                                                      }`}
+                                                      aria-pressed={isSubSelected}
+                                                      aria-label={`${isSubSelected ? 'Deselect' : 'Select'} ${subCat.label} sub-category`}
+                                                    >
+                                                      <div className="flex items-start gap-2">
+                                                        <div className="flex-1 min-w-0">
+                                                          <p
+                                                            className={`text-sm font-medium ${
+                                                              isSubSelected ? "text-indigo-900" : "text-gray-800"
+                                                            }`}
+                                                          >
+                                                            {subCat.label}
+                                                          </p>
+                                                          <p
+                                                            className={`text-xs mt-0.5 ${
+                                                              isSubSelected ? "text-indigo-600" : "text-gray-600"
+                                                            }`}
+                                                          >
+                                                            {subCat.description}
+                                                          </p>
+                                                        </div>
+                                                      </div>
+                                                    </button>
+                                                  )
+                                                })}
+                                              </div>
+                                            </div>
+                                          )
+                                        })}
+                                      </div>
                                     </div>
                                   )}
                                 </div>
