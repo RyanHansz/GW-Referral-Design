@@ -1,23 +1,19 @@
-import OpenAI from "openai"
-import { NextResponse } from "next/server"
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+import { generateText } from "ai"
+import { openai } from "@ai-sdk/openai"
 
 export async function POST(request: Request) {
   try {
     const { prompt } = await request.json()
 
     if (!prompt) {
-      return NextResponse.json(
+      return Response.json(
         { error: "Prompt is required" },
         { status: 400 }
       )
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const { text } = await generateText({
+      model: openai("gpt-4o-mini"),
       messages: [
         {
           role: "system",
@@ -48,15 +44,13 @@ What specific details should be added to this prompt to get better, more relevan
         },
       ],
       temperature: 0.7,
-      max_tokens: 300,
+      maxTokens: 300,
     })
 
-    const suggestions = completion.choices[0]?.message?.content || ""
-
-    return NextResponse.json({ suggestions })
+    return Response.json({ suggestions: text })
   } catch (error) {
     console.error("Error generating suggestions:", error)
-    return NextResponse.json(
+    return Response.json(
       { error: "Failed to generate suggestions" },
       { status: 500 }
     )
