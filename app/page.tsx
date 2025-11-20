@@ -2736,7 +2736,28 @@ export default function ReferralTool() {
                                                 ? `bg-blue-50 border-blue-300 shadow-md ring-2 ring-blue-200`
                                                 : `bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm`
                                             }`}
-                                            onClick={() => toggleCategory(category.id)}
+                                            onClick={() => {
+                                              // Toggle the category
+                                              const newCategories = selectedCategories.includes(category.id)
+                                                ? selectedCategories.filter((id) => id !== category.id)
+                                                : [...selectedCategories, category.id]
+
+                                              setSelectedCategories(newCategories)
+
+                                              // If removing a category, also remove its sub-categories
+                                              if (selectedCategories.includes(category.id)) {
+                                                const categorySubCatIds = category.subCategories.map(sc => sc.id)
+                                                setSelectedSubCategories(prev =>
+                                                  prev.filter(id => !categorySubCatIds.includes(id))
+                                                )
+                                              }
+
+                                              // Auto-submit the refined search
+                                              const promptToUse = editedPromptText.trim() || streamingQuestion
+                                              handlePromptRefinement(promptToUse)
+                                              setIsEditingPrompt(false)
+                                              setEditedPromptText("")
+                                            }}
                                             aria-pressed={isSelected}
                                             aria-label={`${isSelected ? 'Deselect' : 'Select'} ${category.label} category`}
                                           >
@@ -2792,7 +2813,20 @@ export default function ReferralTool() {
                                                     <button
                                                       type="button"
                                                       key={subCat.id}
-                                                      onClick={() => toggleSubCategory(subCat.id)}
+                                                      onClick={() => {
+                                                        // Toggle the sub-category
+                                                        const newSubCategories = selectedSubCategories.includes(subCat.id)
+                                                          ? selectedSubCategories.filter((id) => id !== subCat.id)
+                                                          : [...selectedSubCategories, subCat.id]
+
+                                                        setSelectedSubCategories(newSubCategories)
+
+                                                        // Auto-submit the refined search
+                                                        const promptToUse = editedPromptText.trim() || streamingQuestion
+                                                        handlePromptRefinement(promptToUse)
+                                                        setIsEditingPrompt(false)
+                                                        setEditedPromptText("")
+                                                      }}
                                                       className={`p-2.5 rounded-lg border cursor-pointer transition-all text-left w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
                                                         isSubSelected
                                                           ? "bg-indigo-50 border-indigo-300 shadow-sm"
