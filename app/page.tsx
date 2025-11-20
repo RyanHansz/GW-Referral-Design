@@ -2749,16 +2749,16 @@ export default function ReferralTool() {
                                   <div className="flex items-start gap-2">
                                     <Sparkles className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-semibold text-blue-900 mb-1">
+                                      <div className="text-sm font-semibold text-gray-900 mb-1">
                                         AI Suggestions
                                       </div>
                                       {isLoadingSuggestions ? (
-                                        <div className="flex items-center gap-2 text-sm text-blue-700">
+                                        <div className="flex items-center gap-2 text-sm text-gray-600">
                                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                           <span>Analyzing your prompt...</span>
                                         </div>
                                       ) : (
-                                        <div className="text-sm text-blue-800 whitespace-pre-line">
+                                        <div className="text-sm text-gray-900 whitespace-pre-line">
                                           {promptSuggestions}
                                         </div>
                                       )}
