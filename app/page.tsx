@@ -54,6 +54,7 @@ import { parseMarkdownToHTML } from "@/lib/markdown"
 // Import refinement components and utilities
 import { RefinePromptPanel } from "@/components/refine-prompt-panel"
 import { RefinementHistory } from "@/components/refinement-history"
+import { InlinePromptRefiner } from "@/components/inline-prompt-refiner"
 import { isPromptVague } from "@/lib/prompt-refinement"
 
 interface Resource {
@@ -2671,6 +2672,16 @@ export default function ReferralTool() {
                       </div>
                     </div>
 
+                    {/* Inline Prompt Refiner - shown after results load */}
+                    {!isStreaming && streamingResources.length > 0 && (
+                      <InlinePromptRefiner
+                        initialPrompt={userInput}
+                        onSearch={handlePromptRefinement}
+                        showSuggestions={showRefinementPanel}
+                        className="mb-6"
+                      />
+                    )}
+
                     {/* Show streaming metadata (question and summary) */}
                     {isStreaming && (streamingQuestion || streamingSummary) && (
                       <div className="space-y-4 pb-6">
@@ -2762,24 +2773,7 @@ export default function ReferralTool() {
                       </div>
                     )}
 
-                    {/* Refinement History - show when user has refined their search */}
-                    {!isStreaming && isRefined && originalPrompt && (
-                      <RefinementHistory
-                        originalPrompt={originalPrompt}
-                        refinedPrompt={userInput}
-                        onUndo={handleUndoRefinement}
-                        className="mb-6"
-                      />
-                    )}
-
-                    {/* Refinement Panel - show when search is vague and not refined */}
-                    {!isStreaming && showRefinementPanel && !isRefined && streamingResources.length > 0 && (
-                      <RefinePromptPanel
-                        originalPrompt={userInput}
-                        onRefine={handlePromptRefinement}
-                        className="mb-6"
-                      />
-                    )}
+                    {/* Old refinement components removed - now using InlinePromptRefiner above */}
 
                     {/* Show empty loading state when streaming starts */}
                     {isStreaming && streamingResources.length === 0 && (
