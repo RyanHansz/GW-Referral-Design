@@ -51,6 +51,10 @@ import Image from "next/image"
 
 // Import the new parseMarkdownToHTML function
 import { parseMarkdownToHTML } from "@/lib/markdown"
+// Import refinement components and utilities
+import { RefinePromptPanel } from "@/components/refine-prompt-panel"
+import { RefinementHistory } from "@/components/refinement-history"
+import { isPromptVague } from "@/lib/prompt-refinement"
 
 interface Resource {
   number: number
@@ -549,6 +553,11 @@ export default function ReferralTool() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [showActionPlanSection, setShowActionPlanSection] = useState(false)
   const [streamingFollowUpContent, setStreamingFollowUpContent] = useState("")
+
+  // Prompt refinement state
+  const [originalPrompt, setOriginalPrompt] = useState("")
+  const [isRefined, setIsRefined] = useState(false)
+  const [showRefinementPanel, setShowRefinementPanel] = useState(false)
 
   // Chat mode state
   const [chatMessages, setChatMessages] = useState<
@@ -1168,6 +1177,12 @@ export default function ReferralTool() {
     if (!isFollowUp) {
       setActionPlanContent("")
       setSelectedResources([])
+      // Track original prompt for refinement
+      setOriginalPrompt(userInput.trim())
+      setIsRefined(false)
+      // Detect if prompt is vague
+      const isVague = isPromptVague(userInput.trim())
+      setShowRefinementPanel(isVague)
     }
 
     try {
@@ -1394,6 +1409,24 @@ export default function ReferralTool() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Handle prompt refinement
+  const handlePromptRefinement = (refinedPrompt: string) => {
+    setIsRefined(true)
+    setUserInput(refinedPrompt)
+    setShowRefinementPanel(false)
+    // Trigger new search with refined prompt
+    handleGenerateReferrals(false, "")
+  }
+
+  // Handle undo refinement
+  const handleUndoRefinement = () => {
+    setIsRefined(false)
+    setUserInput(originalPrompt)
+    setShowRefinementPanel(true)
+    // Trigger search with original prompt
+    handleGenerateReferrals(false, "")
   }
 
   const handleSendChatMessage = async () => {
@@ -2715,6 +2748,25 @@ export default function ReferralTool() {
                           </div>
                         )}
                       </div>
+                    )}
+
+                    {/* Refinement History - show when user has refined their search */}
+                    {!isStreaming && isRefined && originalPrompt && (
+                      <RefinementHistory
+                        originalPrompt={originalPrompt}
+                        refinedPrompt={userInput}
+                        onUndo={handleUndoRefinement}
+                        className="mb-6"
+                      />
+                    )}
+
+                    {/* Refinement Panel - show when search is vague and not refined */}
+                    {!isStreaming && showRefinementPanel && !isRefined && streamingResources.length > 0 && (
+                      <RefinePromptPanel
+                        originalPrompt={userInput}
+                        onRefine={handlePromptRefinement}
+                        className="mb-6"
+                      />
                     )}
 
                     {/* Show empty loading state when streaming starts */}
