@@ -2714,6 +2714,64 @@ export default function ReferralTool() {
                                 </div>
                               </div>
 
+                              {/* Filter Controls in Edit Mode */}
+                              <div className="mb-3">
+                                <div className="text-sm font-medium text-gray-700 mb-2">Adjust Filters:</div>
+                                <div className="space-y-2">
+                                  {/* Category Filter */}
+                                  <div>
+                                    <label className="text-xs text-gray-600 mb-1 block">Main Category</label>
+                                    <select
+                                      value={selectedCategories[0] || ""}
+                                      onChange={(e) => {
+                                        if (e.target.value) {
+                                          setSelectedCategories([e.target.value])
+                                          setSelectedSubCategories([])
+                                        } else {
+                                          setSelectedCategories([])
+                                          setSelectedSubCategories([])
+                                        }
+                                      }}
+                                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                    >
+                                      <option value="">All Categories</option>
+                                      {resourceCategories.map((cat) => (
+                                        <option key={cat.id} value={cat.id}>
+                                          {cat.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  {/* Sub-Category Filter */}
+                                  {selectedCategories.length > 0 && (
+                                    <div>
+                                      <label className="text-xs text-gray-600 mb-1 block">Sub-Category</label>
+                                      <select
+                                        value={selectedSubCategories[0] || ""}
+                                        onChange={(e) => {
+                                          if (e.target.value) {
+                                            setSelectedSubCategories([e.target.value])
+                                          } else {
+                                            setSelectedSubCategories([])
+                                          }
+                                        }}
+                                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                                      >
+                                        <option value="">All Sub-Categories</option>
+                                        {resourceCategories
+                                          .find((c) => c.id === selectedCategories[0])
+                                          ?.subCategories.map((subCat) => (
+                                            <option key={subCat.id} value={subCat.id}>
+                                              {subCat.label}
+                                            </option>
+                                          ))}
+                                      </select>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
                               {/* Show filters in edit mode too */}
                               {conversationHistory.length <= 1 &&
                                 (outputLanguage !== "English" ||
