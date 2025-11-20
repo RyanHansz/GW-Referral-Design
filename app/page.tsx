@@ -2895,19 +2895,26 @@ export default function ReferralTool() {
 
                               {/* Refine Search Button - only show after streaming completes (for first search only, not follow-ups) */}
                               {!isStreaming && conversationHistory.length <= 1 && (
-                                <div className="mt-3 pt-3 border-t border-gray-300 flex justify-center">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setEditedPromptText(streamingQuestion)
-                                      setIsEditingPrompt(true)
-                                    }}
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 gap-1.5 font-medium"
-                                  >
-                                    <Sparkles className="w-3.5 h-3.5" />
-                                    Refine Search
-                                  </Button>
+                                <div className="mt-3 pt-3 border-t border-gray-300">
+                                  <div className="text-center mb-2">
+                                    <p className="text-xs text-gray-600">
+                                      Not seeing the right results? Add more details to get better matches
+                                    </p>
+                                  </div>
+                                  <div className="flex justify-center">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditedPromptText(streamingQuestion)
+                                        setIsEditingPrompt(true)
+                                      }}
+                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 gap-1.5 font-medium"
+                                    >
+                                      <Sparkles className="w-3.5 h-3.5" />
+                                      Refine Search
+                                    </Button>
+                                  </div>
                                 </div>
                               )}
                             </>
