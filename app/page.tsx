@@ -51,8 +51,7 @@ import Image from "next/image"
 
 // Import the new parseMarkdownToHTML function
 import { parseMarkdownToHTML } from "@/lib/markdown"
-// Import refinement components and utilities
-import { EditablePromptHeader } from "@/components/editable-prompt-header"
+// Import refinement utilities
 import { isPromptVague } from "@/lib/prompt-refinement"
 
 interface Resource {
@@ -2670,22 +2669,23 @@ export default function ReferralTool() {
                       </div>
                     </div>
 
-                    {/* Editable Prompt Header - shown after results load */}
-                    {!isStreaming && streamingQuestion && (
-                      <EditablePromptHeader
-                        prompt={streamingQuestion}
-                        onUpdate={handlePromptRefinement}
-                        className="mb-6"
-                        filters={
-                          conversationHistory.length === 0 &&
-                          (outputLanguage !== "English" ||
-                            selectedCategories.length > 0 ||
-                            selectedSubCategories.length > 0 ||
-                            selectedResourceTypes.length > 0 ||
-                            location ||
-                            selectedLocations.length > 0 ||
-                            selectedLanguages.length > 0) ? (
-                            <>
+                    {/* Show question header and filters (both during and after streaming) */}
+                    {streamingQuestion && (
+                      <div className="space-y-4 pb-6">
+                        {/* Question Header */}
+                        <div className="bg-gray-100 rounded-2xl p-4 border">
+                          <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
+
+                          {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
+                          {conversationHistory.length === 0 &&
+                            (outputLanguage !== "English" ||
+                              selectedCategories.length > 0 ||
+                              selectedSubCategories.length > 0 ||
+                              selectedResourceTypes.length > 0 ||
+                              location ||
+                              selectedLocations.length > 0 ||
+                              selectedLanguages.length > 0) && (
+                            <div className="mt-3 pt-3 border-t border-gray-300">
                               <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
                                 <Filter className="w-4 h-4" />
                                 Active Filters:
@@ -2742,99 +2742,41 @@ export default function ReferralTool() {
                                   </div>
                                 )}
                               </div>
-                            </>
-                          ) : undefined
-                        }
-                      />
-                    )}
+                            </div>
+                          )}
 
-                    {/* Show streaming metadata (question and summary) */}
-                    {isStreaming && (streamingQuestion || streamingSummary) && (
-                      <div className="space-y-4 pb-6">
-                        {/* Question Header (during streaming only) */}
-                        {streamingQuestion && (
-                          <div className="bg-gray-100 rounded-2xl p-4 border">
-                            <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{streamingQuestion}</h2>
+                          {/* Refine Search Button - only show after streaming completes */}
+                          {!isStreaming && conversationHistory.length === 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-300 flex justify-center">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  // TODO: Implement refinement UI
+                                  const refinedPrompt = window.prompt("Refine your search:", streamingQuestion)
+                                  if (refinedPrompt && refinedPrompt.trim()) {
+                                    handlePromptRefinement(refinedPrompt.trim())
+                                  }
+                                }}
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 gap-1.5 font-medium"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                Refine Search
+                              </Button>
+                            </div>
+                          )}
+                        </div>
 
-                            {/* Active Filters - show when filters are applied (only for first prompt, not follow-ups) */}
-                            {conversationHistory.length === 0 &&
-                              (outputLanguage !== "English" ||
-                                selectedCategories.length > 0 ||
-                                selectedSubCategories.length > 0 ||
-                                selectedResourceTypes.length > 0 ||
-                                location ||
-                                selectedLocations.length > 0 ||
-                                selectedLanguages.length > 0) && (
-                              <div className="mt-3 pt-3 border-t border-gray-300">
-                                <div className="font-semibold text-gray-700 mb-2 flex items-center gap-2 text-sm">
-                                  <Filter className="w-4 h-4" />
-                                  Active Filters:
-                                </div>
-                                <div className="space-y-1 text-gray-700 text-sm">
-                                  {outputLanguage !== "English" && (
-                                    <div>
-                                      <span className="font-medium">Output Language:</span> {outputLanguage}
-                                    </div>
-                                  )}
-                                  {selectedCategories.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Categories:</span>{" "}
-                                      {selectedCategories
-                                        .map((id) => resourceCategories.find((c) => c.id === id)?.label)
-                                        .filter(Boolean)
-                                        .join(", ")}
-                                    </div>
-                                  )}
-                                  {selectedSubCategories.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Sub-Categories:</span>{" "}
-                                      {selectedSubCategories
-                                        .map((id) => {
-                                          for (const cat of resourceCategories) {
-                                            const subCat = cat.subCategories.find((s) => s.id === id)
-                                            if (subCat) return subCat.label
-                                          }
-                                          return null
-                                        })
-                                        .filter(Boolean)
-                                        .join(", ")}
-                                    </div>
-                                  )}
-                                  {selectedResourceTypes.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Resource Types:</span>{" "}
-                                      {selectedResourceTypes.join(", ")}
-                                    </div>
-                                  )}
-                                  {location && (
-                                    <div>
-                                      <span className="font-medium">Location:</span> {location}
-                                    </div>
-                                  )}
-                                  {selectedLocations.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Locations:</span> {selectedLocations.join(", ")}
-                                    </div>
-                                  )}
-                                  {selectedLanguages.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Languages:</span> {selectedLanguages.join(", ")}
-                                    </div>
-                                  )}
-                                </div>
+                        {/* Processing Time and Summary - only shown during streaming */}
+                        {isStreaming && (
+                          <>
+                            <div className="text-sm text-gray-600">Thinking...</div>
+                            {streamingSummary && (
+                              <div className="text-gray-900">
+                                <p className="font-medium mb-4">{streamingSummary}</p>
                               </div>
                             )}
-                          </div>
-                        )}
-
-                        {/* Processing Time - shown during streaming */}
-                        <div className="text-sm text-gray-600">Thinking...</div>
-
-                        {/* Summary */}
-                        {streamingSummary && (
-                          <div className="text-gray-900">
-                            <p className="font-medium mb-4">{streamingSummary}</p>
-                          </div>
+                          </>
                         )}
                       </div>
                     )}
@@ -3044,7 +2986,7 @@ export default function ReferralTool() {
 
                     {conversationHistory.map((exchange, index) => (
                       <div key={index} className="space-y-4 pb-6 border-b border-gray-200 last:border-b-0">
-                        {/* Question Header - Skip for first exchange since EditablePromptHeader handles it */}
+                        {/* Question Header - Skip for first exchange since it's shown above with filters and refine button */}
                         {index > 0 && (
                           <div className="bg-gray-100 rounded-2xl p-4 border">
                             <h2 className="text-lg font-medium text-gray-900 text-center mb-3">{exchange.response.question}</h2>
