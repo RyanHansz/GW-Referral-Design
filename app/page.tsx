@@ -559,6 +559,8 @@ export default function ReferralTool() {
   const [showRefinementPanel, setShowRefinementPanel] = useState(false)
   const [isEditingPrompt, setIsEditingPrompt] = useState(false)
   const [editedPromptText, setEditedPromptText] = useState("")
+  const [initialCategories, setInitialCategories] = useState<string[]>([])
+  const [initialSubCategories, setInitialSubCategories] = useState<string[]>([])
 
   // Chat mode state
   const [chatMessages, setChatMessages] = useState<
@@ -2694,8 +2696,14 @@ export default function ReferralTool() {
                                   onKeyDown={(e) => {
                                     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                                       e.preventDefault()
-                                      if (editedPromptText.trim() && editedPromptText.trim() !== streamingQuestion) {
-                                        handlePromptRefinement(editedPromptText.trim())
+                                      // Check if anything has changed
+                                      const promptChanged = editedPromptText.trim() && editedPromptText.trim() !== streamingQuestion
+                                      const categoriesChanged = JSON.stringify(selectedCategories.sort()) !== JSON.stringify(initialCategories.sort())
+                                      const subCategoriesChanged = JSON.stringify(selectedSubCategories.sort()) !== JSON.stringify(initialSubCategories.sort())
+
+                                      if (promptChanged || categoriesChanged || subCategoriesChanged) {
+                                        const promptToUse = editedPromptText.trim() || streamingQuestion
+                                        handlePromptRefinement(promptToUse)
                                         setIsEditingPrompt(false)
                                         setEditedPromptText("")
                                       }
@@ -2703,6 +2711,9 @@ export default function ReferralTool() {
                                       e.preventDefault()
                                       setIsEditingPrompt(false)
                                       setEditedPromptText("")
+                                      // Reset filters to initial state
+                                      setSelectedCategories(initialCategories)
+                                      setSelectedSubCategories(initialSubCategories)
                                     }
                                   }}
                                   placeholder="Add more details about what the client needs..."
@@ -2736,28 +2747,7 @@ export default function ReferralTool() {
                                                 ? `bg-blue-50 border-blue-300 shadow-md ring-2 ring-blue-200`
                                                 : `bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm`
                                             }`}
-                                            onClick={() => {
-                                              // Toggle the category
-                                              const newCategories = selectedCategories.includes(category.id)
-                                                ? selectedCategories.filter((id) => id !== category.id)
-                                                : [...selectedCategories, category.id]
-
-                                              setSelectedCategories(newCategories)
-
-                                              // If removing a category, also remove its sub-categories
-                                              if (selectedCategories.includes(category.id)) {
-                                                const categorySubCatIds = category.subCategories.map(sc => sc.id)
-                                                setSelectedSubCategories(prev =>
-                                                  prev.filter(id => !categorySubCatIds.includes(id))
-                                                )
-                                              }
-
-                                              // Auto-submit the refined search
-                                              const promptToUse = editedPromptText.trim() || streamingQuestion
-                                              handlePromptRefinement(promptToUse)
-                                              setIsEditingPrompt(false)
-                                              setEditedPromptText("")
-                                            }}
+                                            onClick={() => toggleCategory(category.id)}
                                             aria-pressed={isSelected}
                                             aria-label={`${isSelected ? 'Deselect' : 'Select'} ${category.label} category`}
                                           >
@@ -2813,20 +2803,7 @@ export default function ReferralTool() {
                                                     <button
                                                       type="button"
                                                       key={subCat.id}
-                                                      onClick={() => {
-                                                        // Toggle the sub-category
-                                                        const newSubCategories = selectedSubCategories.includes(subCat.id)
-                                                          ? selectedSubCategories.filter((id) => id !== subCat.id)
-                                                          : [...selectedSubCategories, subCat.id]
-
-                                                        setSelectedSubCategories(newSubCategories)
-
-                                                        // Auto-submit the refined search
-                                                        const promptToUse = editedPromptText.trim() || streamingQuestion
-                                                        handlePromptRefinement(promptToUse)
-                                                        setIsEditingPrompt(false)
-                                                        setEditedPromptText("")
-                                                      }}
+                                                      onClick={() => toggleSubCategory(subCat.id)}
                                                       className={`p-2.5 rounded-lg border cursor-pointer transition-all text-left w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
                                                         isSubSelected
                                                           ? "bg-indigo-50 border-indigo-300 shadow-sm"
@@ -2947,6 +2924,9 @@ export default function ReferralTool() {
                                     onClick={() => {
                                       setIsEditingPrompt(false)
                                       setEditedPromptText("")
+                                      // Reset filters to initial state
+                                      setSelectedCategories(initialCategories)
+                                      setSelectedSubCategories(initialSubCategories)
                                     }}
                                     className="gap-1"
                                   >
@@ -2955,14 +2935,25 @@ export default function ReferralTool() {
                                   </Button>
                                   <Button
                                     onClick={() => {
-                                      if (editedPromptText.trim() && editedPromptText.trim() !== streamingQuestion) {
-                                        handlePromptRefinement(editedPromptText.trim())
+                                      // Check if anything has changed
+                                      const promptChanged = editedPromptText.trim() && editedPromptText.trim() !== streamingQuestion
+                                      const categoriesChanged = JSON.stringify(selectedCategories.sort()) !== JSON.stringify(initialCategories.sort())
+                                      const subCategoriesChanged = JSON.stringify(selectedSubCategories.sort()) !== JSON.stringify(initialSubCategories.sort())
+
+                                      if (promptChanged || categoriesChanged || subCategoriesChanged) {
+                                        const promptToUse = editedPromptText.trim() || streamingQuestion
+                                        handlePromptRefinement(promptToUse)
                                         setIsEditingPrompt(false)
                                         setEditedPromptText("")
                                       }
                                     }}
                                     size="sm"
-                                    disabled={!editedPromptText.trim() || editedPromptText.trim() === streamingQuestion}
+                                    disabled={(() => {
+                                      const promptChanged = editedPromptText.trim() && editedPromptText.trim() !== streamingQuestion
+                                      const categoriesChanged = JSON.stringify(selectedCategories.sort()) !== JSON.stringify(initialCategories.sort())
+                                      const subCategoriesChanged = JSON.stringify(selectedSubCategories.sort()) !== JSON.stringify(initialSubCategories.sort())
+                                      return !promptChanged && !categoriesChanged && !subCategoriesChanged
+                                    })()}
                                     className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md gap-1.5"
                                   >
                                     <Search className="w-4 h-4" />
@@ -3059,6 +3050,8 @@ export default function ReferralTool() {
                                       size="sm"
                                       onClick={() => {
                                         setEditedPromptText(streamingQuestion)
+                                        setInitialCategories(selectedCategories)
+                                        setInitialSubCategories(selectedSubCategories)
                                         setIsEditingPrompt(true)
                                       }}
                                       className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300 gap-1.5 font-medium"
