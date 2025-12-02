@@ -1056,9 +1056,24 @@ export default function ReferralTool() {
   }
 
   const toggleCategory = (categoryId: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
-    )
+    setSelectedCategories((prev) => {
+      const isCurrentlySelected = prev.includes(categoryId)
+
+      if (isCurrentlySelected) {
+        // Deselecting: clear related sub-categories
+        const category = resourceCategories.find(c => c.id === categoryId)
+        if (category?.subCategories) {
+          const subCategoryIds = category.subCategories.map(sub => sub.id)
+          setSelectedSubCategories((prevSub) =>
+            prevSub.filter(subId => !subCategoryIds.includes(subId))
+          )
+        }
+        return prev.filter((id) => id !== categoryId)
+      } else {
+        // Selecting
+        return [...prev, categoryId]
+      }
+    })
   }
 
   const toggleSubCategory = (subCategoryId: string) => {
@@ -2840,6 +2855,29 @@ export default function ReferralTool() {
                                       </div>
                                     </div>
                                   )}
+
+                                  {/* Location Filter */}
+                                  <div className="relative">
+                                    <Label htmlFor="location-input-edit" className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                                      <MapPin className="w-4 h-4 text-blue-600" />
+                                      Location Preferences
+                                    </Label>
+                                    <p className="text-sm text-gray-600 mb-3">
+                                      <span className="font-medium">Optional:</span> Specify a location to find resources nearby.
+                                    </p>
+                                    <Input
+                                      id="location-input-edit"
+                                      placeholder="Enter location (city, ZIP code, area, etc.)"
+                                      value={location}
+                                      onChange={(e) => handleLocationChange(e.target.value)}
+                                      className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-background"
+                                    />
+                                    <div className="mt-2 text-xs text-gray-600">
+                                      <p>
+                                        💡 <strong>Examples:</strong> "Round Rock", "78701", "Austin, TX", "San Marcos"
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
 
